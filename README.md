@@ -25,7 +25,7 @@ dotnet publish -r osx-x64 -c Release /p:PublishSingleFile=true /p:PublishTrimmed
 dotnet publish -r linux-x64 -c Release /p:PublishSingleFile=true /p:PublishTrimmed=true -o linux
 ```
 
-Alternatively, use `dotnet build` to create a set of files that require the .NET Core runtime to be installed:
+Alternatively, use `dotnet build` to create a platform-agnostic bundle (the .NET Core runtime must be installed):
 
 ```
 dotnet build
