@@ -8,15 +8,7 @@ Requires .NET Core 3.1 or newer.
 
 ## Building
 
-Build using Visual Studio or the `dotnet` command-line, e.g.:
-
-```
-dotnet build
-```
-
-### Self-Contained
-
-Publish a self-contained single file for a specific architecture with no external dependencies:
+Use `dotnet publish` to create a single, self-contained file for a specific platform/architecture:
 
 ```
 # Windows
@@ -28,6 +20,16 @@ dotnet publish -r osx-x64 -c Release /p:PublishSingleFile=true /p:PublishTrimmed
 # Linux
 dotnet publish -r linux-x64 -c Release /p:PublishSingleFile=true /p:PublishTrimmed=true -o linux
 ```
+
+Alternatively, use `dotnet build` to create a set of files that require the .NET Core runtime to be installed:
+
+```
+dotnet build
+```
+
+Using this approach will generate a library instead of an executable. Use `dotnet lsconnect.dll` instead of `lsconnect` to run it.
+
+### Self-Contained
 
 ## Usage
 
