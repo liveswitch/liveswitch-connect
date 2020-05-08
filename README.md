@@ -1,5 +1,7 @@
 # LiveSwitch Connect CLI
 
+![build](https://github.com/liveswitch/liveswitch-connect/workflows/build/badge.svg) ![license: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
+
 The LiveSwitch Connect CLI lets you send and receive media to and from LiveSwitch.
 
 Requires .NET Core 3.1 or newer.
