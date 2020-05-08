@@ -10,14 +10,18 @@ Requires .NET Core 3.1 or newer.
 
 Use `dotnet publish` to create a single, self-contained file for a specific platform/architecture:
 
+### Windows
 ```
-# Windows
 dotnet publish -r win-x64 -c Release /p:PublishSingleFile=true /p:PublishTrimmed=true -o win
+```
 
-# macOS
+### macOS
+```
 dotnet publish -r osx-x64 -c Release /p:PublishSingleFile=true /p:PublishTrimmed=true -o osx
+```
 
-# Linux
+### Linux
+```
 dotnet publish -r linux-x64 -c Release /p:PublishSingleFile=true /p:PublishTrimmed=true -o linux
 ```
 
@@ -27,9 +31,9 @@ Alternatively, use `dotnet build` to create a set of files that require the .NET
 dotnet build
 ```
 
-Using this approach will generate a library instead of an executable. Use `dotnet lsconnect.dll` instead of `lsconnect` to run it.
+Using this approach will generate a library instead of an executable.
 
-### Self-Contained
+Use `dotnet lsconnect.dll` instead of `lsconnect` to run it.
 
 ## Usage
 
