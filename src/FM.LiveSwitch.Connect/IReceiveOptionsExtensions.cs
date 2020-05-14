@@ -4,9 +4,17 @@ namespace FM.LiveSwitch.Connect
 {
     static class IReceiveOptionsExtensions
     {
-        public static SfuDownstreamConnection CreateConnection(this IReceiveOptions options, Channel channel, ConnectionInfo remoteConnectionInfo, AudioStream audioStream, VideoStream videoStream, DataStream dataStream, bool logState = true)
+        public static ManagedConnection CreateConnection(this IReceiveOptions options, Channel channel, ConnectionInfo remoteConnectionInfo, AudioStream audioStream, VideoStream videoStream, DataStream dataStream, bool logState = true)
         {
-            var connection = channel.CreateSfuDownstreamConnection(remoteConnectionInfo, audioStream, videoStream, dataStream);
+            ManagedConnection connection;
+            if (remoteConnectionInfo.Id == "mcu")
+            {
+                connection = channel.CreateMcuConnection(audioStream, videoStream, dataStream);
+            }
+            else
+            {
+                connection = channel.CreateSfuDownstreamConnection(remoteConnectionInfo, audioStream, videoStream, dataStream);
+            }
 
             connection.Tag = options.ConnectionTag;
 

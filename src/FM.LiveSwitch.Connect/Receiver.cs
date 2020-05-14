@@ -28,52 +28,80 @@ namespace FM.LiveSwitch.Connect
                         var timeout = Task.Delay(15000);
                         var audioSinks = (TAudioSink[])null;
                         var videoSinks = (TVideoSink[])null;
-                        var connection = (SfuDownstreamConnection)null;
+                        var connection = (ManagedConnection)null;
                         var connectedSource = new TaskCompletionSource<bool>();
                         var connected = connectedSource.Task;
                         var disconnected = (Task)null;
-                        channel.OnRemoteUpstreamConnectionOpen += async (remoteConnectionInfo) =>
+
+                        var connect = new Func<ConnectionInfo, Task>(async (remoteConnectionInfo) =>
                         {
-                            if (remoteConnectionInfo.Id == options.ConnectionId)
+                            var audioStream = CreateAudioStream(remoteConnectionInfo, options);
+                            var videoStream = CreateVideoStream(remoteConnectionInfo, options);
+                            var dataStream = CreateDataStream(remoteConnectionInfo, options);
+                            connection = options.CreateConnection(channel, remoteConnectionInfo, audioStream, videoStream, dataStream);
+
+                            Console.Error.WriteLine($"{GetType().Name} connection '{connection.Id}' created:{Environment.NewLine}{Descriptor.Format(connection.GetDescriptors())}");
+
+                            audioSinks = audioStream?.RemoteTrack.Sinks.Select(x => x as TAudioSink).ToArray();
+                            videoSinks = videoStream?.RemoteTrack.Sinks.Select(x => x as TVideoSink).ToArray();
+
+                            SinksReady(audioSinks, videoSinks, options);
+
+                            disconnected = await connection.Connect();
+
+                            connectedSource.TrySetResult(true);
+                        });
+
+                        if (options.ConnectionId == "mcu")
+                        {
+                            _ = Task.Run(async () =>
                             {
-                                var remoteClientInfo = channel.GetRemoteClientInfo(remoteConnectionInfo.ClientId);
-                                if (remoteClientInfo != null)
+                                await connect(GetMcuConnectionInfo(options));
+                            });
+                        }
+                        else
+                        {
+                            var notifiedSource = new TaskCompletionSource<bool>();
+                            var notified = notifiedSource.Task;
+                            channel.OnRemoteUpstreamConnectionOpen += async (remoteConnectionInfo) =>
+                            {
+                                if (remoteConnectionInfo.Id == options.ConnectionId)
                                 {
-                                    Console.Error.WriteLine($"Remote client '{remoteConnectionInfo.ClientId}' found:{Environment.NewLine}{Descriptor.Format(remoteClientInfo.GetDescriptors())}");
+                                    notifiedSource.TrySetResult(true);
+
+                                    var remoteClientInfo = channel.GetRemoteClientInfo(remoteConnectionInfo.ClientId);
+                                    if (remoteClientInfo != null)
+                                    {
+                                        Console.Error.WriteLine($"Remote client '{remoteConnectionInfo.ClientId}' found:{Environment.NewLine}{Descriptor.Format(remoteClientInfo.GetDescriptors())}");
+                                    }
+
+                                    Console.Error.WriteLine($"Remote connection '{options.ConnectionId}' found:{Environment.NewLine}{Descriptor.Format(remoteConnectionInfo.GetDescriptors())}");
+
+                                    await connect(remoteConnectionInfo);
                                 }
-
-                                Console.Error.WriteLine($"Remote connection '{options.ConnectionId}' found:{Environment.NewLine}{Descriptor.Format(remoteConnectionInfo.GetDescriptors())}");
-
-                                var audioStream = CreateAudioStream(remoteConnectionInfo, options);
-                                var videoStream = CreateVideoStream(remoteConnectionInfo, options);
-                                var dataStream = CreateDataStream(remoteConnectionInfo, options);
-                                connection = options.CreateConnection(channel, remoteConnectionInfo, audioStream, videoStream, dataStream);
-
-                                Console.Error.WriteLine($"{GetType().Name} connection '{connection.Id}' created:{Environment.NewLine}{Descriptor.Format(connection.GetDescriptors())}");
-
-                                audioSinks = audioStream?.RemoteTrack.Sinks.Select(x => x as TAudioSink).ToArray();
-                                videoSinks = videoStream?.RemoteTrack.Sinks.Select(x => x as TVideoSink).ToArray();
-
-                                SinksReady(audioSinks, videoSinks, options);
-
-                                disconnected = await connection.Connect();
-
-                                connectedSource.TrySetResult(true);
-                            }
-                        };
-                        channel.OnRemoteUpstreamConnectionClose += (remoteConnectionInfo) =>
-                        {
-                            if (remoteConnectionInfo.RemoteConnectionId == options.ConnectionId)
+                            };
+                            channel.OnRemoteUpstreamConnectionClose += (remoteConnectionInfo) =>
                             {
-                                Console.Error.WriteLine("Remote disconnected.");
-                            }
-                        };
+                                if (remoteConnectionInfo.RemoteConnectionId == options.ConnectionId)
+                                {
+                                    Console.Error.WriteLine("Remote disconnected.");
+                                }
+                            };
 
-                        Console.Error.WriteLine($"Waiting for remote connection...");
+                            Console.Error.WriteLine($"Waiting for remote connection...");
+
+                            if (await Task.WhenAny(timeout, notified) == timeout)
+                            {
+                                Console.Error.WriteLine($"Remote connection '{options.ConnectionId}' does not exist.");
+                                return 1;
+                            }
+                        }
+
+                        Console.Error.WriteLine($"Connecting...");
 
                         if (await Task.WhenAny(timeout, connected) == timeout)
                         {
-                            Console.Error.WriteLine($"Remote connection '{options.ConnectionId}' does not exist.");
+                            Console.Error.WriteLine($"Timeout connecting to '{options.ConnectionId}'.");
                             return 1;
                         }
 
@@ -114,6 +142,20 @@ namespace FM.LiveSwitch.Connect
                 Console.Error.WriteLine(ex);
                 return -1;
             }
+        }
+
+        private ConnectionInfo GetMcuConnectionInfo(TOptions options)
+        {
+            return new ConnectionInfo
+            {
+                ApplicationId = options.ApplicationId,
+                ChannelId = options.ChannelId,
+                Id = options.ConnectionId,
+                Type = ConnectionType.Mcu,
+                DataStream = new DataStreamInfo(),
+                AudioStream = new MediaStreamInfo { Direction = StreamDirectionHelper.DirectionToString(StreamDirection.SendReceive) },
+                VideoStream = new MediaStreamInfo { Direction = StreamDirectionHelper.DirectionToString(StreamDirection.SendReceive) }
+            };
         }
 
         protected abstract AudioStream CreateAudioStream(ConnectionInfo remoteConnectionInfo, TOptions options);
