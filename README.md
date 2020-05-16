@@ -8,26 +8,32 @@ Requires .NET Core 3.1 or newer.
 
 ## Building
 
-Build using Visual Studio or the `dotnet` command-line, e.g.:
+Use `dotnet publish` to create a single, self-contained file for a specific platform/architecture:
+
+### Windows
+```
+dotnet publish -r win-x64 -c Release /p:PublishSingleFile=true /p:PublishTrimmed=true -o win
+```
+
+### macOS
+```
+dotnet publish -r osx-x64 -c Release /p:PublishSingleFile=true /p:PublishTrimmed=true -o osx
+```
+
+### Linux
+```
+dotnet publish -r linux-x64 -c Release /p:PublishSingleFile=true /p:PublishTrimmed=true -o linux
+```
+
+Alternatively, use `dotnet build` to create a platform-agnostic bundle (the .NET Core runtime must be installed):
 
 ```
 dotnet build
 ```
 
-### Self-Contained
+Using this approach will generate a library instead of an executable.
 
-Publish a self-contained single file for a specific architecture with no external dependencies:
-
-```
-# Windows
-dotnet publish -r win-x64 -c Release /p:PublishSingleFile=true /p:PublishTrimmed=true -o win
-
-# macOS
-dotnet publish -r osx-x64 -c Release /p:PublishSingleFile=true /p:PublishTrimmed=true -o osx
-
-# Linux
-dotnet publish -r linux-x64 -c Release /p:PublishSingleFile=true /p:PublishTrimmed=true -o linux
-```
+Use `dotnet lsconnect.dll` instead of `lsconnect` to run it.
 
 ## Usage
 
@@ -596,7 +602,7 @@ Run `lsconnect render` with the following arguments:
 - `--connection-id` (the connection ID from your web browser)
 
 ```
-dotnet lsconnect.dll render --gateway-url https://v1.liveswitch.fm:8443/sync --application-id my-app-id --shared-secret=--replaceThisWithYourOwnSharedSecret-- --audio-pipe my-audio-pipe --video-pipe my-video-pipe --channel-id {CHANNEL_ID} --connection-id {CONNECTION_ID}
+lsconnect render --gateway-url https://v1.liveswitch.fm:8443/sync --application-id my-app-id --shared-secret=--replaceThisWithYourOwnSharedSecret-- --audio-pipe my-audio-pipe --video-pipe my-video-pipe --channel-id {CHANNEL_ID} --connection-id {CONNECTION_ID}
 ```
 
 You should see logs indicating that:
@@ -622,7 +628,7 @@ Now run `lsconnect capture` in a new console tab with the following arguments:
 - `--channel-id` (the channel ID from your web browser)
 
 ```
-dotnet lsconnect.dll capture --gateway-url https://v1.liveswitch.fm:8443/sync --application-id my-app-id --shared-secret=--replaceThisWithYourOwnSharedSecret-- --audio-pipe my-audio-pipe --video-pipe my-video-pipe --channel-id {CHANNEL_ID}
+lsconnect capture --gateway-url https://v1.liveswitch.fm:8443/sync --application-id my-app-id --shared-secret=--replaceThisWithYourOwnSharedSecret-- --audio-pipe my-audio-pipe --video-pipe my-video-pipe --channel-id {CHANNEL_ID}
 ```
 
 You should see logs indicating that:
@@ -655,7 +661,7 @@ Open the [LiveSwitch Demo](https://v1.liveswitch.fm/) in a web browser and join 
 
 Let's render to pipes named `audio-in` and `video-in`:
 ```
-dotnet lsconnect.dll render ... --audio-pipe audio-in --video-pipe video-in
+lsconnect render ... --audio-pipe audio-in --video-pipe video-in
 ```
 
 We are now waiting for a client connection from `ffmpeg` to these input pipes.
@@ -664,7 +670,7 @@ We are now waiting for a client connection from `ffmpeg` to these input pipes.
 
 Let's capture from pipes named `audio-out` and `video-out`:
 ```
-dotnet lsconnect.dll capture ... --audio-pipe audio-out --video-pipe video-out --server
+lsconnect capture ... --audio-pipe audio-out --video-pipe video-out --server
 ```
 
 > Note the `--server` flag!
@@ -704,7 +710,7 @@ Open the [LiveSwitch Demo](https://v1.liveswitch.fm/) in a web browser and join 
 
 Let's provide `ffmpeg` arguments to connect a live RTSP feed:
 ```
-dotnet lsconnect.dll ffcapture ... --input-args="-rtsp_transport tcp -i rtsp://3.84.6.190/vod/mp4:BigBuckBunny_115k.mov"
+lsconnect ffcapture ... --input-args="-rtsp_transport tcp -i rtsp://3.84.6.190/vod/mp4:BigBuckBunny_115k.mov"
 ```
 
 Audio and video should now be flowing!
@@ -719,7 +725,7 @@ Open the [LiveSwitch Demo](https://v1.liveswitch.fm/) in a web browser and join 
 
 Let's capture from pipes named `audio-rtsp` and `video-rtsp`:
 ```
-dotnet lsconnect.dll capture ... --audio-pipe audio-rtsp --video-pipe video-rtsp --server
+lsconnect capture ... --audio-pipe audio-rtsp --video-pipe video-rtsp --server
 ```
 
 > Note the `--server` flag!
