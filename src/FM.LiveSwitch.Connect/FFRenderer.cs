@@ -8,6 +8,11 @@ namespace FM.LiveSwitch.Connect
 {
     class FFRenderer : Receiver<FFRenderOptions, FFAudioSink, FFVideoSink>
     {
+        private static string ShortId()
+        {
+            return Guid.NewGuid().ToString().Replace("-", "").Substring(0, 8);
+        }
+
         public Task<int> Render(FFRenderOptions options)
         {
             if (options.NoAudio && options.NoVideo)
@@ -60,7 +65,7 @@ namespace FM.LiveSwitch.Connect
 
         private AudioTrack CreateAudioTrack(FFRenderOptions options)
         {
-            var sink = new FFAudioSink($"lsconnect_ffrender_audio_{Utility.GenerateId()}");
+            var sink = new FFAudioSink($"ffrender_audio_{ShortId()}");
             sink.OnPipeConnected += () =>
             {
                 Console.Error.WriteLine("Audio pipe connected.");
@@ -76,7 +81,7 @@ namespace FM.LiveSwitch.Connect
 
         private VideoTrack CreateVideoTrack(FFRenderOptions options)
         {
-            var sink = new FFVideoSink($"lsconnect_ffrender_video_{Utility.GenerateId()}");
+            var sink = new FFVideoSink($"ffrender_video_{ShortId()}");
             sink.OnPipeConnected += () =>
             {
                 Console.Error.WriteLine("Video pipe connected.");
