@@ -2,6 +2,8 @@
 {
     class NamedPipeAudioSink : AudioSink
     {
+        static ILog _Log = Log.GetLogger(typeof(NamedPipeAudioSink));
+
         public override string Label
         {
             get { return "Named Pipe Audio Sink"; }
@@ -13,7 +15,9 @@
 
         public event Action0 OnPipeConnected;
 
-        private readonly NamedPipe _Pipe;
+        protected NamedPipe Pipe { get; private set; }
+
+        private volatile bool _StreamHeaderSent = false;
 
         public NamedPipeAudioSink(string pipeName)
             : this(pipeName, false)
@@ -27,8 +31,8 @@
 
             Deactivated = true;
 
-            _Pipe = new NamedPipe(pipeName, !client);
-            _Pipe.OnConnected += () =>
+            Pipe = new NamedPipe(pipeName, !client);
+            Pipe.OnConnected += () =>
             {
                 Deactivated = false;
                 OnPipeConnected?.Invoke();
@@ -36,28 +40,77 @@
 
             if (client)
             {
-                _Pipe.Connect();
+                Pipe.Connect();
             }
             else
             {
-                _ = _Pipe.TryAccept();
+                _ = Pipe.TryAccept();
             }
         }
 
         protected override void DoProcessFrame(AudioFrame frame, AudioBuffer inputBuffer)
         {
-            if (_Pipe.IsConnected)
+            if (Pipe.IsConnected)
             {
-                foreach (var dataBuffer in inputBuffer.DataBuffers)
+                if (!_StreamHeaderSent)
                 {
-                    _Pipe.TryWrite(dataBuffer);
+                    if (!(_StreamHeaderSent = WriteStreamHeader(frame, inputBuffer)))
+                    {
+                        if (!Deactivated)
+                        {
+                            _Log.Error(Id, "Could not send audio stream header.");
+                        }
+                    }
+                }
+
+                if (_StreamHeaderSent)
+                {
+                    if (!WriteFrameHeader(frame, inputBuffer))
+                    {
+                        if (!Deactivated)
+                        {
+                            _Log.Error(Id, "Could not send audio frame header.");
+                        }
+                    }
+                    else
+                    {
+                        if (!WriteFrame(frame, inputBuffer))
+                        {
+                            if (!Deactivated)
+                            {
+                                _Log.Error(Id, "Could not send audio frame.");
+                            }
+                        }
+                    }
                 }
             }
         }
 
+        protected virtual bool WriteStreamHeader(AudioFrame frame, AudioBuffer inputBuffer)
+        {
+            return true;
+        }
+
+        protected virtual bool WriteFrameHeader(AudioFrame frame, AudioBuffer inputBuffer)
+        {
+            return true;
+        }
+
+        protected virtual bool WriteFrame(AudioFrame frame, AudioBuffer inputBuffer)
+        {
+            foreach (var dataBuffer in inputBuffer.DataBuffers)
+            {
+                if (!Pipe.TryWrite(dataBuffer))
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
         protected override void DoDestroy()
         {
-            _Pipe.Destroy();
+            Pipe.Destroy();
         }
     }
 }

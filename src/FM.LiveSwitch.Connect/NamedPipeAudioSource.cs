@@ -14,6 +14,8 @@ namespace FM.LiveSwitch.Connect
 
         public bool Server { get; private set; }
 
+        public bool StartAsync { get; set; }
+
         public event Action0 OnPipeConnected;
 
         private NamedPipe _Pipe;
@@ -38,8 +40,6 @@ namespace FM.LiveSwitch.Connect
             var promise = new Promise<object>();
             try
             {
-                var frameLength = SoundUtility.CalculateDataLength(FrameDuration, Config);
-
                 _Pipe = new NamedPipe(PipeName, Server);
                 _Pipe.OnConnected += () =>
                 {
@@ -50,33 +50,69 @@ namespace FM.LiveSwitch.Connect
                     RaiseFrame(new AudioFrame(FrameDuration, new AudioBuffer(dataBuffer, OutputFormat)));
                 };
 
-                Task.Run(async () =>
+                if (StartAsync)
                 {
-                    try
+                    Task ready;
+                    if (Server)
                     {
-                        if (Server)
-                        {
-                            await _Pipe.WaitForConnectionAsync();
-                        }
-                        else
-                        {
-                            await _Pipe.ConnectAsync();
-                        }
-                        _Pipe.StartReading(frameLength);
+                        ready = _Pipe.WaitForConnectionAsync();
+                    }
+                    else
+                    {
+                        ready = _Pipe.ConnectAsync();
+                    }
 
-                        promise.Resolve(null);
-                    }
-                    catch (Exception ex)
+                    Task.Run(async () =>
                     {
-                        promise.Reject(ex);
-                    }
-                });
+                        await ready;
+
+                        ReadStreamHeader();
+
+                        _Pipe.StartReading(ReadFrameHeader);
+                    });
+
+                    promise.Resolve(null);
+                }
+                else
+                {
+                    Task.Run(async () =>
+                    {
+                        try
+                        {
+                            if (Server)
+                            {
+                                await _Pipe.WaitForConnectionAsync();
+                            }
+                            else
+                            {
+                                await _Pipe.ConnectAsync();
+                            }
+
+                            ReadStreamHeader();
+
+                            _Pipe.StartReading(ReadFrameHeader);
+
+                            promise.Resolve(null);
+                        }
+                        catch (Exception ex)
+                        {
+                            promise.Reject(ex);
+                        }
+                    });
+                }
             }
             catch (Exception ex)
             {
                 promise.Reject(ex);
             }
             return promise;
+        }
+
+        protected virtual void ReadStreamHeader() { }
+
+        protected virtual int ReadFrameHeader()
+        {
+            return SoundUtility.CalculateDataLength(FrameDuration, Config);
         }
 
         protected override Future<object> DoStop()

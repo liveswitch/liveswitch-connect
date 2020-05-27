@@ -14,13 +14,15 @@ namespace FM.LiveSwitch.Connect
 
         public bool Server { get; private set; }
 
-        public int Width { get; private set; }
+        public bool StartAsync { get; set; }
 
-        public int Height { get; private set; }
+        public int Width { get; protected set; }
+
+        public int Height { get; protected set; }
 
         public event Action0 OnPipeConnected;
 
-        private NamedPipe _Pipe;
+        protected NamedPipe Pipe { get; private set; }
 
         public NamedPipeVideoSource(string pipeName, int width, int height, VideoFormat outputFormat)
             : this(pipeName, width, height, outputFormat, false)
@@ -40,45 +42,79 @@ namespace FM.LiveSwitch.Connect
             var promise = new Promise<object>();
             try
             {
-                _Pipe = new NamedPipe(PipeName, Server);
-                _Pipe.OnConnected += () =>
+                Pipe = new NamedPipe(PipeName, Server);
+                Pipe.OnConnected += () =>
                 {
                     OnPipeConnected?.Invoke();
                 };
-                _Pipe.OnReadDataBuffer += (dataBuffer) =>
+                Pipe.OnReadDataBuffer += (dataBuffer) =>
                 {
                     RaiseFrame(new VideoFrame(new VideoBuffer(Width, Height, dataBuffer, OutputFormat)));
                 };
 
-                var frameLength = VideoBuffer.GetMinimumBufferLength(Width, Height, OutputFormat.Name);
-
-                Task.Run(async () =>
+                if (StartAsync)
                 {
-                    try
+                    Task ready;
+                    if (Server)
                     {
-                        if (Server)
-                        {
-                            await _Pipe.WaitForConnectionAsync();
-                        }
-                        else
-                        {
-                            await _Pipe.ConnectAsync();
-                        }
-                        _Pipe.StartReading(frameLength);
+                        ready = Pipe.WaitForConnectionAsync();
+                    }
+                    else
+                    {
+                        ready = Pipe.ConnectAsync();
+                    }
 
-                        promise.Resolve(null);
-                    }
-                    catch (Exception ex)
+                    Task.Run(async () =>
                     {
-                        promise.Reject(ex);
-                    }
-                });
+                        await ready;
+
+                        ReadStreamHeader();
+
+                        Pipe.StartReading(ReadFrameHeader);
+                    });
+
+                    promise.Resolve(null);
+                }
+                else
+                {
+                    Task.Run(async () =>
+                    {
+                        try
+                        {
+                            if (Server)
+                            {
+                                await Pipe.WaitForConnectionAsync();
+                            }
+                            else
+                            {
+                                await Pipe.ConnectAsync();
+                            }
+
+                            ReadStreamHeader();
+
+                            Pipe.StartReading(ReadFrameHeader);
+
+                            promise.Resolve(null);
+                        }
+                        catch (Exception ex)
+                        {
+                            promise.Reject(ex);
+                        }
+                    });
+                }
             }
             catch (Exception ex)
             {
                 promise.Reject(ex);
             }
             return promise;
+        }
+
+        protected virtual void ReadStreamHeader() { }
+
+        protected virtual int ReadFrameHeader()
+        {
+            return VideoBuffer.GetMinimumBufferLength(Width, Height, OutputFormat.Name);
         }
 
         protected override Future<object> DoStop()
@@ -90,8 +126,8 @@ namespace FM.LiveSwitch.Connect
                 {
                     try
                     {
-                        await _Pipe.StopReading();
-                        await _Pipe.DestroyAsync();
+                        await Pipe.StopReading();
+                        await Pipe.DestroyAsync();
 
                         promise.Resolve(null);
                     }

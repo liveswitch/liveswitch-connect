@@ -2,6 +2,8 @@
 {
     class NamedPipeVideoSink : VideoSink
     {
+        static ILog _Log = Log.GetLogger(typeof(NamedPipeVideoSink));
+
         public override string Label
         {
             get { return "Named Pipe Video Sink"; }
@@ -13,7 +15,9 @@
 
         public event Action0 OnPipeConnected;
 
-        private readonly NamedPipe _Pipe;
+        protected NamedPipe Pipe { get; private set; }
+
+        private volatile bool _StreamHeaderSent = false;
 
         public NamedPipeVideoSink(string pipeName)
             : this(pipeName, false)
@@ -22,13 +26,24 @@
         public NamedPipeVideoSink(string pipeName, bool client)
             : base()
         {
+            Initialize(pipeName, client);
+        }
+
+        public NamedPipeVideoSink(string pipeName, bool client, VideoFormat format)
+            : base(format)
+        {
+            Initialize(pipeName, client);
+        }
+
+        private void Initialize(string pipeName, bool client)
+        {
             PipeName = pipeName;
             Client = client;
 
             Deactivated = true;
 
-            _Pipe = new NamedPipe(pipeName, !client);
-            _Pipe.OnConnected += () =>
+            Pipe = new NamedPipe(pipeName, !client);
+            Pipe.OnConnected += () =>
             {
                 Deactivated = false;
                 OnPipeConnected?.Invoke();
@@ -36,28 +51,77 @@
 
             if (client)
             {
-                _Pipe.Connect();
+                Pipe.Connect();
             }
             else
             {
-                _ = _Pipe.TryAccept();
+                _ = Pipe.TryAccept();
             }
         }
 
         protected override void DoProcessFrame(VideoFrame frame, VideoBuffer inputBuffer)
         {
-            if (_Pipe.IsConnected)
+            if (Pipe.IsConnected)
             {
-                foreach (var dataBuffer in inputBuffer.DataBuffers)
+                if (!_StreamHeaderSent)
                 {
-                    _Pipe.TryWrite(dataBuffer);
+                    if (!(_StreamHeaderSent = WriteStreamHeader(frame, inputBuffer)))
+                    {
+                        if (!Deactivated)
+                        {
+                            _Log.Error(Id, "Could not send video stream header.");
+                        }
+                    }
+                }
+
+                if (_StreamHeaderSent)
+                {
+                    if (!WriteFrameHeader(frame, inputBuffer))
+                    {
+                        if (!Deactivated)
+                        {
+                            _Log.Error(Id, "Could not send video frame header.");
+                        }
+                    }
+                    else
+                    {
+                        if (!WriteFrame(frame, inputBuffer))
+                        {
+                            if (!Deactivated)
+                            {
+                                _Log.Error(Id, "Could not send video frame.");
+                            }
+                        }
+                    }
                 }
             }
         }
 
+        protected virtual bool WriteStreamHeader(VideoFrame frame, VideoBuffer inputBuffer)
+        {
+            return true;
+        }
+
+        protected virtual bool WriteFrameHeader(VideoFrame frame, VideoBuffer inputBuffer)
+        {
+            return true;
+        }
+
+        protected virtual bool WriteFrame(VideoFrame frame, VideoBuffer inputBuffer)
+        {
+            foreach (var dataBuffer in inputBuffer.DataBuffers)
+            {
+                if (!Pipe.TryWrite(dataBuffer))
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
         protected override void DoDestroy()
         {
-            _Pipe.Destroy();
+            Pipe.Destroy();
         }
     }
 }

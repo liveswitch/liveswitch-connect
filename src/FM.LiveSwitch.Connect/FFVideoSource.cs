@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace FM.LiveSwitch.Connect
 {
-    class FFVideoSource : VideoSource
+    class FFVideoSource : NamedPipeVideoSource
     {
         static readonly ILog _Log = Log.GetLogger(typeof(FFVideoSource));
 
@@ -12,12 +11,6 @@ namespace FM.LiveSwitch.Connect
         {
             get { return "FFmpeg Video Source"; }
         }
-
-        public string PipeName { get; private set; }
-
-        public event Action0 OnPipeConnected;
-
-        private NamedPipe _Pipe;
 
         private int _HeaderWidth;
         private int _HeaderHeight;
@@ -27,110 +20,13 @@ namespace FM.LiveSwitch.Connect
         private string _HeaderColourSpace;
         private string _HeaderComment;
 
-        private int _Width;
-        private int _Height;
-
         public FFVideoSource(string pipeName)
-            : base(VideoFormat.I420)
+            : base(pipeName, 0, 0, VideoFormat.I420, true)
         {
-            PipeName = pipeName;
+            StartAsync = true;
         }
 
-        protected override Future<object> DoStart()
-        {
-            var promise = new Promise<object>();
-            try
-            {
-                _Pipe = new NamedPipe(PipeName, true);
-                _Pipe.OnConnected += () =>
-                {
-                    OnPipeConnected?.Invoke();
-                };
-                _Pipe.OnReadDataBuffer += (dataBuffer) =>
-                {
-                    RaiseFrame(new VideoFrame(new VideoBuffer(_Width, _Height, dataBuffer, OutputFormat)));
-                };
-
-                var ready = _Pipe.WaitForConnectionAsync();
-
-                Task.Run(async () =>
-                {
-                    await ready;
-
-                    ReadStreamHeader();
-
-                    var headerParams = new List<string>();
-                    if (_HeaderWidth != 0)
-                    {
-                        headerParams.Add($"Width={_HeaderWidth}");
-                    }
-                    if (_HeaderHeight != 0)
-                    {
-                        headerParams.Add($"Height={_HeaderHeight}");
-                    }
-                    if (_HeaderFrameRate != 0)
-                    {
-                        headerParams.Add($"FrameRate={_HeaderFrameRate}");
-                    }
-                    if (_HeaderInterlacing != null)
-                    {
-                        headerParams.Add($"Interlacing={_HeaderInterlacing}");
-                    }
-                    if (_HeaderPixelAspectRatio != 0)
-                    {
-                        headerParams.Add($"PixelAspectRatio={_HeaderPixelAspectRatio}");
-                    }
-                    if (_HeaderColourSpace != null)
-                    {
-                        headerParams.Add($"ColourSpace={_HeaderColourSpace}");
-                    }
-                    if (_HeaderComment != null)
-                    {
-                        headerParams.Add($"Comment={_HeaderComment}");
-                    }
-                    _Log.Debug(Id, $"Stream Header => {string.Join(", ", headerParams)}");
-
-                    _Pipe.StartReading(ReadFrameHeader);
-                });
-
-                promise.Resolve(null);
-            }
-            catch (Exception ex)
-            {
-                promise.Reject(ex);
-            }
-            return promise;
-        }
-
-        protected override Future<object> DoStop()
-        {
-            var promise = new Promise<object>();
-            try
-            {
-                Task.Run(async () =>
-                {
-                    try
-                    {
-                        await _Pipe.StopReading();
-                        await _Pipe.DestroyAsync();
-
-                        promise.Resolve(null);
-                    }
-                    catch (Exception ex)
-                    {
-                        promise.Reject(ex);
-                    }
-                });
-                promise.Resolve(null);
-            }
-            catch (Exception ex)
-            {
-                promise.Reject(ex);
-            }
-            return promise;
-        }
-
-        private void ReadStreamHeader()
+        protected override void ReadStreamHeader()
         {
             // YUV4MPEG2
             if (Read8() != 'Y' ||
@@ -226,9 +122,41 @@ namespace FM.LiveSwitch.Connect
                     _Log.Warn(string.Format("Ignoring stream header parameter {0}{1}", p, s));
                 }
             }
+
+            // log details
+            var headerParams = new List<string>();
+            if (_HeaderWidth != 0)
+            {
+                headerParams.Add($"Width={_HeaderWidth}");
+            }
+            if (_HeaderHeight != 0)
+            {
+                headerParams.Add($"Height={_HeaderHeight}");
+            }
+            if (_HeaderFrameRate != 0)
+            {
+                headerParams.Add($"FrameRate={_HeaderFrameRate}");
+            }
+            if (_HeaderInterlacing != null)
+            {
+                headerParams.Add($"Interlacing={_HeaderInterlacing}");
+            }
+            if (_HeaderPixelAspectRatio != 0)
+            {
+                headerParams.Add($"PixelAspectRatio={_HeaderPixelAspectRatio}");
+            }
+            if (_HeaderColourSpace != null)
+            {
+                headerParams.Add($"ColourSpace={_HeaderColourSpace}");
+            }
+            if (_HeaderComment != null)
+            {
+                headerParams.Add($"Comment={_HeaderComment}");
+            }
+            _Log.Debug(Id, $"Stream Header => {string.Join(", ", headerParams)}");
         }
 
-        private int ReadFrameHeader()
+        protected override int ReadFrameHeader()
         {
             if (Read8() != 'F' ||
                 Read8() != 'R' ||
@@ -245,8 +173,8 @@ namespace FM.LiveSwitch.Connect
                 throw new Exception("Malformed frame header.");
             }
 
-            _Width = _HeaderWidth;
-            _Height = _HeaderHeight;
+            Width = _HeaderWidth;
+            Height = _HeaderHeight;
             while (c != '\n')
             {
                 c = Read8();
@@ -254,7 +182,11 @@ namespace FM.LiveSwitch.Connect
                 {
                     var s = ReadParameter(out c);
 
-                    if (!ParseAssistant.TryParseIntegerValue(s, out _Width))
+                    if (ParseAssistant.TryParseIntegerValue(s, out var width))
+                    {
+                        Width = width;
+                    }
+                    else
                     {
                         throw new Exception("Invalid frame header width.");
                     }
@@ -263,7 +195,11 @@ namespace FM.LiveSwitch.Connect
                 {
                     var s = ReadParameter(out c);
 
-                    if (!ParseAssistant.TryParseIntegerValue(s, out _Height))
+                    if (ParseAssistant.TryParseIntegerValue(s, out var height))
+                    {
+                        Height = height;
+                    }
+                    else
                     {
                         throw new Exception("Invalid frame header height.");
                     }
@@ -276,14 +212,14 @@ namespace FM.LiveSwitch.Connect
                 }
             }
 
-            return _Width * _Height * 3 / 2;
+            return Width * Height * 3 / 2;
         }
 
         private readonly DataBuffer _Single = DataBuffer.Allocate(1);
 
         private int Read8()
         {
-            return _Pipe.Read(_Single).Read8(0);
+            return Pipe.Read(_Single).Read8(0);
         }
 
         private string ReadParameter(out int c)
