@@ -5,113 +5,104 @@ namespace FM.LiveSwitch.Connect
 {
     class Faker : Sender<FakeOptions, FakeAudioSource, FakeVideoSource>
     {
-        public Task<int> Fake(FakeOptions options)
+        public Faker(FakeOptions options)
+            : base(options)
+        { }
+
+        public Task<int> Fake()
         {
-            if (options.NoAudio && options.NoVideo)
+            if (!Options.NoAudio)
             {
-                Console.Error.WriteLine("--no-audio and --no-video cannot both be set.");
-                return Task.FromResult(1);
-            }
-            if (!options.NoAudio)
-            {
-                if (options.AudioClockRate % 8000 != 0)
+                if (Options.AudioClockRate % 8000 != 0)
                 {
                     Console.Error.WriteLine("--audio-clock-rate must be a multiple of 8000.");
                     return Task.FromResult(1);
                 }
-                if (options.AudioClockRate < 8000)
+                if (Options.AudioClockRate < 8000)
                 {
                     Console.Error.WriteLine("--audio-clock-rate minimum value is 8000.");
                     return Task.FromResult(1);
                 }
-                if (options.AudioClockRate > 96000)
+                if (Options.AudioClockRate > 96000)
                 {
                     Console.Error.WriteLine("--audio-clock-rate maximum value is 96000.");
                     return Task.FromResult(1);
                 }
-                if (options.AudioChannelCount < 1)
+                if (Options.AudioChannelCount < 1)
                 {
                     Console.Error.WriteLine("--audio-channel-count minimum value is 1.");
                     return Task.FromResult(1);
                 }
-                if (options.AudioChannelCount > 2)
+                if (Options.AudioChannelCount > 2)
                 {
                     Console.Error.WriteLine("--audio-channel-count maximum value is 2.");
                     return Task.FromResult(1);
                 }
-                if (options.AudioFrequency < 20)
+                if (Options.AudioFrequency < 20)
                 {
                     Console.Error.WriteLine("--audio-frequency minimum value is 20.");
                     return Task.FromResult(1);
                 }
-                if (options.AudioFrequency > 20000)
+                if (Options.AudioFrequency > 20000)
                 {
                     Console.Error.WriteLine("--audio-frequency maximum value is 20000.");
                     return Task.FromResult(1);
                 }
-                if (options.AudioFrequency < 1)
+                if (Options.AudioFrequency < 1)
                 {
                     Console.Error.WriteLine("--audio-amplitude minimum value is 1.");
                     return Task.FromResult(1);
                 }
-                if (options.AudioFrequency > 32767)
+                if (Options.AudioFrequency > 32767)
                 {
                     Console.Error.WriteLine("--audio-amplitude maximum value is 32767.");
                     return Task.FromResult(1);
                 }
             }
-            if (!options.NoVideo)
+            if (!Options.NoVideo)
             {
-                if (options.VideoWidth == 0)
+                if (Options.VideoWidth == 0)
                 {
                     Console.Error.WriteLine("--video-width must be a specified if --video-pipe is specified.");
                     return Task.FromResult(1);
                 }
-                if (options.VideoHeight == 0)
+                if (Options.VideoHeight == 0)
                 {
                     Console.Error.WriteLine("--video-height must be a specified if --video-pipe is specified.");
                     return Task.FromResult(1);
                 }
-                if (options.VideoWidth % 2 != 0)
+                if (Options.VideoWidth % 2 != 0)
                 {
                     Console.Error.WriteLine("--video-width must be a multiple of 2.");
                     return Task.FromResult(1);
                 }
-                if (options.VideoHeight % 2 != 0)
+                if (Options.VideoHeight % 2 != 0)
                 {
                     Console.Error.WriteLine("--video-height must be a multiple of 2.");
                     return Task.FromResult(1);
                 }
-                if (options.VideoFrameRate < 1)
+                if (Options.VideoFrameRate < 1)
                 {
                     Console.Error.WriteLine("--video-frame-rate minimum value is 1.");
                     return Task.FromResult(1);
                 }
-                if (options.VideoFrameRate > 120)
+                if (Options.VideoFrameRate > 120)
                 {
                     Console.Error.WriteLine("--video-frame-rate maximum value is 120.");
                     return Task.FromResult(1);
                 }
             }
-            return Send(options);
+            return Send();
         }
 
-        protected override FakeAudioSource CreateAudioSource(FakeOptions options)
+        protected override FakeAudioSource CreateAudioSource()
         {
-            if (options.NoAudio)
-            {
-                return null;
-            }
-            return new FakeAudioSource(new AudioConfig(options.AudioClockRate, options.AudioChannelCount), options.AudioFrequency, options.AudioAmplitude);
+            return new FakeAudioSource(new AudioConfig(Options.AudioClockRate, Options.AudioChannelCount), Options.AudioFrequency, Options.AudioAmplitude);
         }
 
-        protected override FakeVideoSource CreateVideoSource(FakeOptions options)
+        protected override FakeVideoSource CreateVideoSource()
         {
-            if (options.NoVideo)
-            {
-                return null;
-            }
-            return new FakeVideoSource(new VideoConfig(options.VideoWidth, options.VideoHeight, options.VideoFrameRate), options.VideoFormat.CreateFormat());
+            return new FakeVideoSource(new VideoConfig(Options.VideoWidth, Options.VideoHeight, Options.VideoFrameRate), Options.VideoFormat.CreateFormat());
         }
     }
 }

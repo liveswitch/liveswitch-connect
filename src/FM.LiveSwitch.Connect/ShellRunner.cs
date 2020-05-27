@@ -8,11 +8,19 @@ namespace FM.LiveSwitch.Connect
 {
     class ShellRunner
     {
-        public async Task<int> Run(ShellOptions options)
+        public ShellOptions Options { get; private set; }
+
+        public ShellRunner(ShellOptions options)
+            : base()
+        {
+            Options = options;
+        }
+
+        public async Task<int> Run()
         {
             try
             {
-                var shellManager = new ShellManager(options);
+                var shellManager = new ShellManager(Options);
 
                 // watch for exit signal
                 var exitSignalledSource = new TaskCompletionSource<bool>();

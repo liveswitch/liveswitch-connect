@@ -10,11 +10,5 @@ namespace FM.LiveSwitch.Connect
 
         [Option("video-log", Required = false, Default = "video: {width}x{height} {codec} frame received ({footprint} bytes) for SSRC {synchronizationSource} and timestamp {timestamp}", HelpText = "The video log template. Uses curly-brace syntax. Valid variables: footprint, width, height, mediaStreamId, rtpStreamId, sequenceNumber, synchronizationSource, systemTimestamp, timestamp, codec, applicationId, channelId, userId, userAlias, deviceId, deviceAlias, clientId, clientTag, connectionId, connectionTag, mediaId")]
         public string VideoLog { get; set; }
-
-        [Option("no-audio", Required = false, HelpText = "Do not fake audio.")]
-        public bool NoAudio { get; set; }
-
-        [Option("no-video", Required = false, HelpText = "Do not fake video.")]
-        public bool NoVideo { get; set; }
     }
 }

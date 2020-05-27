@@ -58,7 +58,7 @@ namespace FM.LiveSwitch.Connect
                     options.DisableOpenH264 = disableOpenH264;
                     return Task.Run(async () =>
                     {
-                        return await new ShellRunner().Run(options);
+                        return await new ShellRunner(options).Run();
                     }).GetAwaiter().GetResult();
                 },
                 (CaptureOptions options) =>
@@ -66,7 +66,7 @@ namespace FM.LiveSwitch.Connect
                     options.DisableOpenH264 = disableOpenH264;
                     return Task.Run(async () =>
                     {
-                        return await new Capturer().Capture(options);
+                        return await new Capturer(options).Capture();
                     }).GetAwaiter().GetResult();
                 },
                 (FFCaptureOptions options) =>
@@ -74,7 +74,7 @@ namespace FM.LiveSwitch.Connect
                     options.DisableOpenH264 = disableOpenH264;
                     return Task.Run(async () =>
                     {
-                        return await new FFCapturer().Capture(options);
+                        return await new FFCapturer(options).Capture();
                     }).GetAwaiter().GetResult();
                 },
                 (FakeOptions options) =>
@@ -82,7 +82,7 @@ namespace FM.LiveSwitch.Connect
                     options.DisableOpenH264 = disableOpenH264;
                     return Task.Run(async () =>
                     {
-                        return await new Faker().Fake(options);
+                        return await new Faker(options).Fake();
                     }).GetAwaiter().GetResult();
                 },
                 (PlayOptions options) =>
@@ -90,7 +90,7 @@ namespace FM.LiveSwitch.Connect
                     options.DisableOpenH264 = disableOpenH264;
                     return Task.Run(async () =>
                     {
-                        return await new Player().Play(options);
+                        return await new Player(options).Play();
                     }).GetAwaiter().GetResult();
                 },
                 (RenderOptions options) =>
@@ -98,7 +98,7 @@ namespace FM.LiveSwitch.Connect
                     options.DisableOpenH264 = disableOpenH264;
                     return Task.Run(async () =>
                     {
-                        return await new Renderer().Render(options);
+                        return await new Renderer(options).Render();
                     }).GetAwaiter().GetResult();
                 },
                 (FFRenderOptions options) =>
@@ -106,7 +106,7 @@ namespace FM.LiveSwitch.Connect
                     options.DisableOpenH264 = disableOpenH264;
                     return Task.Run(async () =>
                     {
-                        return await new FFRenderer().Render(options);
+                        return await new FFRenderer(options).Render();
                     }).GetAwaiter().GetResult();
                 },
                 (LogOptions options) =>
@@ -114,7 +114,7 @@ namespace FM.LiveSwitch.Connect
                     options.DisableOpenH264 = disableOpenH264;
                     return Task.Run(async () =>
                     {
-                        return await new Logger().Log(options);
+                        return await new Logger(options).Log();
                     }).GetAwaiter().GetResult();
                 },
                 (RecordOptions options) =>
@@ -122,7 +122,7 @@ namespace FM.LiveSwitch.Connect
                     options.DisableOpenH264 = disableOpenH264;
                     return Task.Run(async () =>
                     {
-                        return await new Recorder().Record(options);
+                        return await new Recorder(options).Record();
                     }).GetAwaiter().GetResult();
                 },
                 (InterceptOptions options) =>
@@ -130,7 +130,7 @@ namespace FM.LiveSwitch.Connect
                     options.DisableOpenH264 = disableOpenH264;
                     return Task.Run(async () =>
                     {
-                        return await new Interceptor().Intercept(options);
+                        return await new Interceptor(options).Intercept();
                     }).GetAwaiter().GetResult();
                 },
                 errors =>

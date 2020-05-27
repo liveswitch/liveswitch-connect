@@ -28,11 +28,5 @@ namespace FM.LiveSwitch.Connect
 
         [Option("video-frame-rate", Required = false, Default = 30, HelpText = "The video frame rate. Minimum value is 1. Maximum value is 120.")]
         public double VideoFrameRate { get; set; }
-
-        [Option("no-audio", Required = false, HelpText = "Do not fake audio.")]
-        public bool NoAudio { get; set; }
-
-        [Option("no-video", Required = false, HelpText = "Do not fake video.")]
-        public bool NoVideo { get; set; }
     }
 }

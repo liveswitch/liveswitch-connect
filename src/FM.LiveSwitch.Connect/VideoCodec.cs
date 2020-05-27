@@ -2,7 +2,7 @@
 {
     enum VideoCodec
     {
-        Copy,
+        Any,
         VP8,
         VP9,
         H264

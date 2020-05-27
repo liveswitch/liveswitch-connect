@@ -6,31 +6,30 @@ using System.Threading.Tasks;
 
 namespace FM.LiveSwitch.Connect
 {
-    class Recorder : Receiver<RecordOptions, Matroska.AudioSink, Matroska.VideoSink>
+    class Recorder : Receiver<RecordOptions, LiveSwitch.Matroska.AudioSink, LiveSwitch.Matroska.VideoSink>
     {
-        public Task<int> Record(RecordOptions options)
+        public Recorder(RecordOptions options)
+            : base(options)
+        { }
+
+        public Task<int> Record()
         {
-            if (options.NoAudio && options.NoVideo)
+            if (!Options.NoVideo)
             {
-                Console.Error.WriteLine("--no-audio and --no-video cannot both be set.");
-                return Task.FromResult(1);
-            }
-            if (!options.NoVideo)
-            {
-                if (options.DisableOpenH264 && options.VideoCodec == VideoCodec.H264)
+                if (Options.DisableOpenH264 && Options.VideoCodec == VideoCodec.H264)
                 {
                     Console.Error.WriteLine("--video-codec cannot be H264. OpenH264 failed to initialize.");
                     return Task.FromResult(1);
                 }
             }
-            return Receive(options);
+            return Receive();
         }
 
-        private string ProcessFilePath(string filePath, ConnectionInfo remoteConnectionInfo, RecordOptions options)
+        private string ProcessFilePath(string filePath, ConnectionInfo remoteConnectionInfo)
         {
             return filePath
-                .Replace("{applicationId}", options.ApplicationId)
-                .Replace("{channelId}", options.ChannelId)
+                .Replace("{applicationId}", Options.ApplicationId)
+                .Replace("{channelId}", Options.ChannelId)
                 .Replace("{userId}", remoteConnectionInfo.UserId)
                 .Replace("{userAlias}", remoteConnectionInfo.UserAlias)
                 .Replace("{deviceId}", remoteConnectionInfo.DeviceId)
@@ -42,16 +41,16 @@ namespace FM.LiveSwitch.Connect
                 .Replace("{mediaId}", remoteConnectionInfo.MediaId);
         }
 
-        protected override AudioStream CreateAudioStream(ConnectionInfo remoteConnectionInfo, RecordOptions options)
+        protected override AudioStream CreateAudioStream(ConnectionInfo remoteConnectionInfo)
         {
-            if (options.NoAudio || !remoteConnectionInfo.HasAudio)
+            if (Options.NoAudio || !remoteConnectionInfo.HasAudio)
             {
                 return null;
             }
 
             var fileIndex = 0;
             var fileExtension = "mka";
-            var filePathWithoutExtension = ProcessFilePath(Path.Combine(options.OutputPath, options.OutputFileName), remoteConnectionInfo, options);
+            var filePathWithoutExtension = ProcessFilePath(Path.Combine(Options.OutputPath, Options.OutputFileName), remoteConnectionInfo);
             var filePath = $"{filePathWithoutExtension}-{fileIndex}.{fileExtension}";
             while (File.Exists(filePath))
             {
@@ -63,7 +62,7 @@ namespace FM.LiveSwitch.Connect
             File.WriteAllText(jsonPath, remoteConnectionInfo.ToJson());
             Console.WriteLine(jsonPath);
 
-            var track = CreateAudioTrack(options, filePath);
+            var track = CreateAudioTrack(filePath);
             var stream = new AudioStream(null, track);
             stream.OnStateChange += () =>
             {
@@ -76,16 +75,16 @@ namespace FM.LiveSwitch.Connect
             return stream;
         }
 
-        protected override VideoStream CreateVideoStream(ConnectionInfo remoteConnectionInfo, RecordOptions options)
+        protected override VideoStream CreateVideoStream(ConnectionInfo remoteConnectionInfo)
         {
-            if (options.NoVideo || !remoteConnectionInfo.HasVideo)
+            if (Options.NoVideo || !remoteConnectionInfo.HasVideo)
             {
                 return null;
             }
 
             var fileIndex = 0;
             var fileExtension = "mkv";
-            var filePathWithoutExtension = ProcessFilePath(Path.Combine(options.OutputPath, options.OutputFileName), remoteConnectionInfo, options);
+            var filePathWithoutExtension = ProcessFilePath(Path.Combine(Options.OutputPath, Options.OutputFileName), remoteConnectionInfo);
             var filePath = $"{filePathWithoutExtension}-{fileIndex}.{fileExtension}";
             while (File.Exists(filePath))
             {
@@ -97,7 +96,7 @@ namespace FM.LiveSwitch.Connect
             File.WriteAllText(jsonPath, remoteConnectionInfo.ToJson());
             Console.WriteLine(jsonPath);
 
-            var track = CreateVideoTrack(options, filePath);
+            var track = CreateVideoTrack(filePath);
             var stream = new VideoStream(null, track);
             stream.OnStateChange += () =>
             {
@@ -110,28 +109,28 @@ namespace FM.LiveSwitch.Connect
             return stream;
         }
 
-        private AudioTrack CreateAudioTrack(RecordOptions options, string filePath)
+        private AudioTrack CreateAudioTrack(string filePath)
         {
             var tracks = new List<AudioTrack>();
-            foreach (var inputCodec in ((AudioCodec[])Enum.GetValues(typeof(AudioCodec))).Where(x => x != AudioCodec.Copy))
+            foreach (var inputCodec in ((AudioCodec[])Enum.GetValues(typeof(AudioCodec))).Where(x => x != AudioCodec.Any))
             {
-                var outputCodec = options.AudioCodec == AudioCodec.Copy ? inputCodec : options.AudioCodec;
+                var outputCodec = Options.AudioCodec == AudioCodec.Any ? inputCodec : Options.AudioCodec;
                 tracks.Add(CreateAudioTrack(inputCodec, outputCodec, filePath));
             }
             return new AudioTrack(tracks.ToArray());
         }
 
-        private VideoTrack CreateVideoTrack(RecordOptions options, string filePath)
+        private VideoTrack CreateVideoTrack(string filePath)
         {
             var tracks = new List<VideoTrack>();
-            foreach (var inputCodec in ((VideoCodec[])Enum.GetValues(typeof(VideoCodec))).Where(x => x != VideoCodec.Copy))
+            foreach (var inputCodec in ((VideoCodec[])Enum.GetValues(typeof(VideoCodec))).Where(x => x != VideoCodec.Any))
             {
-                var outputCodec = options.VideoCodec == VideoCodec.Copy ? inputCodec : options.VideoCodec;
-                if (options.DisableOpenH264 && (inputCodec == VideoCodec.H264 || outputCodec == VideoCodec.H264))
+                var outputCodec = Options.VideoCodec == VideoCodec.Any ? inputCodec : Options.VideoCodec;
+                if (Options.DisableOpenH264 && (inputCodec == VideoCodec.H264 || outputCodec == VideoCodec.H264))
                 {
                     continue;
                 }
-                tracks.Add(CreateVideoTrack(inputCodec, options.VideoCodec == VideoCodec.Copy ? inputCodec : options.VideoCodec, filePath));
+                tracks.Add(CreateVideoTrack(inputCodec, Options.VideoCodec == VideoCodec.Any ? inputCodec : Options.VideoCodec, filePath));
             }
             return new VideoTrack(tracks.ToArray());
         }
@@ -139,7 +138,7 @@ namespace FM.LiveSwitch.Connect
         private AudioTrack CreateAudioTrack(AudioCodec inputCodec, AudioCodec outputCodec, string filePath)
         {
             var depacketizer = inputCodec.CreateDepacketizer();
-            var sink = new Matroska.AudioSink(filePath);
+            var sink = new LiveSwitch.Matroska.AudioSink(filePath);
             if (inputCodec == outputCodec)
             {
                 return new AudioTrack(depacketizer).Next(sink);
@@ -153,7 +152,7 @@ namespace FM.LiveSwitch.Connect
         private VideoTrack CreateVideoTrack(VideoCodec inputCodec, VideoCodec outputCodec, string filePath)
         {
             var depacketizer = inputCodec.CreateDepacketizer();
-            var sink = new Matroska.VideoSink(filePath);
+            var sink = new LiveSwitch.Matroska.VideoSink(filePath);
             if (inputCodec == outputCodec)
             {
                 return new VideoTrack(depacketizer).Next(sink);

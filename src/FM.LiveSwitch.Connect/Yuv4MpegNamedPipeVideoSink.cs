@@ -1,16 +1,16 @@
 ﻿namespace FM.LiveSwitch.Connect
 {
-    class FFVideoSink : NamedPipeVideoSink
+    class Yuv4MpegNamedPipeVideoSink : NamedPipeVideoSink
     {
         public override string Label
         {
-            get { return "FFmpeg Video Sink"; }
+            get { return "YUV4MPEG Named Pipe Video Sink"; }
         }
 
         private int _HeaderWidth;
         private int _HeaderHeight;
 
-        public FFVideoSink(string pipeName)
+        public Yuv4MpegNamedPipeVideoSink(string pipeName)
             : base(pipeName, false, VideoFormat.I420)
         { }
 

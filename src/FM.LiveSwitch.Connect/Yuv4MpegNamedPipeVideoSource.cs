@@ -3,13 +3,13 @@ using System.Collections.Generic;
 
 namespace FM.LiveSwitch.Connect
 {
-    class FFVideoSource : NamedPipeVideoSource
+    class Yuv4MpegNamedPipeVideoSource : NamedPipeVideoSource
     {
-        static readonly ILog _Log = Log.GetLogger(typeof(FFVideoSource));
+        static readonly ILog _Log = Log.GetLogger(typeof(Yuv4MpegNamedPipeVideoSource));
 
         public override string Label
         {
-            get { return "FFmpeg Video Source"; }
+            get { return "YUV4MPEG Named Pipe Video Source"; }
         }
 
         private int _HeaderWidth;
@@ -20,7 +20,7 @@ namespace FM.LiveSwitch.Connect
         private string _HeaderColourSpace;
         private string _HeaderComment;
 
-        public FFVideoSource(string pipeName)
+        public Yuv4MpegNamedPipeVideoSource(string pipeName)
             : base(pipeName, 0, 0, VideoFormat.I420, true)
         {
             StartAsync = true;

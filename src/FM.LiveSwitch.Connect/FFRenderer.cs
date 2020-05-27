@@ -6,31 +6,30 @@ using System.Threading.Tasks;
 
 namespace FM.LiveSwitch.Connect
 {
-    class FFRenderer : Receiver<FFRenderOptions, FFAudioSink, FFVideoSink>
+    class FFRenderer : Receiver<FFRenderOptions, NamedPipeAudioSink, NamedPipeVideoSink>
     {
+        public FFRenderer(FFRenderOptions options)
+            : base(options)
+        { }
+
         private static string ShortId()
         {
             return Guid.NewGuid().ToString().Replace("-", "").Substring(0, 8);
         }
 
-        public Task<int> Render(FFRenderOptions options)
+        public Task<int> Render()
         {
-            if (options.NoAudio && options.NoVideo)
-            {
-                Console.Error.WriteLine("--no-audio and --no-video cannot both be set.");
-                return Task.FromResult(1);
-            }
-            return Receive(options);
+            return Receive();
         }
 
-        protected override AudioStream CreateAudioStream(ConnectionInfo remoteConnectionInfo, FFRenderOptions options)
+        protected override AudioStream CreateAudioStream(ConnectionInfo remoteConnectionInfo)
         {
-            if (options.NoAudio || !remoteConnectionInfo.HasAudio)
+            if (Options.NoAudio || !remoteConnectionInfo.HasAudio)
             {
                 return null;
             }
 
-            var track = CreateAudioTrack(options);
+            var track = CreateAudioTrack();
             var stream = new AudioStream(null, track);
             stream.OnStateChange += () =>
             {
@@ -43,14 +42,14 @@ namespace FM.LiveSwitch.Connect
             return stream;
         }
 
-        protected override VideoStream CreateVideoStream(ConnectionInfo remoteConnectionInfo, FFRenderOptions options)
+        protected override VideoStream CreateVideoStream(ConnectionInfo remoteConnectionInfo)
         {
-            if (options.NoVideo || !remoteConnectionInfo.HasVideo)
+            if (Options.NoVideo || !remoteConnectionInfo.HasVideo)
             {
                 return null;
             }
 
-            var track = CreateVideoTrack(options);
+            var track = CreateVideoTrack();
             var stream = new VideoStream(null, track);
             stream.OnStateChange += () =>
             {
@@ -63,34 +62,34 @@ namespace FM.LiveSwitch.Connect
             return stream;
         }
 
-        private AudioTrack CreateAudioTrack(FFRenderOptions options)
+        private AudioTrack CreateAudioTrack()
         {
-            var sink = new FFAudioSink($"ffrender_audio_{ShortId()}");
+            var sink = new PcmNamedPipeAudioSink($"ffrender_pcm_{ShortId()}");
             sink.OnPipeConnected += () =>
             {
                 Console.Error.WriteLine("Audio pipe connected.");
             };
 
             var tracks = new List<AudioTrack>();
-            foreach (var codec in ((AudioCodec[])Enum.GetValues(typeof(AudioCodec))).Where(x => x != AudioCodec.Copy))
+            foreach (var codec in ((AudioCodec[])Enum.GetValues(typeof(AudioCodec))).Where(x => x != AudioCodec.Any))
             {
-                tracks.Add(CreateAudioTrack(codec, options));
+                tracks.Add(CreateAudioTrack(codec));
             }
             return new AudioTrack(tracks.ToArray()).Next(sink);
         }
 
-        private VideoTrack CreateVideoTrack(FFRenderOptions options)
+        private VideoTrack CreateVideoTrack()
         {
-            var sink = new FFVideoSink($"ffrender_video_{ShortId()}");
+            var sink = new Yuv4MpegNamedPipeVideoSink($"ffrender_i420_{ShortId()}");
             sink.OnPipeConnected += () =>
             {
                 Console.Error.WriteLine("Video pipe connected.");
             };
 
             var tracks = new List<VideoTrack>();
-            foreach (var codec in ((VideoCodec[])Enum.GetValues(typeof(VideoCodec))).Where(x => x != VideoCodec.Copy))
+            foreach (var codec in ((VideoCodec[])Enum.GetValues(typeof(VideoCodec))).Where(x => x != VideoCodec.Any))
             {
-                if (options.DisableOpenH264 && codec == VideoCodec.H264)
+                if (Options.DisableOpenH264 && codec == VideoCodec.H264)
                 {
                     continue;
                 }
@@ -99,7 +98,7 @@ namespace FM.LiveSwitch.Connect
             return new VideoTrack(tracks.ToArray()).Next(sink);
         }
 
-        private AudioTrack CreateAudioTrack(AudioCodec codec, FFRenderOptions options)
+        private AudioTrack CreateAudioTrack(AudioCodec codec)
         {
             var depacketizer = codec.CreateDepacketizer();
             var decoder = codec.CreateDecoder();
@@ -117,9 +116,9 @@ namespace FM.LiveSwitch.Connect
 
         private Process FFmpeg;
 
-        protected override void SinksReady(FFAudioSink[] audioSinks, FFVideoSink[] videoSinks, FFRenderOptions options)
+        protected override void SinksReady(NamedPipeAudioSink[] audioSinks, NamedPipeVideoSink[] videoSinks)
         {
-            base.SinksReady(audioSinks, videoSinks, options);
+            base.SinksReady(audioSinks, videoSinks);
 
             var args = new List<string>
             {
@@ -149,12 +148,12 @@ namespace FM.LiveSwitch.Connect
                 });
             }
 
-            args.Add(options.OutputArgs);
+            args.Add(Options.OutputArgs);
 
             FFmpeg = FFUtility.FFmpeg(string.Join(" ", args));
         }
 
-        protected override void SinksUnready(FFAudioSink[] audioSinks, FFVideoSink[] videoSinks, FFRenderOptions options)
+        protected override void SinksUnready(NamedPipeAudioSink[] audioSinks, NamedPipeVideoSink[] videoSinks)
         {
             if (audioSinks != null)
             {
@@ -174,7 +173,7 @@ namespace FM.LiveSwitch.Connect
                 FFmpeg.WaitForExit();
             }
 
-            base.SinksUnready(audioSinks, videoSinks, options);
+            base.SinksUnready(audioSinks, videoSinks);
         }
     }
 }

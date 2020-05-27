@@ -38,7 +38,7 @@ namespace FM.LiveSwitch.Connect
             }
         }
 
-        public static AudioPipe CreatePacketizer(this AudioCodec codec)
+        public static AudioPacketizer CreatePacketizer(this AudioCodec codec)
         {
             switch (codec)
             {
@@ -55,7 +55,7 @@ namespace FM.LiveSwitch.Connect
             }
         }
 
-        public static AudioPipe CreateDepacketizer(this AudioCodec codec)
+        public static AudioDepacketizer CreateDepacketizer(this AudioCodec codec)
         {
             switch (codec)
             {
@@ -74,16 +74,21 @@ namespace FM.LiveSwitch.Connect
 
         public static NullAudioSink CreateNullSink(this AudioCodec codec, bool isPacketized)
         {
+            return new NullAudioSink(CreateFormat(codec, isPacketized));
+        }
+
+        public static AudioFormat CreateFormat(this AudioCodec codec, bool isPacketized = false)
+        {
             switch (codec)
             {
                 case AudioCodec.Opus:
-                    return new NullAudioSink(new Opus.Format() { IsPacketized = isPacketized });
+                    return new Opus.Format() { IsPacketized = isPacketized };
                 case AudioCodec.G722:
-                    return new NullAudioSink(new G722.Format() { IsPacketized = isPacketized });
+                    return new G722.Format() { IsPacketized = isPacketized, ClockRate = isPacketized ? 8000 : 16000 };
                 case AudioCodec.PCMU:
-                    return new NullAudioSink(new Pcmu.Format() { IsPacketized = isPacketized });
+                    return new Pcmu.Format() { IsPacketized = isPacketized };
                 case AudioCodec.PCMA:
-                    return new NullAudioSink(new Pcma.Format() { IsPacketized = isPacketized });
+                    return new Pcma.Format() { IsPacketized = isPacketized };
                 default:
                     throw new Exception("Unknown audio codec.");
             }

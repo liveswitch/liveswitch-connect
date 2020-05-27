@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace FM.LiveSwitch.Connect
 {
-    abstract class Options : IChannelOptions, IClientOptions
+    abstract class Options : IConnectionOptions, IChannelOptions, IClientOptions
     {
         public bool DisableOpenH264 { get; set; }
 
@@ -42,5 +42,17 @@ namespace FM.LiveSwitch.Connect
 
         [Option("connection-tag", Required = false, HelpText = "The local connection tag.")]
         public string ConnectionTag { get; set; }
+
+        [Option("no-audio", Required = false, HelpText = "Do not process audio.")]
+        public bool NoAudio { get; set; }
+
+        [Option("no-video", Required = false, HelpText = "Do not process video.")]
+        public bool NoVideo { get; set; }
+
+        [Option("audio-codec", Required = false, Default = AudioCodec.Any, HelpText = "The audio codec to negotiate with LiveSwitch.")]
+        public AudioCodec AudioCodec { get; set; }
+
+        [Option("video-codec", Required = false, Default = VideoCodec.Any, HelpText = "The video codec to negotiate with LiveSwitch.")]
+        public VideoCodec VideoCodec { get; set; }
     }
 }
