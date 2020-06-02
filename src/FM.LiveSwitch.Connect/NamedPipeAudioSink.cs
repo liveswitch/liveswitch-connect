@@ -26,6 +26,17 @@
         public NamedPipeAudioSink(string pipeName, bool client)
             : base()
         {
+            Initialize(pipeName, client);
+        }
+
+        public NamedPipeAudioSink(string pipeName, bool client, AudioFormat format)
+            : base(format)
+        {
+            Initialize(pipeName, client);
+        }
+
+        private void Initialize(string pipeName, bool client)
+        {
             PipeName = pipeName;
             Client = client;
 

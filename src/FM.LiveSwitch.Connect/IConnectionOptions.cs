@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace FM.LiveSwitch.Connect
+﻿namespace FM.LiveSwitch.Connect
 {
     interface IConnectionOptions
     {
@@ -9,5 +7,13 @@ namespace FM.LiveSwitch.Connect
         string ConnectionTag { get; }
 
         string DataChannelLabel { get; }
+
+        bool NoAudio { get; set; }
+
+        bool NoVideo { get; set; }
+
+        AudioCodec AudioCodec { get; }
+
+        VideoCodec VideoCodec { get; }
     }
 }

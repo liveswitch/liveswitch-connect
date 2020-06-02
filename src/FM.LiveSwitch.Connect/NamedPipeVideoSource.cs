@@ -49,7 +49,7 @@ namespace FM.LiveSwitch.Connect
                 };
                 Pipe.OnReadDataBuffer += (dataBuffer) =>
                 {
-                    RaiseFrame(new VideoFrame(new VideoBuffer(Width, Height, dataBuffer, OutputFormat)));
+                    RaiseFramePayload(dataBuffer);
                 };
 
                 if (StartAsync)
@@ -115,6 +115,11 @@ namespace FM.LiveSwitch.Connect
         protected virtual int ReadFrameHeader()
         {
             return VideoBuffer.GetMinimumBufferLength(Width, Height, OutputFormat.Name);
+        }
+
+        protected virtual void RaiseFramePayload(DataBuffer dataBuffer)
+        {
+            RaiseFrame(new VideoFrame(new VideoBuffer(Width, Height, dataBuffer, OutputFormat)));
         }
 
         protected override Future<object> DoStop()

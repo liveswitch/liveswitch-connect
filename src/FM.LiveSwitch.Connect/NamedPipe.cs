@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.IO.Pipes;
-using System.Linq;
-using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -29,11 +26,12 @@ namespace FM.LiveSwitch.Connect
 
         public bool Server { get; private set; }
 
-        public bool IsConnected { get { return _PipeStream.IsConnected; } }
+        public bool IsConnected { get { return Stream.IsConnected; } }
 
-        private PipeStream _PipeStream;
-        private NamedPipeClientStream _ClientPipeStream;
-        private NamedPipeServerStream _ServerPipeStream;
+        public PipeStream Stream { get; private set; }
+
+        private NamedPipeClientStream _ClientStream;
+        private NamedPipeServerStream _ServerStream;
 
         public event Action OnConnected;
 
@@ -44,24 +42,24 @@ namespace FM.LiveSwitch.Connect
 
             if (server)
             {
-                _PipeStream = _ServerPipeStream = new NamedPipeServerStream(pipeName, PipeDirection.InOut, NamedPipeServerStream.MaxAllowedServerInstances, PipeTransmissionMode.Byte, PipeOptions.Asynchronous | PipeOptions.WriteThrough);
+                Stream = _ServerStream = new NamedPipeServerStream(pipeName, PipeDirection.InOut, NamedPipeServerStream.MaxAllowedServerInstances, PipeTransmissionMode.Byte, PipeOptions.Asynchronous | PipeOptions.WriteThrough);
             }
             else
             {
-                _PipeStream = _ClientPipeStream = new NamedPipeClientStream(".", pipeName, PipeDirection.InOut, PipeOptions.Asynchronous);
+                Stream = _ClientStream = new NamedPipeClientStream(".", pipeName, PipeDirection.InOut, PipeOptions.Asynchronous);
             }
         }
 
         public void Destroy()
         {
-            _PipeStream.Flush();
-            _PipeStream.Dispose();
+            Stream.Flush();
+            Stream.Dispose();
         }
 
         public async Task DestroyAsync()
         {
-            await _PipeStream.FlushAsync();
-            await _PipeStream.DisposeAsync();
+            await Stream.FlushAsync();
+            await Stream.DisposeAsync();
         }
 
         public void WaitForConnection()
@@ -70,7 +68,7 @@ namespace FM.LiveSwitch.Connect
             {
                 throw new NotSupportedException();
             }
-            _ServerPipeStream.WaitForConnection();
+            _ServerStream.WaitForConnection();
             OnConnected?.Invoke();
         }
 
@@ -80,7 +78,7 @@ namespace FM.LiveSwitch.Connect
             {
                 throw new NotSupportedException();
             }
-            await _ServerPipeStream.WaitForConnectionAsync();
+            await _ServerStream.WaitForConnectionAsync();
             OnConnected?.Invoke();
         }
 
@@ -90,7 +88,7 @@ namespace FM.LiveSwitch.Connect
             {
                 throw new NotSupportedException();
             }
-            _ClientPipeStream.Connect();
+            _ClientStream.Connect();
             OnConnected?.Invoke();
         }
 
@@ -100,18 +98,18 @@ namespace FM.LiveSwitch.Connect
             {
                 throw new NotSupportedException();
             }
-            await _ClientPipeStream.ConnectAsync();
+            await _ClientStream.ConnectAsync();
             OnConnected?.Invoke();
         }
 
         public void Write(DataBuffer dataBuffer)
         {
-            _PipeStream.Write(dataBuffer.Data, dataBuffer.Index, dataBuffer.Length);
+            Stream.Write(dataBuffer.Data, dataBuffer.Index, dataBuffer.Length);
         }
 
         public Task WriteAsync(DataBuffer dataBuffer)
         {
-            return _PipeStream.WriteAsync(dataBuffer.Data, dataBuffer.Index, dataBuffer.Length);
+            return Stream.WriteAsync(dataBuffer.Data, dataBuffer.Index, dataBuffer.Length);
         }
 
         public DataBuffer Read(int length)
@@ -129,7 +127,7 @@ namespace FM.LiveSwitch.Connect
             var offset = 0;
             while (offset < dataBuffer.Length)
             {
-                offset += _PipeStream.Read(dataBuffer.Data, dataBuffer.Index + offset, dataBuffer.Length - offset);
+                offset += Stream.Read(dataBuffer.Data, dataBuffer.Index + offset, dataBuffer.Length - offset);
             }
             return dataBuffer;
         }
@@ -139,7 +137,7 @@ namespace FM.LiveSwitch.Connect
             var offset = 0;
             while (offset < dataBuffer.Length)
             {
-                offset += await _PipeStream.ReadAsync(dataBuffer.Data, dataBuffer.Index + offset, dataBuffer.Length - offset);
+                offset += await Stream.ReadAsync(dataBuffer.Data, dataBuffer.Index + offset, dataBuffer.Length - offset);
             }
             return dataBuffer;
         }

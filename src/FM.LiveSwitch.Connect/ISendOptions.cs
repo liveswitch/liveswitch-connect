@@ -1,13 +1,11 @@
-﻿using System.Collections.Generic;
-
-namespace FM.LiveSwitch.Connect
+﻿namespace FM.LiveSwitch.Connect
 {
     interface ISendOptions : IConnectionOptions, IChannelOptions, IClientOptions
     {
         string MediaId { get; }
 
-        public IEnumerable<AudioCodec> AudioCodecs { get; }
+        int AudioBitrate { get; }
 
-        public IEnumerable<VideoCodec> VideoCodecs { get; }
+        int VideoBitrate { get; }
     }
 }

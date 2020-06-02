@@ -152,12 +152,11 @@ The `capture` verb lets you capture local media from a named pipe and send it to
 
   --video-height            The video height.
 
-  --audio-codecs            (Default: Opus G722 PCMU PCMA) The allowed audio
-                            codecs.
-
-  --video-codecs            (Default: VP8 VP9 H264) The allowed video codecs.
-
   --media-id                The local media ID.
+
+  --audio-bitrate           (Default: 32) The requested audio bitrate.
+
+  --video-bitrate           (Default: 1000) The requested video bitrate.
 
   --gateway-url             Required. The gateway URL.
 
@@ -182,6 +181,16 @@ The `capture` verb lets you capture local media from a named pipe and send it to
   --client-roles            The local client roles.
 
   --connection-tag          The local connection tag.
+
+  --no-audio                Do not process audio.
+
+  --no-video                Do not process video.
+
+  --audio-codec             (Default: Any) The audio codec to negotiate with
+                            LiveSwitch.
+
+  --video-codec             (Default: Any) The video codec to negotiate with
+                            LiveSwitch.
 ```
 
 ## FFCapture
@@ -190,42 +199,55 @@ The `ffcapture` verb lets you capture local media from FFmpeg and send it to a L
 
 ### Usage
 ```
-  --input-args            Required. The FFmpeg input arguments.
+  --input-args                    Required. The FFmpeg input arguments.
 
-  --no-audio              Do not capture audio.
+  --audio-mode                    (Default: LSEncode) Where audio is encoded.
 
-  --no-video              Do not capture video.
+  --video-mode                    (Default: LSEncode) Where video is encoded.
 
-  --audio-codecs          (Default: Opus G722 PCMU PCMA) The allowed audio
-                          codecs.
+  --ffencode-keyframe-interval    (Default: 30) The keyframe interval for video.
+                                  Only used if video-mode is ffencode.
 
-  --video-codecs          (Default: VP8 VP9 H264) The allowed video codecs.
+  --media-id                      The local media ID.
 
-  --media-id              The local media ID.
+  --audio-bitrate                 (Default: 32) The requested audio bitrate.
 
-  --gateway-url           Required. The gateway URL.
+  --video-bitrate                 (Default: 1000) The requested video bitrate.
 
-  --application-id        Required. The application ID.
+  --gateway-url                   Required. The gateway URL.
 
-  --shared-secret         Required. The shared secret for the application ID.
+  --application-id                Required. The application ID.
 
-  --channel-id            Required. The channel ID.
+  --shared-secret                 Required. The shared secret for the
+                                  application ID.
 
-  --data-channel-label    The data channel label.
+  --channel-id                    Required. The channel ID.
 
-  --user-id               The local user ID.
+  --data-channel-label            The data channel label.
 
-  --user-alias            The local user alias.
+  --user-id                       The local user ID.
 
-  --device-id             The local device ID.
+  --user-alias                    The local user alias.
 
-  --device-alias          The local device alias.
+  --device-id                     The local device ID.
 
-  --client-tag            The local client tag.
+  --device-alias                  The local device alias.
 
-  --client-roles          The local client roles.
+  --client-tag                    The local client tag.
 
-  --connection-tag        The local connection tag.
+  --client-roles                  The local client roles.
+
+  --connection-tag                The local connection tag.
+
+  --no-audio                      Do not process audio.
+
+  --no-video                      Do not process video.
+
+  --audio-codec                   (Default: Any) The audio codec to negotiate
+                                  with LiveSwitch.
+
+  --video-codec                   (Default: Any) The video codec to negotiate
+                                  with LiveSwitch.
 ```
 
 ## Fake
@@ -258,16 +280,11 @@ The `fake` verb lets you generate fake media and send it to a LiveSwitch server.
   --video-frame-rate       (Default: 30) The video frame rate. Minimum value is
                            1. Maximum value is 120.
 
-  --no-audio               Do not fake audio.
-
-  --no-video               Do not fake video.
-
-  --audio-codecs           (Default: Opus G722 PCMU PCMA) The allowed audio
-                           codecs.
-
-  --video-codecs           (Default: VP8 VP9 H264) The allowed video codecs.
-
   --media-id               The local media ID.
+
+  --audio-bitrate          (Default: 32) The requested audio bitrate.
+
+  --video-bitrate          (Default: 1000) The requested video bitrate.
 
   --gateway-url            Required. The gateway URL.
 
@@ -292,6 +309,16 @@ The `fake` verb lets you generate fake media and send it to a LiveSwitch server.
   --client-roles           The local client roles.
 
   --connection-tag         The local connection tag.
+
+  --no-audio               Do not process audio.
+
+  --no-video               Do not process video.
+
+  --audio-codec            (Default: Any) The audio codec to negotiate with
+                           LiveSwitch.
+
+  --video-codec            (Default: Any) The video codec to negotiate with
+                           LiveSwitch.
 ```
 
 ## Play
@@ -304,12 +331,11 @@ The `play` verb lets you capture media from a local file (or pair of files) and 
 
   --video-path            The video file path.
 
-  --audio-codecs          (Default: Opus G722 PCMU PCMA) The allowed audio
-                          codecs.
-
-  --video-codecs          (Default: VP8 VP9 H264) The allowed video codecs.
-
   --media-id              The local media ID.
+
+  --audio-bitrate         (Default: 32) The requested audio bitrate.
+
+  --video-bitrate         (Default: 1000) The requested video bitrate.
 
   --gateway-url           Required. The gateway URL.
 
@@ -334,6 +360,16 @@ The `play` verb lets you capture media from a local file (or pair of files) and 
   --client-roles          The local client roles.
 
   --connection-tag        The local connection tag.
+
+  --no-audio              Do not process audio.
+
+  --no-video              Do not process video.
+
+  --audio-codec           (Default: Any) The audio codec to negotiate with
+                          LiveSwitch.
+
+  --video-codec           (Default: Any) The video codec to negotiate with
+                          LiveSwitch.
 ```
 
 ## Render
@@ -365,7 +401,7 @@ The `render` verb lets you render remote media from a LiveSwitch server to a nam
 
   --video-height            The video height.
 
-  --connection-id           Required. The remote connection ID.
+  --connection-id           Required. The remote connection ID or 'mcu'.
 
   --gateway-url             Required. The gateway URL.
 
@@ -390,6 +426,16 @@ The `render` verb lets you render remote media from a LiveSwitch server to a nam
   --client-roles            The local client roles.
 
   --connection-tag          The local connection tag.
+
+  --no-audio                Do not process audio.
+
+  --no-video                Do not process video.
+
+  --audio-codec             (Default: Any) The audio codec to negotiate with
+                            LiveSwitch.
+
+  --video-codec             (Default: Any) The video codec to negotiate with
+                            LiveSwitch.
 ```
 
 ## FFRender
@@ -400,11 +446,7 @@ The `ffrender` verb lets you render remote media from a LiveSwitch server to FFm
 ```
   --output-args           Required. The FFmpeg output arguments.
 
-  --no-audio              Do not render audio.
-
-  --no-video              Do not render video.
-
-  --connection-id         Required. The remote connection ID.
+  --connection-id         Required. The remote connection ID or 'mcu'.
 
   --gateway-url           Required. The gateway URL.
 
@@ -429,6 +471,16 @@ The `ffrender` verb lets you render remote media from a LiveSwitch server to FFm
   --client-roles          The local client roles.
 
   --connection-tag        The local connection tag.
+
+  --no-audio              Do not process audio.
+
+  --no-video              Do not process video.
+
+  --audio-codec           (Default: Any) The audio codec to negotiate with
+                          LiveSwitch.
+
+  --video-codec           (Default: Any) The video codec to negotiate with
+                          LiveSwitch.
 ```
 
 ## Log
@@ -460,11 +512,7 @@ The `log` verb lets you log remote media frame details from a LiveSwitch server 
                           clientId, clientTag, connectionId, connectionTag,
                           mediaId
 
-  --no-audio              Do not fake audio.
-
-  --no-video              Do not fake video.
-
-  --connection-id         Required. The remote connection ID.
+  --connection-id         Required. The remote connection ID or 'mcu'.
 
   --gateway-url           Required. The gateway URL.
 
@@ -489,6 +537,16 @@ The `log` verb lets you log remote media frame details from a LiveSwitch server 
   --client-roles          The local client roles.
 
   --connection-tag        The local connection tag.
+
+  --no-audio              Do not process audio.
+
+  --no-video              Do not process video.
+
+  --audio-codec           (Default: Any) The audio codec to negotiate with
+                          LiveSwitch.
+
+  --video-codec           (Default: Any) The video codec to negotiate with
+                          LiveSwitch.
 ```
 
 ## Record
@@ -509,15 +567,7 @@ The `record` verb lets you record remote media from a LiveSwitch server to a loc
                           deviceAlias, clientId, clientTag, connectionId,
                           connectionTag, mediaId
 
-  --audio-codec           (Default: Copy) The output audio codec.
-
-  --video-codec           (Default: Copy) The output video codec.
-
-  --no-audio              Do not record audio.
-
-  --no-video              Do not record video.
-
-  --connection-id         Required. The remote connection ID.
+  --connection-id         Required. The remote connection ID or 'mcu'.
 
   --gateway-url           Required. The gateway URL.
 
@@ -542,6 +592,16 @@ The `record` verb lets you record remote media from a LiveSwitch server to a loc
   --client-roles          The local client roles.
 
   --connection-tag        The local connection tag.
+
+  --no-audio              Do not process audio.
+
+  --no-video              Do not process video.
+
+  --audio-codec           (Default: Any) The audio codec to negotiate with
+                          LiveSwitch.
+
+  --video-codec           (Default: Any) The video codec to negotiate with
+                          LiveSwitch.
 ```
 
 ## Intercept
@@ -560,7 +620,7 @@ The `intercept` verb lets you forward audio and/or video packets to a specific d
   --video-ip-address      (Default: 127.0.0.1) The destination IP address for
                           video packets.
 
-  --connection-id         Required. The remote connection ID.
+  --connection-id         Required. The remote connection ID or 'mcu'.
 
   --gateway-url           Required. The gateway URL.
 
@@ -585,6 +645,16 @@ The `intercept` verb lets you forward audio and/or video packets to a specific d
   --client-roles          The local client roles.
 
   --connection-tag        The local connection tag.
+
+  --no-audio              Do not process audio.
+
+  --no-video              Do not process video.
+
+  --audio-codec           (Default: Any) The audio codec to negotiate with
+                          LiveSwitch.
+
+  --video-codec           (Default: Any) The video codec to negotiate with
+                          LiveSwitch.
 ```
 
 ## Loopback Example

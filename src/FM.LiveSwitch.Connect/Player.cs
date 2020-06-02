@@ -5,32 +5,28 @@ namespace FM.LiveSwitch.Connect
 {
     class Player : Sender<PlayOptions, MatroskaAudioSource, MatroskaVideoSource>
     {
-        public Task<int> Play(PlayOptions options)
+        public Player(PlayOptions options)
+            : base(options)
+        { }
+
+        public Task<int> Play()
         {
-            if (options.AudioPath == null && options.VideoPath == null)
+            if (Options.AudioPath == null && Options.VideoPath == null)
             {
                 Console.Error.WriteLine("--audio-path and/or --video-path must be specified.");
                 return Task.FromResult(1);
             }
-            return Send(options);
+            return Send();
         }
 
-        protected override MatroskaAudioSource CreateAudioSource(PlayOptions options)
+        protected override MatroskaAudioSource CreateAudioSource()
         {
-            if (options.AudioPath == null)
-            {
-                return null;
-            }
-            return new MatroskaAudioSource(options.AudioPath);
+            return new MatroskaAudioSource(Options.AudioPath);
         }
 
-        protected override MatroskaVideoSource CreateVideoSource(PlayOptions options)
+        protected override MatroskaVideoSource CreateVideoSource()
         {
-            if (options.VideoPath == null)
-            {
-                return null;
-            }
-            return new MatroskaVideoSource(options.VideoPath);
+            return new MatroskaVideoSource(Options.VideoPath);
         }
     }
 }

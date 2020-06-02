@@ -2,7 +2,7 @@
 {
     enum AudioCodec
     {
-        Copy,
+        Any,
         Opus,
         G722,
         PCMU,

@@ -34,7 +34,7 @@ namespace FM.LiveSwitch.Connect
             }
         }
 
-        public static VideoPipe CreatePacketizer(this VideoCodec codec)
+        public static VideoPacketizer CreatePacketizer(this VideoCodec codec)
         {
             switch (codec)
             {
@@ -49,16 +49,16 @@ namespace FM.LiveSwitch.Connect
             }
         }
 
-        public static VideoPipe CreateDepacketizer(this VideoCodec codec)
+        public static VideoDepacketizer<VideoFragment> CreateDepacketizer(this VideoCodec codec)
         {
             switch (codec)
             {
                 case VideoCodec.VP8:
-                    return new Vp8.Depacketizer();
+                    return new Vp8.Depacketizer() as object as VideoDepacketizer<VideoFragment>;
                 case VideoCodec.VP9:
-                    return new Vp9.Depacketizer();
+                    return new Vp9.Depacketizer() as object as VideoDepacketizer<VideoFragment>;
                 case VideoCodec.H264:
-                    return new H264.Depacketizer();
+                    return new H264.Depacketizer() as object as VideoDepacketizer<VideoFragment>;
                 default:
                     throw new Exception("Unknown video codec.");
             }
@@ -66,14 +66,19 @@ namespace FM.LiveSwitch.Connect
 
         public static NullVideoSink CreateNullSink(this VideoCodec codec, bool isPacketized)
         {
+            return new NullVideoSink(CreateFormat(codec, isPacketized));
+        }
+
+        public static VideoFormat CreateFormat(this VideoCodec codec, bool isPacketized = false)
+        {
             switch (codec)
             {
                 case VideoCodec.VP8:
-                    return new NullVideoSink(new Vp8.Format() { IsPacketized = isPacketized });
+                    return new Vp8.Format() { IsPacketized = isPacketized };
                 case VideoCodec.VP9:
-                    return new NullVideoSink(new Vp9.Format() { IsPacketized = isPacketized });
+                    return new Vp9.Format() { IsPacketized = isPacketized };
                 case VideoCodec.H264:
-                    return new NullVideoSink(new H264.Format(H264.ProfileLevelId.Default, H264.PacketizationMode.Default) { IsPacketized = isPacketized });
+                    return new H264.Format(H264.ProfileLevelId.Default, H264.PacketizationMode.Default) { IsPacketized = isPacketized };
                 default:
                     throw new Exception("Unknown video codec.");
             }

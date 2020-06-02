@@ -10,18 +10,31 @@ namespace FM.LiveSwitch.Connect
         where TAudioSink : AudioSink
         where TVideoSink : VideoSink
     {
-        protected async Task<int> Receive(TOptions options)
+        public TOptions Options { get; private set; }
+
+        public Receiver(TOptions options)
         {
+            Options = options;
+        }
+
+        protected async Task<int> Receive()
+        {
+            if (Options.NoAudio && Options.NoVideo)
+            {
+                Console.Error.WriteLine("--no-audio and --no-video cannot both be set.");
+                return 1;
+            }
+
             try
             {
-                var client = options.CreateClient();
+                var client = Options.CreateClient();
 
                 Console.Error.WriteLine($"{GetType().Name} client '{client.Id}' created:{Environment.NewLine}{Descriptor.Format(client.GetDescriptors())}");
 
-                await client.Register(options);
+                await client.Register(Options);
                 try
                 {
-                    var channel = await client.Join(options);
+                    var channel = await client.Join(Options);
                     try
                     {
                         // wait up to 15 seconds to connect
@@ -35,28 +48,28 @@ namespace FM.LiveSwitch.Connect
 
                         var connect = new Func<ConnectionInfo, Task>(async (remoteConnectionInfo) =>
                         {
-                            var audioStream = CreateAudioStream(remoteConnectionInfo, options);
-                            var videoStream = CreateVideoStream(remoteConnectionInfo, options);
-                            var dataStream = CreateDataStream(remoteConnectionInfo, options);
-                            connection = options.CreateConnection(channel, remoteConnectionInfo, audioStream, videoStream, dataStream);
+                            var audioStream = CreateAudioStream(remoteConnectionInfo);
+                            var videoStream = CreateVideoStream(remoteConnectionInfo);
+                            var dataStream = CreateDataStream(remoteConnectionInfo);
+                            connection = Options.CreateConnection(channel, remoteConnectionInfo, audioStream, videoStream, dataStream);
 
                             Console.Error.WriteLine($"{GetType().Name} connection '{connection.Id}' created:{Environment.NewLine}{Descriptor.Format(connection.GetDescriptors())}");
 
                             audioSinks = audioStream?.RemoteTrack.Sinks.Select(x => x as TAudioSink).ToArray();
                             videoSinks = videoStream?.RemoteTrack.Sinks.Select(x => x as TVideoSink).ToArray();
 
-                            SinksReady(audioSinks, videoSinks, options);
+                            SinksReady(audioSinks, videoSinks);
 
                             disconnected = await connection.Connect();
 
                             connectedSource.TrySetResult(true);
                         });
 
-                        if (options.ConnectionId == "mcu")
+                        if (Options.ConnectionId == "mcu")
                         {
                             _ = Task.Run(async () =>
                             {
-                                await connect(GetMcuConnectionInfo(options));
+                                await connect(GetMcuConnectionInfo());
                             });
                         }
                         else
@@ -65,7 +78,7 @@ namespace FM.LiveSwitch.Connect
                             var notified = notifiedSource.Task;
                             channel.OnRemoteUpstreamConnectionOpen += async (remoteConnectionInfo) =>
                             {
-                                if (remoteConnectionInfo.Id == options.ConnectionId)
+                                if (remoteConnectionInfo.Id == Options.ConnectionId)
                                 {
                                     notifiedSource.TrySetResult(true);
 
@@ -75,14 +88,14 @@ namespace FM.LiveSwitch.Connect
                                         Console.Error.WriteLine($"Remote client '{remoteConnectionInfo.ClientId}' found:{Environment.NewLine}{Descriptor.Format(remoteClientInfo.GetDescriptors())}");
                                     }
 
-                                    Console.Error.WriteLine($"Remote connection '{options.ConnectionId}' found:{Environment.NewLine}{Descriptor.Format(remoteConnectionInfo.GetDescriptors())}");
+                                    Console.Error.WriteLine($"Remote connection '{Options.ConnectionId}' found:{Environment.NewLine}{Descriptor.Format(remoteConnectionInfo.GetDescriptors())}");
 
                                     await connect(remoteConnectionInfo);
                                 }
                             };
                             channel.OnRemoteUpstreamConnectionClose += (remoteConnectionInfo) =>
                             {
-                                if (remoteConnectionInfo.RemoteConnectionId == options.ConnectionId)
+                                if (remoteConnectionInfo.RemoteConnectionId == Options.ConnectionId)
                                 {
                                     Console.Error.WriteLine("Remote disconnected.");
                                 }
@@ -92,7 +105,7 @@ namespace FM.LiveSwitch.Connect
 
                             if (await Task.WhenAny(timeout, notified) == timeout)
                             {
-                                Console.Error.WriteLine($"Remote connection '{options.ConnectionId}' does not exist.");
+                                Console.Error.WriteLine($"Remote connection '{Options.ConnectionId}' does not exist.");
                                 return 1;
                             }
                         }
@@ -101,7 +114,7 @@ namespace FM.LiveSwitch.Connect
 
                         if (await Task.WhenAny(timeout, connected) == timeout)
                         {
-                            Console.Error.WriteLine($"Timeout connecting to '{options.ConnectionId}'.");
+                            Console.Error.WriteLine($"Timeout connecting to '{Options.ConnectionId}'.");
                             return 1;
                         }
 
@@ -114,7 +127,7 @@ namespace FM.LiveSwitch.Connect
 
                             e.Cancel = true;
 
-                            SinksUnready(audioSinks, videoSinks, options);
+                            SinksUnready(audioSinks, videoSinks);
 
                             // close connections gracefully
                             await connection.Disconnect();
@@ -144,13 +157,13 @@ namespace FM.LiveSwitch.Connect
             }
         }
 
-        private ConnectionInfo GetMcuConnectionInfo(TOptions options)
+        private ConnectionInfo GetMcuConnectionInfo()
         {
             return new ConnectionInfo
             {
-                ApplicationId = options.ApplicationId,
-                ChannelId = options.ChannelId,
-                Id = options.ConnectionId,
+                ApplicationId = Options.ApplicationId,
+                ChannelId = Options.ChannelId,
+                Id = Options.ConnectionId,
                 Type = ConnectionType.Mcu,
                 DataStream = new DataStreamInfo(),
                 AudioStream = new MediaStreamInfo { Direction = StreamDirectionHelper.DirectionToString(StreamDirection.SendReceive) },
@@ -158,18 +171,18 @@ namespace FM.LiveSwitch.Connect
             };
         }
 
-        protected abstract AudioStream CreateAudioStream(ConnectionInfo remoteConnectionInfo, TOptions options);
+        protected abstract AudioStream CreateAudioStream(ConnectionInfo remoteConnectionInfo);
 
-        protected abstract VideoStream CreateVideoStream(ConnectionInfo remoteConnectionInfo, TOptions options);
+        protected abstract VideoStream CreateVideoStream(ConnectionInfo remoteConnectionInfo);
 
-        protected DataStream CreateDataStream(ConnectionInfo remoteConnectionInfo, TOptions options)
+        protected DataStream CreateDataStream(ConnectionInfo remoteConnectionInfo)
         {
-            if (options.DataChannelLabel == null || !remoteConnectionInfo.HasData)
+            if (Options.DataChannelLabel == null || !remoteConnectionInfo.HasData)
             {
                 return null;
             }
 
-            return new DataStream(new DataChannel(options.DataChannelLabel)
+            return new DataStream(new DataChannel(Options.DataChannelLabel)
             {
                 OnReceive = (args) =>
                 {
@@ -185,8 +198,8 @@ namespace FM.LiveSwitch.Connect
             });
         }
 
-        protected virtual void SinksReady(TAudioSink[] audioSinks, TVideoSink[] videoSinks, TOptions options) { }
+        protected virtual void SinksReady(TAudioSink[] audioSinks, TVideoSink[] videoSinks) { }
 
-        protected virtual void SinksUnready(TAudioSink[] audioSinks, TVideoSink[] videoSinks, TOptions options) { }
+        protected virtual void SinksUnready(TAudioSink[] audioSinks, TVideoSink[] videoSinks) { }
     }
 }

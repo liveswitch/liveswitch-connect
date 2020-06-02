@@ -18,7 +18,7 @@ namespace FM.LiveSwitch.Connect
 
         public event Action0 OnPipeConnected;
 
-        private NamedPipe _Pipe;
+        protected NamedPipe Pipe { get; private set; }
 
         public NamedPipeAudioSource(string pipeName, AudioFormat outputFormat)
             : this(pipeName, outputFormat, 20)
@@ -26,6 +26,10 @@ namespace FM.LiveSwitch.Connect
 
         public NamedPipeAudioSource(string pipeName, AudioFormat outputFormat, int frameDuration)
             : this(pipeName, outputFormat, frameDuration, false)
+        { }
+
+        public NamedPipeAudioSource(string pipeName, AudioFormat outputFormat, bool server)
+            : this(pipeName, outputFormat, 20, server)
         { }
 
         public NamedPipeAudioSource(string pipeName, AudioFormat outputFormat, int frameDuration, bool server)
@@ -40,14 +44,14 @@ namespace FM.LiveSwitch.Connect
             var promise = new Promise<object>();
             try
             {
-                _Pipe = new NamedPipe(PipeName, Server);
-                _Pipe.OnConnected += () =>
+                Pipe = new NamedPipe(PipeName, Server);
+                Pipe.OnConnected += () =>
                 {
                     OnPipeConnected?.Invoke();
                 };
-                _Pipe.OnReadDataBuffer += (dataBuffer) =>
+                Pipe.OnReadDataBuffer += (dataBuffer) =>
                 {
-                    RaiseFrame(new AudioFrame(FrameDuration, new AudioBuffer(dataBuffer, OutputFormat)));
+                    RaiseFramePayload(dataBuffer);
                 };
 
                 if (StartAsync)
@@ -55,11 +59,11 @@ namespace FM.LiveSwitch.Connect
                     Task ready;
                     if (Server)
                     {
-                        ready = _Pipe.WaitForConnectionAsync();
+                        ready = Pipe.WaitForConnectionAsync();
                     }
                     else
                     {
-                        ready = _Pipe.ConnectAsync();
+                        ready = Pipe.ConnectAsync();
                     }
 
                     Task.Run(async () =>
@@ -68,7 +72,7 @@ namespace FM.LiveSwitch.Connect
 
                         ReadStreamHeader();
 
-                        _Pipe.StartReading(ReadFrameHeader);
+                        Pipe.StartReading(ReadFrameHeader);
                     });
 
                     promise.Resolve(null);
@@ -81,16 +85,16 @@ namespace FM.LiveSwitch.Connect
                         {
                             if (Server)
                             {
-                                await _Pipe.WaitForConnectionAsync();
+                                await Pipe.WaitForConnectionAsync();
                             }
                             else
                             {
-                                await _Pipe.ConnectAsync();
+                                await Pipe.ConnectAsync();
                             }
 
                             ReadStreamHeader();
 
-                            _Pipe.StartReading(ReadFrameHeader);
+                            Pipe.StartReading(ReadFrameHeader);
 
                             promise.Resolve(null);
                         }
@@ -115,6 +119,11 @@ namespace FM.LiveSwitch.Connect
             return SoundUtility.CalculateDataLength(FrameDuration, Config);
         }
 
+        protected virtual void RaiseFramePayload(DataBuffer dataBuffer)
+        {
+            RaiseFrame(new AudioFrame(FrameDuration, new AudioBuffer(dataBuffer, OutputFormat)));
+        }
+
         protected override Future<object> DoStop()
         {
             var promise = new Promise<object>();
@@ -124,8 +133,8 @@ namespace FM.LiveSwitch.Connect
                 {
                     try
                     {
-                        await _Pipe.StopReading();
-                        await _Pipe.DestroyAsync();
+                        await Pipe.StopReading();
+                        await Pipe.DestroyAsync();
 
                         promise.Resolve(null);
                     }
