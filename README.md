@@ -31,9 +31,7 @@ Alternatively, use `dotnet build` to create a platform-agnostic bundle (the .NET
 dotnet build
 ```
 
-Using this approach will generate a library instead of an executable.
-
-Use `dotnet lsconnect.dll` instead of `lsconnect` to run it.
+Using this approach will generate a library instead of an executable. Use `dotnet lsconnect.dll` instead of `lsconnect` to run it.
 
 ## Usage
 
@@ -832,12 +830,10 @@ Get the device index for the screen to share:
 ffmpeg -f avfoundation -list_devices true -i ""
 ```
 
-Replace "2" with your device index as noted above
+Replace "2" with your device index from above:
 ```
 lsconnect ffcapture ... --input-args="-f avfoundation -i \"2\" -r 30 -vf scale=1536:960" --no-audio
 ```
-
-
 
 ## Contact
 
