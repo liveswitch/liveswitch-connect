@@ -49,7 +49,7 @@ lsconnect [verb] [options]
 
   fake         Sends media from a fake source.
 
-  play         Sends media from a local file.
+  play         Sends media from a local file (that has been recorded via lsconnect record; to stream arbitrary media, use ffcapture).
 
   render       Renders remote media to a named pipe.
 
@@ -833,6 +833,12 @@ ffmpeg -f avfoundation -list_devices true -i ""
 Replace "2" with your device index from above:
 ```
 lsconnect ffcapture ... --input-args="-f avfoundation -i \"2\" -r 30 -vf scale=1536:960" --no-audio
+```
+
+### Stream an arbitrary file source
+
+```
+./lsconnect ffcapture .. --input-args="-stream_loop -1 -i test.mp4 -r 30 -vf scale=640:480"
 ```
 
 ## Contact
