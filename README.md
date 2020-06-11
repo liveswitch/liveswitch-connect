@@ -321,7 +321,7 @@ The `fake` verb lets you generate fake media and send it to a LiveSwitch server.
 
 ## Play
 
-The `play` verb lets you capture media from a local file (or pair of files) and send it to a LiveSwitch server.
+The `play` verb lets you capture media from a local file (or pair of files) and send it to a LiveSwitch server. Note that this is specifically for files that have been recorded in the recording format of `lsconnect` or LiveSwitch itself. To stream arbitrary media, use `ffcapture`. For details, see `Stream from an arbitrary mp4 file` below.
 
 ### Usage
 ```
@@ -833,6 +833,13 @@ ffmpeg -f avfoundation -list_devices true -i ""
 Replace "2" with your device index from above:
 ```
 lsconnect ffcapture ... --input-args="-f avfoundation -i \"2\" -r 30 -vf scale=1536:960" --no-audio
+```
+
+### Stream from an arbitrary mp4 file
+Sample file taken from here: https://file-examples.com/index.php/sample-video-files/
+Note that `-stream_loop -1` plays the file on a loop, `-r 30` indicates 30fps and `-vf scale=640:480` scales to 640x480. You may need to tweak these depending on your file and output requirements.
+```
+lsconnect ffcapture ... --input-args="-stream_loop -1 -i test.mp4 -r 30 -vf scale=640:480"
 ```
 
 ## Contact
