@@ -49,7 +49,7 @@ lsconnect [verb] [options]
 
   fake         Sends media from a fake source.
 
-  play         Sends media from a local file (that has been recorded via lsconnect record; to stream arbitrary media, use ffcapture).
+  play         Sends media from a local file.
 
   render       Renders remote media to a named pipe.
 
@@ -321,7 +321,7 @@ The `fake` verb lets you generate fake media and send it to a LiveSwitch server.
 
 ## Play
 
-The `play` verb lets you capture media from a local file (or pair of files) and send it to a LiveSwitch server.
+The `play` verb lets you capture media from a local file (or pair of files) and send it to a LiveSwitch server. This is specifically for files that have been recorded using lsconnect/LiveSwitch. To stream arbitrary media into a LiveSwitch server, use ffcapture. See examples below.
 
 ### Usage
 ```
