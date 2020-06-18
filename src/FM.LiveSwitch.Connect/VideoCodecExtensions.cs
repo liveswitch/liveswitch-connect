@@ -15,12 +15,12 @@ namespace FM.LiveSwitch.Connect
                 case VideoCodec.H264:
                     if (Nvidia.Utility.NvencSupported)
                     {
-                        Log.Debug("Using Nvidia Encoder.");
+                        Console.WriteLine("Using Nvidia Encoder.");
                         return new Nvidia.Encoder(VideoFormat.I420);
                     }
                     else
                     {
-                        Log.Debug("Using OpenH264 Encoder.");
+                        Console.WriteLine("Using OpenH264 Encoder.");
                         return new OpenH264.Encoder();
                     }
                 default:
@@ -39,12 +39,12 @@ namespace FM.LiveSwitch.Connect
                 case VideoCodec.H264:
                     if (Nvidia.Utility.NvdecSupported)
                     {
-                        Log.Debug("Using Nvidia Decoder.");
+                        Console.WriteLine("Using Nvidia Decoder.");
                         return new Nvidia.Decoder();
                     }
                     else
                     {
-                        Log.Debug("Using OpenH264 Decoder.");
+                        Console.WriteLine("Using OpenH264 Decoder.");
                         return new OpenH264.Decoder();
                     }
                 default:

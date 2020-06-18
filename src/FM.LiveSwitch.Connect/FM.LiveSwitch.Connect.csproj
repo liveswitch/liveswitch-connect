@@ -25,4 +25,13 @@
       <HintPath>FM.LiveSwitch.Nvidia.dll</HintPath>
     </Reference>
   </ItemGroup>
+
+  <ItemGroup>
+    <None Update="lib\win_x64\libnvidiafm.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="lib\win_x86\libnvidiafm.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 </Project>
