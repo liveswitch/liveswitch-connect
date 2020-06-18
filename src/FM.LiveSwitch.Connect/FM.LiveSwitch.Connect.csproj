@@ -20,4 +20,9 @@
     <PackageReference Include="FM.LiveSwitch" Version="1.8.1.24993" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="FM.LiveSwitch.Nvidia">
+      <HintPath>FM.LiveSwitch.Nvidia.dll</HintPath>
+    </Reference>
+  </ItemGroup>
 </Project>

@@ -13,7 +13,14 @@ namespace FM.LiveSwitch.Connect
                 case VideoCodec.VP9:
                     return new Vp9.Encoder();
                 case VideoCodec.H264:
-                    return new OpenH264.Encoder();
+                    if (Nvidia.Utility.NvencSupported)
+                    {
+                        return new Nvidia.Encoder(VideoFormat.I420);
+                    }
+                    else
+                    {
+                        return new OpenH264.Encoder();
+                    }
                 default:
                     throw new Exception("Unknown video codec.");
             }
@@ -28,7 +35,14 @@ namespace FM.LiveSwitch.Connect
                 case VideoCodec.VP9:
                     return new Vp9.Decoder();
                 case VideoCodec.H264:
-                    return new OpenH264.Decoder();
+                    if (Nvidia.Utility.NvdecSupported)
+                    {
+                        return new Nvidia.Decoder();
+                    }
+                    else
+                    {
+                        return new OpenH264.Decoder();
+                    }
                 default:
                     throw new Exception("Unknown video codec.");
             }
