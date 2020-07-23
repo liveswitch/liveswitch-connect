@@ -16,9 +16,14 @@ namespace FM.LiveSwitch.Connect
         {
             if (!Options.NoVideo)
             {
-                if (Options.DisableOpenH264 && Options.VideoCodec == VideoCodec.H264)
+                if (!Options.IsH264EncoderAvailable() && Options.VideoCodec == VideoCodec.H264)
                 {
-                    Console.Error.WriteLine("--video-codec cannot be H264. OpenH264 failed to initialize.");
+                    Console.Error.WriteLine("--video-codec cannot be H264. No H.264 encoder is available.");
+                    return Task.FromResult(1);
+                }
+                if (Options.DisableNvidia && Options.VideoCodec == VideoCodec.H265)
+                {
+                    Console.Error.WriteLine("--video-codec cannot be H265. Nvidia hardware support is unavailable.");
                     return Task.FromResult(1);
                 }
             }
@@ -158,8 +163,8 @@ namespace FM.LiveSwitch.Connect
                 return new VideoTrack(depacketizer).Next(sink);
             }
 
-            var decoder = inputCodec.CreateDecoder();
-            var encoder = outputCodec.CreateEncoder();
+            var decoder = inputCodec.CreateDecoder(Options);
+            var encoder = outputCodec.CreateEncoder(Options);
             return new VideoTrack(depacketizer).Next(decoder).Next(new Yuv.ImageConverter(encoder.InputFormat)).Next(encoder).Next(sink);
         }
     }

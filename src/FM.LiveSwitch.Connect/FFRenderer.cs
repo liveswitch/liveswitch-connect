@@ -89,7 +89,11 @@ namespace FM.LiveSwitch.Connect
             var tracks = new List<VideoTrack>();
             foreach (var codec in ((VideoCodec[])Enum.GetValues(typeof(VideoCodec))).Where(x => x != VideoCodec.Any))
             {
-                if (Options.DisableOpenH264 && codec == VideoCodec.H264)
+                if (!Options.IsH264EncoderAvailable() && codec == VideoCodec.H264)
+                {
+                    continue;
+                }
+                if (Options.DisableNvidia && codec == VideoCodec.H265)
                 {
                     continue;
                 }
@@ -109,7 +113,7 @@ namespace FM.LiveSwitch.Connect
         private VideoTrack CreateVideoTrack(VideoCodec codec)
         {
             var depacketizer = codec.CreateDepacketizer();
-            var decoder = codec.CreateDecoder();
+            var decoder = codec.CreateDecoder(Options);
             var converter = new Yuv.ImageConverter(VideoFormat.I420); //TODO: use matroska and remove this?
             return new VideoTrack(depacketizer).Next(decoder).Next(converter);
         }

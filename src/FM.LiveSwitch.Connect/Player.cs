@@ -26,7 +26,7 @@ namespace FM.LiveSwitch.Connect
 
         protected override MatroskaVideoSource CreateVideoSource()
         {
-            return new MatroskaVideoSource(Options.VideoPath);
+            return new MatroskaVideoSource(Options);
         }
     }
 }

@@ -323,7 +323,7 @@ namespace FM.LiveSwitch.Connect
                     }
                     else
                     {
-                        VideoEncoder = VideoFormat.CreateCodec().CreateEncoder();
+                        VideoEncoder = VideoFormat.CreateCodec().CreateEncoder(Options);
                         VideoEncoder.AddOutput(VideoPacketizer);
 
                         VideoConverter = new ImageConverter(VideoSource.OutputFormat, VideoEncoder.InputFormat);

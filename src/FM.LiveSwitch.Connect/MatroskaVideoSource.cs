@@ -2,9 +2,13 @@
 {
     class MatroskaVideoSource : Matroska.VideoSource
     {
-        public MatroskaVideoSource(string path)
-            : base(path)
-        { }
+        private PlayOptions Options;
+
+        public MatroskaVideoSource(PlayOptions options)
+            : base(options.VideoPath)
+        {
+            Options = options;
+        }
 
         protected override VideoDecoder CreateVp8Decoder()
         {
@@ -18,7 +22,27 @@
 
         protected override VideoDecoder CreateH264Decoder()
         {
-            return new OpenH264.Decoder();
+            if ((Options.H264Decoder == H264Decoder.Auto || Options.H264Decoder == H264Decoder.NVDEC) && !Options.DisableNvidia)
+            {
+                return new Nvidia.H264.Decoder();
+            }
+            else if ((Options.H264Decoder == H264Decoder.Auto || Options.H264Decoder == H264Decoder.OpenH264) && !Options.DisableOpenH264)
+            {
+                return new OpenH264.Decoder();
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        protected override VideoDecoder CreateH265Decoder()
+        {
+            if (!Options.DisableNvidia)
+            {
+                return new Nvidia.H265.Decoder();
+            }
+            return null;
         }
     }
 }

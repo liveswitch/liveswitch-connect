@@ -78,6 +78,7 @@ namespace FM.LiveSwitch.Connect
         private const int Vp8PacketSize = 1000 + 12;
         private const int Vp9PacketSize = 1000 + 12;
         private const int H264PacketSize = 1000 + 12;
+        private const int H265PacketSize = 1000 + 12;
 
         protected override Task Ready()
         {
@@ -261,6 +262,16 @@ namespace FM.LiveSwitch.Connect
                                 $"rtp://127.0.0.1:{source.Port}?pkt_size={H264PacketSize}"
                             });
                         }
+                        else if (VideoFormat.IsH265)
+                        {
+                            args.AddRange(new[]
+                            {
+                                $"-map 0:v:0",
+                                $"-f rtp",
+                                $"-c copy",
+                                $"rtp://127.0.0.1:{source.Port}?pkt_size={H265PacketSize}"
+                            });
+                        }
                         else
                         {
                             throw new Exception("Unknown video format.");
@@ -316,6 +327,22 @@ namespace FM.LiveSwitch.Connect
                                 $"-b:v {Options.VideoBitrate}k",
                                 $"-g {Options.FFEncodeKeyFrameInterval} -keyint_min {Options.FFEncodeKeyFrameInterval}",
                                 $"rtp://127.0.0.1:{source.Port}?pkt_size={H264PacketSize}"
+                            });
+                        }
+                        else if (VideoFormat.IsH265)
+                        {
+                            args.AddRange(new[]
+                            {
+                                $"-map 0:v:0",
+                                $"-f rtp",
+                                $"-c libx265",
+                                $"-profile:v baseline",
+                                $"-level:v 1.3",
+                                $"-pix_fmt yuv420p",
+                                $"-tune zerolatency",
+                                $"-b:v {Options.VideoBitrate}k",
+                                $"-g {Options.FFEncodeKeyFrameInterval} -keyint_min {Options.FFEncodeKeyFrameInterval}",
+                                $"rtp://127.0.0.1:{source.Port}?pkt_size={H265PacketSize}"
                             });
                         }
                         else

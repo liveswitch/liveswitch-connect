@@ -33,6 +33,17 @@ namespace FM.LiveSwitch.Connect
                 Console.Error.WriteLine("OpenH264 failed to initialize.", ex);
             }
 
+            Console.Error.WriteLine("Checking for Nvidia hardware support...");
+            var disableNvidia = !Nvidia.Utility.NvencSupported;
+            if (disableNvidia)
+            {
+                Console.Error.WriteLine("Nvidia hardware encoder/decoder support not detected.");
+            }
+            else
+            {
+                Console.Error.WriteLine("Nvidia hardware encoder/decoder is supported.");
+            }
+
             using var parser = new Parser((settings) =>
             {
                 settings.CaseInsensitiveEnumValues = true;
@@ -56,6 +67,7 @@ namespace FM.LiveSwitch.Connect
                 (ShellOptions options) =>
                 {
                     options.DisableOpenH264 = disableOpenH264;
+                    options.DisableNvidia = disableNvidia;
                     return Task.Run(async () =>
                     {
                         return await new ShellRunner(options).Run();
@@ -64,6 +76,7 @@ namespace FM.LiveSwitch.Connect
                 (CaptureOptions options) =>
                 {
                     options.DisableOpenH264 = disableOpenH264;
+                    options.DisableNvidia = disableNvidia;
                     return Task.Run(async () =>
                     {
                         return await new Capturer(options).Capture();
@@ -72,6 +85,7 @@ namespace FM.LiveSwitch.Connect
                 (FFCaptureOptions options) =>
                 {
                     options.DisableOpenH264 = disableOpenH264;
+                    options.DisableNvidia = disableNvidia;
                     return Task.Run(async () =>
                     {
                         return await new FFCapturer(options).Capture();
@@ -80,6 +94,7 @@ namespace FM.LiveSwitch.Connect
                 (FakeOptions options) =>
                 {
                     options.DisableOpenH264 = disableOpenH264;
+                    options.DisableNvidia = disableNvidia;
                     return Task.Run(async () =>
                     {
                         return await new Faker(options).Fake();
@@ -88,6 +103,7 @@ namespace FM.LiveSwitch.Connect
                 (PlayOptions options) =>
                 {
                     options.DisableOpenH264 = disableOpenH264;
+                    options.DisableNvidia = disableNvidia;
                     return Task.Run(async () =>
                     {
                         return await new Player(options).Play();
@@ -96,6 +112,7 @@ namespace FM.LiveSwitch.Connect
                 (RenderOptions options) =>
                 {
                     options.DisableOpenH264 = disableOpenH264;
+                    options.DisableNvidia = disableNvidia;
                     return Task.Run(async () =>
                     {
                         return await new Renderer(options).Render();
@@ -104,6 +121,7 @@ namespace FM.LiveSwitch.Connect
                 (FFRenderOptions options) =>
                 {
                     options.DisableOpenH264 = disableOpenH264;
+                    options.DisableNvidia = disableNvidia;
                     return Task.Run(async () =>
                     {
                         return await new FFRenderer(options).Render();
@@ -112,6 +130,7 @@ namespace FM.LiveSwitch.Connect
                 (LogOptions options) =>
                 {
                     options.DisableOpenH264 = disableOpenH264;
+                    options.DisableNvidia = disableNvidia;
                     return Task.Run(async () =>
                     {
                         return await new Logger(options).Log();
@@ -120,6 +139,7 @@ namespace FM.LiveSwitch.Connect
                 (RecordOptions options) =>
                 {
                     options.DisableOpenH264 = disableOpenH264;
+                    options.DisableNvidia = disableNvidia;
                     return Task.Run(async () =>
                     {
                         return await new Recorder(options).Record();
@@ -128,6 +148,7 @@ namespace FM.LiveSwitch.Connect
                 (InterceptOptions options) =>
                 {
                     options.DisableOpenH264 = disableOpenH264;
+                    options.DisableNvidia = disableNvidia;
                     return Task.Run(async () =>
                     {
                         return await new Interceptor(options).Intercept();

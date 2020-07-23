@@ -7,6 +7,8 @@ namespace FM.LiveSwitch.Connect
     {
         public bool DisableOpenH264 { get; set; }
 
+        public bool DisableNvidia { get; set; }
+
         [Option("gateway-url", Required = true, HelpText = "The gateway URL.")]
         public string GatewayUrl { get; set; }
 
@@ -54,5 +56,11 @@ namespace FM.LiveSwitch.Connect
 
         [Option("video-codec", Required = false, Default = VideoCodec.Any, HelpText = "The video codec to negotiate with LiveSwitch.")]
         public VideoCodec VideoCodec { get; set; }
+
+        [Option("h264-encoder", Required = false, Default = H264Encoder.Auto, HelpText = "The H.264 encoder to use.")]
+        public H264Encoder H264Encoder { get; set; }
+
+        [Option("h264-decoder", Required = false, Default = H264Decoder.Auto, HelpText = "The H.264 decoder to use.")]
+        public H264Decoder H264Decoder { get; set; }
     }
 }

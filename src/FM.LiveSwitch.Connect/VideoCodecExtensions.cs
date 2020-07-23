@@ -4,7 +4,7 @@ namespace FM.LiveSwitch.Connect
 {
     static class VideoCodecExtensions
     {
-        public static VideoEncoder CreateEncoder(this VideoCodec codec)
+        public static VideoEncoder CreateEncoder(this VideoCodec codec, IConnectionOptions options)
         {
             switch (codec)
             {
@@ -13,22 +13,33 @@ namespace FM.LiveSwitch.Connect
                 case VideoCodec.VP9:
                     return new Vp9.Encoder();
                 case VideoCodec.H264:
-                    if (Nvidia.Utility.NvencSupported)
+                    if ((options.H264Encoder == H264Encoder.Auto || options.H264Encoder == H264Encoder.NVENC) && !options.DisableNvidia)
                     {
-                        Console.WriteLine("Using Nvidia Encoder.");
-                        return new Nvidia.Encoder(VideoFormat.I420);
+                        return new Nvidia.H264.Encoder();
+                    }
+                    else if ((options.H264Encoder == H264Encoder.Auto || options.H264Encoder == H264Encoder.OpenH264) && !options.DisableOpenH264)
+                    {
+                        return new OpenH264.Encoder();
                     }
                     else
                     {
-                        Console.WriteLine("Using OpenH264 Encoder.");
-                        return new OpenH264.Encoder();
+                        throw new Exception("H.264 video codec selected, but no encoders are enabled");
+                    }
+                case VideoCodec.H265:
+                    if (!options.DisableNvidia)
+                    {
+                        return new Nvidia.H265.Encoder();
+                    }
+                    else
+                    {
+                        throw new Exception("H.265 video codec selected, Nvidia hardware support is required but not detected.");
                     }
                 default:
                     throw new Exception("Unknown video codec.");
             }
         }
 
-        public static VideoDecoder CreateDecoder(this VideoCodec codec)
+        public static VideoDecoder CreateDecoder(this VideoCodec codec, IConnectionOptions options)
         {
             switch (codec)
             {
@@ -37,15 +48,26 @@ namespace FM.LiveSwitch.Connect
                 case VideoCodec.VP9:
                     return new Vp9.Decoder();
                 case VideoCodec.H264:
-                    if (Nvidia.Utility.NvdecSupported)
+                    if ((options.H264Decoder == H264Decoder.Auto || options.H264Decoder == H264Decoder.NVDEC) && !options.DisableNvidia)
                     {
-                        Console.WriteLine("Using Nvidia Decoder.");
-                        return new Nvidia.Decoder();
+                        return new Nvidia.H264.Decoder();
+                    }
+                    else if ((options.H264Decoder == H264Decoder.Auto || options.H264Decoder == H264Decoder.OpenH264) && !options.DisableOpenH264)
+                    {
+                        return new OpenH264.Decoder();
                     }
                     else
                     {
-                        Console.WriteLine("Using OpenH264 Decoder.");
-                        return new OpenH264.Decoder();
+                        throw new Exception("H.264 video codec selected, but no decoders are enabled");
+                    }
+                case VideoCodec.H265:
+                    if (!options.DisableNvidia)
+                    {
+                        return new Nvidia.H265.Decoder();
+                    }
+                    else
+                    {
+                        throw new Exception("H.265 video codec selected, Nvidia hardware support is required but not detected.");
                     }
                 default:
                     throw new Exception("Unknown video codec.");
@@ -62,6 +84,8 @@ namespace FM.LiveSwitch.Connect
                     return new Vp9.Packetizer();
                 case VideoCodec.H264:
                     return new H264.Packetizer();
+                case VideoCodec.H265:
+                    return new H265.Packetizer();
                 default:
                     throw new Exception("Unknown video codec.");
             }
@@ -77,6 +101,8 @@ namespace FM.LiveSwitch.Connect
                     return new Vp9.Depacketizer() as object as VideoDepacketizer<VideoFragment>;
                 case VideoCodec.H264:
                     return new H264.Depacketizer() as object as VideoDepacketizer<VideoFragment>;
+                case VideoCodec.H265:
+                    return new H265.Depacketizer() as object as VideoDepacketizer<VideoFragment>;
                 default:
                     throw new Exception("Unknown video codec.");
             }
@@ -97,6 +123,8 @@ namespace FM.LiveSwitch.Connect
                     return new Vp9.Format() { IsPacketized = isPacketized };
                 case VideoCodec.H264:
                     return new H264.Format(H264.ProfileLevelId.Default, H264.PacketizationMode.Default) { IsPacketized = isPacketized };
+                case VideoCodec.H265:
+                    return new H265.Format() { IsPacketized = isPacketized };
                 default:
                     throw new Exception("Unknown video codec.");
             }

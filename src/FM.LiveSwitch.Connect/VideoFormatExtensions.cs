@@ -18,6 +18,10 @@ namespace FM.LiveSwitch.Connect
             {
                 return VideoCodec.H264;
             }
+            if (format.Name == VideoFormat.H265Name)
+            {
+                return VideoCodec.H265;
+            }
             throw new Exception("Unknown video format.");
         }
     }

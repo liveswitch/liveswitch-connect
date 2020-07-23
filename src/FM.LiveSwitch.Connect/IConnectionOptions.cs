@@ -4,6 +4,8 @@
     {
         bool DisableOpenH264 { get; }
 
+        bool DisableNvidia { get; }
+
         string ConnectionTag { get; }
 
         string DataChannelLabel { get; }
@@ -15,5 +17,9 @@
         AudioCodec AudioCodec { get; }
 
         VideoCodec VideoCodec { get; }
+
+        H264Encoder H264Encoder { get; }
+
+        H264Decoder H264Decoder { get; }
     }
 }
