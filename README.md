@@ -189,6 +189,12 @@ The `capture` verb lets you capture local media from a named pipe and send it to
 
   --video-codec             (Default: Any) The video codec to negotiate with
                             LiveSwitch.
+
+  --h264-encoder            (Default: Auto) The H.264 encoder to use for the
+                            H.264 codec.
+
+  --h264-decoder            (Default: Auto) The H.264 decoder to use for the
+                            H.264 codec.
 ```
 
 ## FFCapture
@@ -246,6 +252,12 @@ The `ffcapture` verb lets you capture local media from FFmpeg and send it to a L
 
   --video-codec                   (Default: Any) The video codec to negotiate
                                   with LiveSwitch.
+
+  --h264-encoder                  (Default: Auto) The H.264 encoder to use for the
+                                  H.264 codec.
+
+  --h264-decoder                  (Default: Auto) The H.264 decoder to use for the
+                                  H.264 codec.
 ```
 
 ## Fake
@@ -317,6 +329,12 @@ The `fake` verb lets you generate fake media and send it to a LiveSwitch server.
 
   --video-codec            (Default: Any) The video codec to negotiate with
                            LiveSwitch.
+
+  --h264-encoder           (Default: Auto) The H.264 encoder to use for the
+                           H.264 codec.
+
+  --h264-decoder           (Default: Auto) The H.264 decoder to use for the
+                           H.264 codec.
 ```
 
 ## Play
@@ -368,6 +386,12 @@ The `play` verb lets you capture media from a local file (or pair of files) and 
 
   --video-codec           (Default: Any) The video codec to negotiate with
                           LiveSwitch.
+
+  --h264-encoder          (Default: Auto) The H.264 encoder to use for the
+                          H.264 codec.
+
+  --h264-decoder          (Default: Auto) The H.264 decoder to use for the
+                          H.264 codec.
 ```
 
 ## Render
@@ -434,6 +458,12 @@ The `render` verb lets you render remote media from a LiveSwitch server to a nam
 
   --video-codec             (Default: Any) The video codec to negotiate with
                             LiveSwitch.
+
+  --h264-encoder            (Default: Auto) The H.264 encoder to use for the
+                            H.264 codec.
+
+  --h264-decoder            (Default: Auto) The H.264 decoder to use for the
+                            H.264 codec.
 ```
 
 ## FFRender
@@ -479,6 +509,12 @@ The `ffrender` verb lets you render remote media from a LiveSwitch server to FFm
 
   --video-codec           (Default: Any) The video codec to negotiate with
                           LiveSwitch.
+
+  --h264-encoder          (Default: Auto) The H.264 encoder to use for the
+                          H.264 codec.
+
+  --h264-decoder          (Default: Auto) The H.264 decoder to use for the
+                          H.264 codec.
 ```
 
 ## Log
@@ -545,6 +581,12 @@ The `log` verb lets you log remote media frame details from a LiveSwitch server 
 
   --video-codec           (Default: Any) The video codec to negotiate with
                           LiveSwitch.
+
+  --h264-encoder          (Default: Auto) The H.264 encoder to use for the
+                          H.264 codec.
+
+  --h264-decoder          (Default: Auto) The H.264 decoder to use for the
+                          H.264 codec.
 ```
 
 ## Record
@@ -600,6 +642,12 @@ The `record` verb lets you record remote media from a LiveSwitch server to a loc
 
   --video-codec           (Default: Any) The video codec to negotiate with
                           LiveSwitch.
+
+  --h264-encoder          (Default: Auto) The H.264 encoder to use for the
+                          H.264 codec.
+
+  --h264-decoder          (Default: Auto) The H.264 decoder to use for the
+                          H.264 codec.
 ```
 
 ## Intercept
@@ -653,6 +701,12 @@ The `intercept` verb lets you forward audio and/or video packets to a specific d
 
   --video-codec           (Default: Any) The video codec to negotiate with
                           LiveSwitch.
+
+  --h264-encoder          (Default: Auto) The H.264 encoder to use for the
+                          H.264 codec.
+
+  --h264-decoder          (Default: Auto) The H.264 decoder to use for the
+                          H.264 codec.
 ```
 
 ## Loopback Example
