@@ -49,16 +49,16 @@ namespace FM.LiveSwitch.Connect
             }
         }
 
-        public static VideoDepacketizer<VideoFragment> CreateDepacketizer(this VideoCodec codec)
+        public static VideoPipe CreateDepacketizer(this VideoCodec codec)
         {
             switch (codec)
             {
                 case VideoCodec.VP8:
-                    return new Vp8.Depacketizer() as object as VideoDepacketizer<VideoFragment>;
+                    return new Vp8.Depacketizer();
                 case VideoCodec.VP9:
-                    return new Vp9.Depacketizer() as object as VideoDepacketizer<VideoFragment>;
+                    return new Vp9.Depacketizer();
                 case VideoCodec.H264:
-                    return new H264.Depacketizer() as object as VideoDepacketizer<VideoFragment>;
+                    return new H264.Depacketizer();
                 default:
                     throw new Exception("Unknown video codec.");
             }
