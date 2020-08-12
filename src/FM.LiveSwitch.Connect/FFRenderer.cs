@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace FM.LiveSwitch.Connect
@@ -71,9 +70,9 @@ namespace FM.LiveSwitch.Connect
             };
 
             var tracks = new List<AudioTrack>();
-            foreach (var codec in ((AudioCodec[])Enum.GetValues(typeof(AudioCodec))).Where(x => x != AudioCodec.Any))
+            foreach (var encoding in (AudioEncoding[])Enum.GetValues(typeof(AudioEncoding)))
             {
-                tracks.Add(CreateAudioTrack(codec));
+                tracks.Add(CreateAudioTrack(encoding));
             }
             return new AudioTrack(tracks.ToArray()).Next(sink);
         }
@@ -87,29 +86,29 @@ namespace FM.LiveSwitch.Connect
             };
 
             var tracks = new List<VideoTrack>();
-            foreach (var codec in ((VideoCodec[])Enum.GetValues(typeof(VideoCodec))).Where(x => x != VideoCodec.Any))
+            foreach (var encoding in (VideoEncoding[])Enum.GetValues(typeof(VideoEncoding)))
             {
-                if (Options.DisableOpenH264 && codec == VideoCodec.H264)
+                if (Options.DisableOpenH264 && encoding == VideoEncoding.H264)
                 {
                     continue;
                 }
-                tracks.Add(CreateVideoTrack(codec));
+                tracks.Add(CreateVideoTrack(encoding));
             }
             return new VideoTrack(tracks.ToArray()).Next(sink);
         }
 
-        private AudioTrack CreateAudioTrack(AudioCodec codec)
+        private AudioTrack CreateAudioTrack(AudioEncoding encoding)
         {
-            var depacketizer = codec.CreateDepacketizer();
-            var decoder = codec.CreateDecoder();
+            var depacketizer = encoding.CreateDepacketizer();
+            var decoder = encoding.CreateDecoder();
             var converter = new SoundConverter(Opus.Format.DefaultConfig);
             return new AudioTrack(depacketizer).Next(decoder).Next(converter);
         }
 
-        private VideoTrack CreateVideoTrack(VideoCodec codec)
+        private VideoTrack CreateVideoTrack(VideoEncoding encoding)
         {
-            var depacketizer = codec.CreateDepacketizer();
-            var decoder = codec.CreateDecoder();
+            var depacketizer = encoding.CreateDepacketizer();
+            var decoder = encoding.CreateDecoder();
             var converter = new Yuv.ImageConverter(VideoFormat.I420); //TODO: use matroska and remove this?
             return new VideoTrack(depacketizer).Next(decoder).Next(converter);
         }

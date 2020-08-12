@@ -29,14 +29,24 @@
 
         private void Initialize()
         {
-            _Reader.OnPacket += (payload, sequenceNumber, timestamp, marker) =>
+            _Reader.OnPacket += (packet) =>
             {
-                RaiseFrame(new AudioFrame(-1, new PacketizedAudioBuffer(payload, OutputFormat, new RtpPacketHeader()))
-                {
-                    SequenceNumber = sequenceNumber,
-                    Timestamp = timestamp
-                });
+                packet.Payload.LittleEndian = OutputFormat.LittleEndian;
+
+                RaisePacket(packet);
             };
+        }
+
+        private void RaisePacket(RtpPacket packet)
+        {
+            RaiseFrame(new AudioFrame(-1, new PacketizedAudioBuffer(packet.Payload, OutputFormat, new RtpPacketHeader
+            {
+                Marker = packet.Marker
+            }))
+            {
+                SequenceNumber = packet.SequenceNumber,
+                Timestamp = packet.Timestamp
+            });
         }
 
         protected override Future<object> DoStart()

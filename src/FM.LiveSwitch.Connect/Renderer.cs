@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace FM.LiveSwitch.Connect
@@ -125,9 +124,9 @@ namespace FM.LiveSwitch.Connect
         private AudioTrack CreateAudioTrack()
         {
             var tracks = new List<AudioTrack>();
-            foreach (var codec in ((AudioCodec[])Enum.GetValues(typeof(AudioCodec))).Where(x => x != AudioCodec.Any))
+            foreach (var encoding in (AudioEncoding[])Enum.GetValues(typeof(AudioEncoding)))
             {
-                tracks.Add(CreateAudioTrack(codec));
+                tracks.Add(CreateAudioTrack(encoding));
             }
             return new AudioTrack(tracks.ToArray());
         }
@@ -135,21 +134,21 @@ namespace FM.LiveSwitch.Connect
         private VideoTrack CreateVideoTrack()
         {
             var tracks = new List<VideoTrack>();
-            foreach (var codec in ((VideoCodec[])Enum.GetValues(typeof(VideoCodec))).Where(x => x != VideoCodec.Any))
+            foreach (var encoding in (VideoEncoding[])Enum.GetValues(typeof(VideoEncoding)))
             {
-                if (Options.DisableOpenH264 && codec == VideoCodec.H264)
+                if (Options.DisableOpenH264 && encoding == VideoEncoding.H264)
                 {
                     continue;
                 }
-                tracks.Add(CreateVideoTrack(codec));
+                tracks.Add(CreateVideoTrack(encoding));
             }
             return new VideoTrack(tracks.ToArray());
         }
 
-        private AudioTrack CreateAudioTrack(AudioCodec codec)
+        private AudioTrack CreateAudioTrack(AudioEncoding encoding)
         {
-            var depacketizer = codec.CreateDepacketizer();
-            var decoder = codec.CreateDecoder();
+            var depacketizer = encoding.CreateDepacketizer();
+            var decoder = encoding.CreateDecoder();
             var converter = new SoundConverter(new AudioConfig(Options.AudioClockRate, Options.AudioChannelCount));
             var reframer = new SoundReframer(new AudioConfig(Options.AudioClockRate, Options.AudioChannelCount), Options.AudioFrameDuration);
             var sink = new NamedPipeAudioSink(Options.AudioPipe, Options.Client);
@@ -160,10 +159,10 @@ namespace FM.LiveSwitch.Connect
             return new AudioTrack(depacketizer).Next(decoder).Next(converter).Next(reframer).Next(sink);
         }
 
-        private VideoTrack CreateVideoTrack(VideoCodec codec)
+        private VideoTrack CreateVideoTrack(VideoEncoding encoding)
         {
-            var depacketizer = codec.CreateDepacketizer();
-            var decoder = codec.CreateDecoder();
+            var depacketizer = encoding.CreateDepacketizer();
+            var decoder = encoding.CreateDecoder();
             var converter = new Yuv.ImageConverter(Options.VideoFormat.CreateFormat());
             converter.OnProcessFrame += (frame) =>
             {

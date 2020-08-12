@@ -4,84 +4,22 @@ namespace FM.LiveSwitch.Connect
 {
     static class VideoCodecExtensions
     {
-        public static VideoEncoder CreateEncoder(this VideoCodec codec)
+        public static VideoEncoding ToEncoding(this VideoCodec codec)
         {
             switch (codec)
             {
                 case VideoCodec.VP8:
-                    return new Vp8.Encoder();
+                    return VideoEncoding.VP8;
                 case VideoCodec.VP9:
-                    return new Vp9.Encoder();
+                    return VideoEncoding.VP9;
                 case VideoCodec.H264:
-                    return new OpenH264.Encoder();
+                    return VideoEncoding.H264;
+                case VideoCodec.Any:
+                    throw new Exception("Cannot convert 'any' codec to encoding.");
                 default:
-                    throw new Exception("Unknown video codec.");
+                    throw new Exception("Unknown video encoding.");
             }
         }
 
-        public static VideoDecoder CreateDecoder(this VideoCodec codec)
-        {
-            switch (codec)
-            {
-                case VideoCodec.VP8:
-                    return new Vp8.Decoder();
-                case VideoCodec.VP9:
-                    return new Vp9.Decoder();
-                case VideoCodec.H264:
-                    return new OpenH264.Decoder();
-                default:
-                    throw new Exception("Unknown video codec.");
-            }
-        }
-
-        public static VideoPacketizer CreatePacketizer(this VideoCodec codec)
-        {
-            switch (codec)
-            {
-                case VideoCodec.VP8:
-                    return new Vp8.Packetizer();
-                case VideoCodec.VP9:
-                    return new Vp9.Packetizer();
-                case VideoCodec.H264:
-                    return new H264.Packetizer();
-                default:
-                    throw new Exception("Unknown video codec.");
-            }
-        }
-
-        public static VideoPipe CreateDepacketizer(this VideoCodec codec)
-        {
-            switch (codec)
-            {
-                case VideoCodec.VP8:
-                    return new Vp8.Depacketizer();
-                case VideoCodec.VP9:
-                    return new Vp9.Depacketizer();
-                case VideoCodec.H264:
-                    return new H264.Depacketizer();
-                default:
-                    throw new Exception("Unknown video codec.");
-            }
-        }
-
-        public static NullVideoSink CreateNullSink(this VideoCodec codec, bool isPacketized)
-        {
-            return new NullVideoSink(CreateFormat(codec, isPacketized));
-        }
-
-        public static VideoFormat CreateFormat(this VideoCodec codec, bool isPacketized = false)
-        {
-            switch (codec)
-            {
-                case VideoCodec.VP8:
-                    return new Vp8.Format() { IsPacketized = isPacketized };
-                case VideoCodec.VP9:
-                    return new Vp9.Format() { IsPacketized = isPacketized };
-                case VideoCodec.H264:
-                    return new H264.Format(H264.ProfileLevelId.Default, H264.PacketizationMode.Default) { IsPacketized = isPacketized };
-                default:
-                    throw new Exception("Unknown video codec.");
-            }
-        }
     }
 }

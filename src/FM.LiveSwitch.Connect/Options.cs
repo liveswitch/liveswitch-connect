@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace FM.LiveSwitch.Connect
 {
-    abstract class Options : IConnectionOptions, IChannelOptions, IClientOptions
+    abstract class Options
     {
         public bool DisableOpenH264 { get; set; }
 
@@ -16,43 +16,7 @@ namespace FM.LiveSwitch.Connect
         [Option("shared-secret", Required = true, HelpText = "The shared secret for the application ID.")]
         public string SharedSecret { get; set; }
 
-        [Option("channel-id", Required = true, HelpText = "The channel ID.")]
-        public string ChannelId { get; set; }
-
-        [Option("data-channel-label", Required = false, HelpText = "The data channel label.")]
-        public string DataChannelLabel { get; set; }
-
-        [Option("user-id", Required = false, HelpText = "The local user ID.")]
-        public string UserId { get; set; }
-
-        [Option("user-alias", Required = false, HelpText = "The local user alias.")]
-        public string UserAlias { get; set; }
-
-        [Option("device-id", Required = false, HelpText = "The local device ID.")]
-        public string DeviceId { get; set; }
-
-        [Option("device-alias", Required = false, HelpText = "The local device alias.")]
-        public string DeviceAlias { get; set; }
-
-        [Option("client-tag", Required = false, HelpText = "The local client tag.")]
-        public string ClientTag { get; set; }
-
-        [Option("client-roles", Required = false, HelpText = "The local client roles.")]
-        public IEnumerable<string> ClientRoles { get; set; }
-
-        [Option("connection-tag", Required = false, HelpText = "The local connection tag.")]
-        public string ConnectionTag { get; set; }
-
-        [Option("no-audio", Required = false, HelpText = "Do not process audio.")]
-        public bool NoAudio { get; set; }
-
-        [Option("no-video", Required = false, HelpText = "Do not process video.")]
-        public bool NoVideo { get; set; }
-
-        [Option("audio-codec", Required = false, Default = AudioCodec.Any, HelpText = "The audio codec to negotiate with LiveSwitch.")]
-        public AudioCodec AudioCodec { get; set; }
-
-        [Option("video-codec", Required = false, Default = VideoCodec.Any, HelpText = "The video codec to negotiate with LiveSwitch.")]
-        public VideoCodec VideoCodec { get; set; }
+        [Option("log-level", Required = false, Default = LogLevel.Error, HelpText = "The LiveSwitch log level.")]
+        public LogLevel LogLevel { get; set; }
     }
 }

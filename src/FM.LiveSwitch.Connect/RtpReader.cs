@@ -11,7 +11,7 @@ namespace FM.LiveSwitch.Connect
 
         public int Port { get; private set; }
 
-        public event Action<DataBuffer, long, long, bool> OnPacket;
+        public event Action<RtpPacket> OnPacket;
 
         private UdpClient _Listener = null;
 
@@ -119,18 +119,8 @@ namespace FM.LiveSwitch.Connect
             var lastRtpSequenceNumber = -1;
             var firstSystemTimestamp = -1L;
             var firstTimestamp = -1L;
-            while (_LoopActive)
+            var dispatchQueue = new DispatchQueue<UdpReceiveResult>(async (result) =>
             {
-                UdpReceiveResult result;
-                try
-                {
-                    result = await _Listener.ReceiveAsync();
-                }
-                catch (ObjectDisposedException)
-                {
-                    break;
-                }
-
                 var buffer = DataBuffer.Wrap(result.Buffer);
                 var header = RtpPacketHeader.ReadFrom(buffer);
 
@@ -172,13 +162,28 @@ namespace FM.LiveSwitch.Connect
 
                 try
                 {
-                    OnPacket?.Invoke(buffer.Subset(header.CalculateHeaderLength()), sequenceNumber, timestamp, marker);
+                    OnPacket?.Invoke(new RtpPacket(buffer.Subset(header.CalculateHeaderLength()), sequenceNumber, timestamp, marker));
                 }
                 catch (Exception ex)
                 {
                     Console.Error.WriteLine($"Unexpected exception raising packet. {ex}");
                 }
+            });
+
+            while (_LoopActive)
+            {
+                try
+                {
+                    dispatchQueue.Enqueue(await _Listener.ReceiveAsync());
+                }
+                catch (ObjectDisposedException)
+                {
+                    break;
+                }
             }
+
+            dispatchQueue.WaitForDrain();
+            dispatchQueue.Destroy();
         }
     }
 }
