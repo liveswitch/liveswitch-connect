@@ -61,12 +61,12 @@ namespace FM.LiveSwitch.Connect
             }
             if (!Options.NoVideo)
             {
-                if (Options.VideoWidth == 0)
+                if (!Options.VideoWidth.HasValue || Options.VideoWidth == 0)
                 {
                     Console.Error.WriteLine("--video-width must be a specified if --video-pipe is specified.");
                     return Task.FromResult(1);
                 }
-                if (Options.VideoHeight == 0)
+                if (!Options.VideoHeight.HasValue || Options.VideoHeight == 0)
                 {
                     Console.Error.WriteLine("--video-height must be a specified if --video-pipe is specified.");
                     return Task.FromResult(1);
@@ -81,7 +81,7 @@ namespace FM.LiveSwitch.Connect
                     Console.Error.WriteLine("--video-height must be a multiple of 2.");
                     return Task.FromResult(1);
                 }
-                if (Options.VideoFrameRate < 1)
+                if (!Options.VideoFrameRate.HasValue || Options.VideoFrameRate < 1)
                 {
                     Console.Error.WriteLine("--video-frame-rate minimum value is 1.");
                     return Task.FromResult(1);
@@ -102,7 +102,7 @@ namespace FM.LiveSwitch.Connect
 
         protected override FakeVideoSource CreateVideoSource()
         {
-            return new FakeVideoSource(new VideoConfig(Options.VideoWidth, Options.VideoHeight, Options.VideoFrameRate), Options.VideoFormat.CreateFormat());
+            return new FakeVideoSource(new VideoConfig(Options.VideoWidth.Value, Options.VideoHeight.Value, Options.VideoFrameRate.Value), Options.VideoFormat.CreateFormat());
         }
     }
 }

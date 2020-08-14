@@ -56,12 +56,12 @@ namespace FM.LiveSwitch.Connect
             }
             if (Options.VideoPipe != null)
             {
-                if (Options.VideoWidth == 0)
+                if (!Options.VideoWidth.HasValue || Options.VideoWidth == 0)
                 {
                     Console.Error.WriteLine("--video-width must be a specified if --video-pipe is specified.");
                     return Task.FromResult(1);
                 }
-                if (Options.VideoHeight == 0)
+                if (!Options.VideoHeight.HasValue || Options.VideoHeight == 0)
                 {
                     Console.Error.WriteLine("--video-height must be a specified if --video-pipe is specified.");
                     return Task.FromResult(1);
@@ -92,7 +92,7 @@ namespace FM.LiveSwitch.Connect
 
         protected override NamedPipeVideoSource CreateVideoSource()
         {
-            var source = new NamedPipeVideoSource(Options.VideoPipe, Options.VideoWidth, Options.VideoHeight, Options.VideoFormat.CreateFormat(), Options.Server);
+            var source = new NamedPipeVideoSource(Options.VideoPipe, Options.VideoWidth.Value, Options.VideoHeight.Value, Options.VideoFormat.CreateFormat(), Options.Server);
             source.OnPipeConnected += () =>
             {
                 Console.Error.WriteLine("Video pipe connected.");

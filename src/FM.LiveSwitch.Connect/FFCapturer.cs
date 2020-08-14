@@ -1,12 +1,39 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace FM.LiveSwitch.Connect
 {
     class FFCapturer : Sender<FFCaptureOptions, AudioSource, VideoSource>
     {
+        public AudioFormat RtpAudioFormat
+        {
+            get 
+            {
+                if (Options.AudioEncoding.HasValue)
+                {
+                    return Options.AudioEncoding.Value.CreateFormat(true);
+                }
+                return AudioFormat;
+            }
+        }
+
+        public VideoFormat RtpVideoFormat
+        {
+            get
+            {
+                if (Options.VideoEncoding.HasValue)
+                {
+                    return Options.VideoEncoding.Value.CreateFormat(true);
+                }
+                return VideoFormat;
+            }
+        }
+
         public FFCapturer(FFCaptureOptions options)
             : base(options)
         { }
@@ -25,6 +52,10 @@ namespace FM.LiveSwitch.Connect
                     Console.Error.WriteLine("--audio-codec must be set (not 'any') if --audio-mode is 'noencode'.");
                     return Task.FromResult(1);
                 }
+                if (Options.AudioEncoding.HasValue)
+                {
+                    Options.AudioTranscode = true;
+                }
             }
             if (!Options.NoVideo)
             {
@@ -32,6 +63,10 @@ namespace FM.LiveSwitch.Connect
                 {
                     Console.Error.WriteLine("--video-codec must be set (not 'any') if --video-mode is 'noencode'.");
                     return Task.FromResult(1);
+                }
+                if (Options.VideoEncoding.HasValue)
+                {
+                    Options.VideoTranscode = true;
                 }
             }
             return Send();
@@ -50,7 +85,7 @@ namespace FM.LiveSwitch.Connect
             }
             else
             {
-                return new RtpAudioSource(AudioFormat);
+                return new RtpAudioSource(RtpAudioFormat);
             }
         }
 
@@ -67,7 +102,7 @@ namespace FM.LiveSwitch.Connect
             }
             else
             {
-                return new RtpVideoSource(VideoFormat);
+                return new RtpVideoSource(RtpVideoFormat);
             }
         }
 
@@ -92,12 +127,14 @@ namespace FM.LiveSwitch.Connect
             if (AudioSource != null)
             {
                 var config = AudioSource.Config;
+
+                args.Add($"-map 0:a:0");
+
                 if (Options.AudioMode == FFCaptureMode.LSEncode)
                 {
                     var source = AudioSource as PcmNamedPipeAudioSource;
                     args.AddRange(new[]
                     {
-                        $"-map 0:a:0",
                         $"-f s16le",
                         $"-ar {config.ClockRate}",
                         $"-ac {config.ChannelCount}",
@@ -107,120 +144,92 @@ namespace FM.LiveSwitch.Connect
                 else
                 {
                     var source = AudioSource as RtpAudioSource;
+
+                    args.Add($"-f rtp");
+
                     if (Options.AudioMode == FFCaptureMode.NoEncode)
                     {
-                        if (AudioFormat.IsOpus)
-                        {
-                            args.AddRange(new[]
-                            {
-                                $"-map 0:a:0",
-                                $"-f rtp",
-                                $"-c copy",
-                                $"rtp://127.0.0.1:{source.Port}"
-                            });
-                        }
-                        else if (AudioFormat.IsG722)
-                        {
-                            args.AddRange(new[]
-                            {
-                                $"-map 0:a:0",
-                                $"-f rtp",
-                                $"-c copy",
-                                $"rtp://127.0.0.1:{source.Port}?pkt_size={G722PacketSize}"
-                            });
-                        }
-                        else if (AudioFormat.IsPcmu)
-                        {
-                            args.AddRange(new[]
-                            {
-                                $"-map 0:a:0",
-                                $"-f rtp",
-                                $"-c copy",
-                                $"rtp://127.0.0.1:{source.Port}?pkt_size={PcmuPacketSize}"
-                            });
-                        }
-                        else if (AudioFormat.IsPcma)
-                        {
-                            args.AddRange(new[]
-                            {
-                                $"-map 0:a:0",
-                                $"-f rtp",
-                                $"-c copy",
-                                $"rtp://127.0.0.1:{source.Port}?pkt_size={PcmaPacketSize}"
-                            });
-                        }
-                        else
-                        {
-                            throw new Exception("Unknown audio format.");
-                        }
+                        args.Add($"-c copy");
                     }
                     else
                     {
-                        if (AudioFormat.IsOpus)
+                        if (RtpAudioFormat.IsOpus)
                         {
                             args.AddRange(new[]
                             {
-                                $"-map 0:a:0",
-                                $"-f rtp",
                                 $"-ar {config.ClockRate}",
                                 $"-ac {config.ChannelCount}",
                                 $"-c libopus",
                                 $"-b:a {Options.AudioBitrate}k",
-                                $"rtp://127.0.0.1:{source.Port}"
                             });
                         }
-                        else if (AudioFormat.IsG722)
+                        else if (RtpAudioFormat.IsG722)
                         {
                             args.AddRange(new[]
                             {
-                                $"-map 0:a:0",
-                                $"-f rtp",
                                 $"-ar 16000",
                                 $"-ac 1",
                                 $"-c g722",
-                                $"rtp://127.0.0.1:{source.Port}?pkt_size={G722PacketSize}"
                             });
                         }
-                        else if (AudioFormat.IsPcmu)
+                        else if (RtpAudioFormat.IsPcmu)
                         {
                             args.AddRange(new[]
                             {
-                                $"-map 0:a:0",
-                                $"-f rtp",
                                 $"-ar 8000",
                                 $"-ac 1",
                                 $"-c pcm_mulaw",
-                                $"rtp://127.0.0.1:{source.Port}?pkt_size={PcmuPacketSize}"
                             });
                         }
-                        else if (AudioFormat.IsPcma)
+                        else if (RtpAudioFormat.IsPcma)
                         {
                             args.AddRange(new[]
                             {
-                                $"-map 0:a:0",
-                                $"-f rtp",
                                 $"-ar 8000",
                                 $"-ac 1",
                                 $"-c pcm_alaw",
-                                $"rtp://127.0.0.1:{source.Port}?pkt_size={PcmaPacketSize}"
                             });
                         }
                         else
                         {
-                            throw new Exception("Unknown audio format.");
+                            throw new Exception("Unknown audio encoding.");
                         }
+                    }
+
+                    if (RtpAudioFormat.IsOpus)
+                    {
+                        args.Add($"rtp://127.0.0.1:{source.Port}");
+                    }
+                    else if (RtpAudioFormat.IsG722)
+                    {
+                        args.Add($"rtp://127.0.0.1:{source.Port}?pkt_size={G722PacketSize}");
+                    }
+                    else if (RtpAudioFormat.IsPcmu)
+                    {
+                        args.Add($"rtp://127.0.0.1:{source.Port}?pkt_size={PcmuPacketSize}");
+                    }
+                    else if (RtpAudioFormat.IsPcma)
+                    {
+                        args.Add($"rtp://127.0.0.1:{source.Port}?pkt_size={PcmaPacketSize}");
+                    }
+                    else
+                    {
+                        throw new Exception("Unknown audio encoding.");
                     }
                 }
             }
 
+            var readH264ParameterSets = false;
+            var sdpFileName = null as string;
             if (VideoSource != null)
             {
+                args.Add($"-map 0:v:0");
+
                 if (Options.VideoMode == FFCaptureMode.LSEncode)
                 {
                     var source = VideoSource as Yuv4MpegNamedPipeVideoSource;
                     args.AddRange(new[]
                     {
-                        $"-map 0:v:0",
                         $"-f yuv4mpegpipe",
                         $"-pix_fmt yuv420p",
                         NamedPipe.GetOSPipeName(source.PipeName)
@@ -229,51 +238,30 @@ namespace FM.LiveSwitch.Connect
                 else
                 {
                     var source = VideoSource as RtpVideoSource;
+
+                    args.Add($"-f rtp");
+
                     if (Options.VideoMode == FFCaptureMode.NoEncode)
                     {
-                        if (VideoFormat.IsVp8)
+                        args.Add($"-c copy");
+
+                        if (RtpVideoFormat.IsH264)
                         {
+                            readH264ParameterSets = true;
+                            source.NeedsParameterSets = true;
+                            sdpFileName = $"{VideoSource.Id}.sdp";
                             args.AddRange(new[]
                             {
-                                $"-map 0:v:0",
-                                $"-f rtp",
-                                $"-c copy",
-                                $"rtp://127.0.0.1:{source.Port}?pkt_size={Vp8PacketSize}"
+                                $"-sdp_file {sdpFileName}",
                             });
-                        }
-                        else if (VideoFormat.IsVp9)
-                        {
-                            args.AddRange(new[]
-                            {
-                                $"-map 0:v:0",
-                                $"-f rtp",
-                                $"-c copy",
-                                $"rtp://127.0.0.1:{source.Port}?pkt_size={Vp9PacketSize}"
-                            });
-                        }
-                        else if (VideoFormat.IsH264)
-                        {
-                            args.AddRange(new[]
-                            {
-                                $"-map 0:v:0",
-                                $"-f rtp",
-                                $"-c copy",
-                                $"rtp://127.0.0.1:{source.Port}?pkt_size={H264PacketSize}"
-                            });
-                        }
-                        else
-                        {
-                            throw new Exception("Unknown video format.");
                         }
                     }
                     else
                     {
-                        if (VideoFormat.IsVp8)
+                        if (RtpVideoFormat.IsVp8)
                         {
                             args.AddRange(new[]
                             {
-                                $"-map 0:v:0",
-                                $"-f rtp",
                                 $"-c libvpx -auto-alt-ref 0",
                                 $"-pix_fmt yuv420p",
                                 $"-quality realtime",
@@ -281,15 +269,12 @@ namespace FM.LiveSwitch.Connect
                                 $"-crf 10",
                                 $"-b:v {Options.VideoBitrate}k",
                                 $"-g {Options.FFEncodeKeyFrameInterval}",
-                                $"rtp://127.0.0.1:{source.Port}?pkt_size={Vp8PacketSize}"
                             });
                         }
-                        else if (VideoFormat.IsVp9)
+                        else if (RtpVideoFormat.IsVp9)
                         {
                             args.AddRange(new[]
                             {
-                                $"-map 0:v:0",
-                                $"-f rtp",
                                 $"-c libvpx-vp9 -strict experimental",
                                 $"-level 0",
                                 $"-pix_fmt yuv420p",
@@ -299,15 +284,12 @@ namespace FM.LiveSwitch.Connect
                                 $"-speed 16",
                                 $"-b:v {Options.VideoBitrate}k -maxrate {Options.VideoBitrate}k",
                                 $"-g {Options.FFEncodeKeyFrameInterval}",
-                                $"rtp://127.0.0.1:{source.Port}?pkt_size={Vp9PacketSize}"
                             });
                         }
-                        else if (VideoFormat.IsH264)
+                        else if (RtpVideoFormat.IsH264)
                         {
                             args.AddRange(new[]
                             {
-                                $"-map 0:v:0",
-                                $"-f rtp",
                                 $"-c libx264",
                                 $"-profile:v baseline",
                                 $"-level:v 1.3",
@@ -315,7 +297,6 @@ namespace FM.LiveSwitch.Connect
                                 $"-tune zerolatency",
                                 $"-b:v {Options.VideoBitrate}k",
                                 $"-g {Options.FFEncodeKeyFrameInterval} -keyint_min {Options.FFEncodeKeyFrameInterval}",
-                                $"rtp://127.0.0.1:{source.Port}?pkt_size={H264PacketSize}"
                             });
                         }
                         else
@@ -323,10 +304,32 @@ namespace FM.LiveSwitch.Connect
                             throw new Exception("Unknown video format.");
                         }
                     }
+
+                    if (RtpVideoFormat.IsVp8)
+                    {
+                        args.Add($"rtp://127.0.0.1:{source.Port}?pkt_size={Vp8PacketSize}");
+                    }
+                    else if (RtpVideoFormat.IsVp9)
+                    {
+                        args.Add($"rtp://127.0.0.1:{source.Port}?pkt_size={Vp9PacketSize}");
+                    }
+                    else if (RtpVideoFormat.IsH264)
+                    {
+                        args.Add($"rtp://127.0.0.1:{source.Port}?pkt_size={H264PacketSize}");
+                    }
+                    else
+                    {
+                        throw new Exception("Unknown video format.");
+                    }
                 }
             }
 
             FFmpeg = FFUtility.FFmpeg(string.Join(" ", args));
+
+            if (readH264ParameterSets)
+            {
+                ProcessParameterSets(sdpFileName);
+            }
 
             return ready;
         }
@@ -340,6 +343,124 @@ namespace FM.LiveSwitch.Connect
             }
 
             return base.Unready();
+        }
+
+        private void ProcessParameterSets(string sdpFileName)
+        {
+            // wait for SDP file to exist
+            var cancelTimeout = new CancellationTokenSource();
+            var timeout = Task.Delay(5000, cancelTimeout.Token);
+            while (!File.Exists(sdpFileName) && !timeout.IsCompletedSuccessfully)
+            {
+                Thread.Sleep(10);
+            }
+            if (timeout.IsCompletedSuccessfully)
+            {
+                throw new Exception("File containing H.264 parameter sets was not found.");
+            }
+            cancelTimeout.Cancel();
+
+            // read SDP file
+            cancelTimeout = new CancellationTokenSource();
+            timeout = Task.Delay(5000, cancelTimeout.Token);
+            string sdp = null;
+            Exception readException = null;
+            while (sdp == null && !timeout.IsCompletedSuccessfully)
+            {
+                try
+                {
+                    sdp = File.ReadAllText(sdpFileName);
+                }
+                catch (Exception ex)
+                {
+                    readException = ex;
+                }
+            }
+            if (timeout.IsCompletedSuccessfully)
+            {
+                throw new Exception("File containing H.264 parameter sets could not be read.", readException);
+            }
+            cancelTimeout.Cancel();
+
+            // remove header (removed in future release)
+            // http://git.videolan.org/?p=ffmpeg.git;a=commitdiff;h=26c7f91e6624b1a46e39fb887b07b77db6cee328
+            var header = "SDP:\n";
+            if (sdp.StartsWith(header))
+            {
+                sdp = sdp.Substring(header.Length);
+            }
+
+            Console.Error.WriteLine($"H.264 SDP:{Environment.NewLine}{sdp}");
+
+            // parse message
+            var sdpMessage = Sdp.Message.Parse(sdp);
+            if (sdpMessage == null)
+            {
+                throw new Exception("File containing H.264 parameter sets could not be parsed.");
+            }
+
+            var sdpMediaDescription = sdpMessage.MediaDescriptions.FirstOrDefault();
+            if (sdpMediaDescription?.Media?.MediaType != Sdp.MediaType.Video)
+            {
+                throw new Exception("File containing H.264 parameter sets is missing video description.");
+            }
+
+            var rtpMapAttribute = sdpMediaDescription.GetRtpMapAttributes()?.FirstOrDefault();
+            if (rtpMapAttribute?.FormatName != VideoFormat.H264Name)
+            {
+                throw new Exception("File containing H.264 parameter sets is missing H.264 RTP map attribute.");
+            }
+
+            var formatSpecificParametersString = rtpMapAttribute.RelatedFormatParametersAttribute?.FormatSpecificParameters;
+            if (formatSpecificParametersString != null)
+            {
+                var formatSpecificParameters = DeserializeFormatSpecificParameters(formatSpecificParametersString);
+                if (formatSpecificParameters.TryGetValue("sprop-parameter-sets", out var spropParameterSets))
+                {
+                    var encodedParameterSets = spropParameterSets.Split(',');
+                    var decodedParameterSets = encodedParameterSets.Select(Base64.Decode);
+                    var parameterSets = decodedParameterSets.Select(decodedParameterSet => DataBuffer.Wrap(decodedParameterSet)).ToArray();
+                    var naluTypes = parameterSets.Select(parameterSet => parameterSet.Read8(0) & H264.Nalu.TypeMask);
+
+                    Console.Error.WriteLine("H.264 parameter set types: " + string.Join(", ", naluTypes));
+
+                    ((RtpVideoSource)VideoSource).ParameterSets = parameterSets;
+                }
+            }
+
+            try
+            {
+                File.Delete(sdpFileName);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("File containing H.264 parameter sets could not be deleted.", ex);
+            }
+        }
+
+        private Dictionary<string, string> DeserializeFormatSpecificParameters(string formatSpecificParametersString)
+        {
+            var formatSpecificParameters = new Dictionary<string, string>();
+
+            if (formatSpecificParametersString != null)
+            {
+                var pairs = formatSpecificParametersString.Split(';');
+                foreach (var pair in pairs)
+                {
+                    var trimmedPair = pair.Trim();
+                    var equalsIndex = trimmedPair.IndexOf('=');
+                    if (equalsIndex == -1)
+                    {
+                        formatSpecificParameters[trimmedPair] = null;
+                    }
+                    else
+                    {
+                        formatSpecificParameters[trimmedPair.Substring(0, equalsIndex)] = trimmedPair.Substring(equalsIndex + 1);
+                    }
+                }
+            }
+
+            return formatSpecificParameters;
         }
     }
 }

@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace FM.LiveSwitch.Connect
 {
-    class Recorder : Receiver<RecordOptions, LiveSwitch.Matroska.AudioSink, LiveSwitch.Matroska.VideoSink>
+    class Recorder : Receiver<RecordOptions, Matroska.AudioSink, Matroska.VideoSink>
     {
         public Recorder(RecordOptions options)
             : base(options)
@@ -112,10 +111,10 @@ namespace FM.LiveSwitch.Connect
         private AudioTrack CreateAudioTrack(string filePath)
         {
             var tracks = new List<AudioTrack>();
-            foreach (var inputCodec in ((AudioCodec[])Enum.GetValues(typeof(AudioCodec))).Where(x => x != AudioCodec.Any))
+            foreach (var inputEncoding in (AudioEncoding[])Enum.GetValues(typeof(AudioEncoding)))
             {
-                var outputCodec = Options.AudioCodec == AudioCodec.Any ? inputCodec : Options.AudioCodec;
-                tracks.Add(CreateAudioTrack(inputCodec, outputCodec, filePath));
+                var outputEncoding = Options.AudioCodec == AudioCodec.Any ? inputEncoding : Options.AudioCodec.ToEncoding();
+                tracks.Add(CreateAudioTrack(inputEncoding, outputEncoding, filePath));
             }
             return new AudioTrack(tracks.ToArray());
         }
@@ -123,22 +122,22 @@ namespace FM.LiveSwitch.Connect
         private VideoTrack CreateVideoTrack(string filePath)
         {
             var tracks = new List<VideoTrack>();
-            foreach (var inputCodec in ((VideoCodec[])Enum.GetValues(typeof(VideoCodec))).Where(x => x != VideoCodec.Any))
+            foreach (var inputEncoding in (VideoEncoding[])Enum.GetValues(typeof(VideoEncoding)))
             {
-                var outputCodec = Options.VideoCodec == VideoCodec.Any ? inputCodec : Options.VideoCodec;
-                if (Options.DisableOpenH264 && (inputCodec == VideoCodec.H264 || outputCodec == VideoCodec.H264))
+                var outputEncoding = Options.VideoCodec == VideoCodec.Any ? inputEncoding : Options.VideoCodec.ToEncoding();
+                if (Options.DisableOpenH264 && (inputEncoding == VideoEncoding.H264 || outputEncoding == VideoEncoding.H264))
                 {
                     continue;
                 }
-                tracks.Add(CreateVideoTrack(inputCodec, Options.VideoCodec == VideoCodec.Any ? inputCodec : Options.VideoCodec, filePath));
+                tracks.Add(CreateVideoTrack(inputEncoding, outputEncoding, filePath));
             }
             return new VideoTrack(tracks.ToArray());
         }
 
-        private AudioTrack CreateAudioTrack(AudioCodec inputCodec, AudioCodec outputCodec, string filePath)
+        private AudioTrack CreateAudioTrack(AudioEncoding inputCodec, AudioEncoding outputCodec, string filePath)
         {
             var depacketizer = inputCodec.CreateDepacketizer();
-            var sink = new LiveSwitch.Matroska.AudioSink(filePath);
+            var sink = new Matroska.AudioSink(filePath);
             if (inputCodec == outputCodec)
             {
                 return new AudioTrack(depacketizer).Next(sink);
@@ -149,10 +148,10 @@ namespace FM.LiveSwitch.Connect
             return new AudioTrack(depacketizer).Next(decoder).Next(new SoundConverter(encoder.InputConfig)).Next(encoder).Next(sink);
         }
 
-        private VideoTrack CreateVideoTrack(VideoCodec inputCodec, VideoCodec outputCodec, string filePath)
+        private VideoTrack CreateVideoTrack(VideoEncoding inputCodec, VideoEncoding outputCodec, string filePath)
         {
             var depacketizer = inputCodec.CreateDepacketizer();
-            var sink = new LiveSwitch.Matroska.VideoSink(filePath);
+            var sink = new Matroska.VideoSink(filePath);
             if (inputCodec == outputCodec)
             {
                 return new VideoTrack(depacketizer).Next(sink);

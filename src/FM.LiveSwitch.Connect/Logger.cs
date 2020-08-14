@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace FM.LiveSwitch.Connect
@@ -16,7 +15,7 @@ namespace FM.LiveSwitch.Connect
             return Receive();
         }
 
-        private string ProcessAudioLog(string log, AudioFrame frame, AudioCodec codec, ConnectionInfo remoteConnectionInfo)
+        private string ProcessAudioLog(string log, AudioFrame frame, AudioEncoding encoding, ConnectionInfo remoteConnectionInfo)
         {
             var pcmBuffer = GetPcmAudioBuffer(frame);
             var compressedBuffer = GetCompressedAudioBuffer(frame);
@@ -31,7 +30,7 @@ namespace FM.LiveSwitch.Connect
                 .Replace("{synchronizationSource}", frame.SynchronizationSource.ToString())
                 .Replace("{systemTimestamp}", frame.SystemTimestamp.ToString())
                 .Replace("{timestamp}", frame.Timestamp.ToString())
-                .Replace("{codec}", codec.ToString())
+                .Replace("{encoding}", encoding.ToString())
                 .Replace("{applicationId}", Options.ApplicationId)
                 .Replace("{channelId}", Options.ChannelId)
                 .Replace("{userId}", remoteConnectionInfo.UserId)
@@ -45,7 +44,7 @@ namespace FM.LiveSwitch.Connect
                 .Replace("{mediaId}", remoteConnectionInfo.MediaId);
         }
 
-        private string ProcessVideoLog(string log, VideoFrame frame, VideoCodec codec, ConnectionInfo remoteConnectionInfo)
+        private string ProcessVideoLog(string log, VideoFrame frame, VideoEncoding encoding, ConnectionInfo remoteConnectionInfo)
         {
             var rawBuffer = GetRawVideoBuffer(frame);
             var compressedBuffer = GetCompressedVideoBuffer(frame);
@@ -59,7 +58,7 @@ namespace FM.LiveSwitch.Connect
                 .Replace("{synchronizationSource}", frame.SynchronizationSource.ToString())
                 .Replace("{systemTimestamp}", frame.SystemTimestamp.ToString())
                 .Replace("{timestamp}", frame.Timestamp.ToString())
-                .Replace("{codec}", codec.ToString())
+                .Replace("{encoding}", encoding.ToString())
                 .Replace("{applicationId}", Options.ApplicationId)
                 .Replace("{channelId}", Options.ChannelId)
                 .Replace("{userId}", remoteConnectionInfo.UserId)
@@ -168,9 +167,9 @@ namespace FM.LiveSwitch.Connect
         private AudioTrack CreateAudioTrack(ConnectionInfo remoteConnectionInfo)
         {
             var tracks = new List<AudioTrack>();
-            foreach (var codec in ((AudioCodec[])Enum.GetValues(typeof(AudioCodec))).Where(x => x != AudioCodec.Any))
+            foreach (var encoding in (AudioEncoding[])Enum.GetValues(typeof(AudioEncoding)))
             {
-                tracks.Add(CreateAudioTrack(codec, remoteConnectionInfo));
+                tracks.Add(CreateAudioTrack(encoding, remoteConnectionInfo));
             }
             return new AudioTrack(tracks.ToArray());
         }
@@ -178,37 +177,37 @@ namespace FM.LiveSwitch.Connect
         private VideoTrack CreateVideoTrack(ConnectionInfo remoteConnectionInfo)
         {
             var tracks = new List<VideoTrack>();
-            foreach (var codec in ((VideoCodec[])Enum.GetValues(typeof(VideoCodec))).Where(x => x != VideoCodec.Any))
+            foreach (var encoding in (VideoEncoding[])Enum.GetValues(typeof(VideoEncoding)))
             {
-                if (Options.DisableOpenH264 && codec == VideoCodec.H264)
+                if (Options.DisableOpenH264 && encoding == VideoEncoding.H264)
                 {
                     continue;
                 }
-                tracks.Add(CreateVideoTrack(codec, remoteConnectionInfo));
+                tracks.Add(CreateVideoTrack(encoding, remoteConnectionInfo));
             }
             return new VideoTrack(tracks.ToArray());
         }
 
-        private AudioTrack CreateAudioTrack(AudioCodec codec, ConnectionInfo remoteConnectionInfo)
+        private AudioTrack CreateAudioTrack(AudioEncoding encoding, ConnectionInfo remoteConnectionInfo)
         {
-            var depacketizer = codec.CreateDepacketizer();
-            var decoder = codec.CreateDecoder();
+            var depacketizer = encoding.CreateDepacketizer();
+            var decoder = encoding.CreateDecoder();
             var sink = new NullAudioSink();
             sink.OnProcessFrame += (frame) =>
             {
-                Console.WriteLine(ProcessAudioLog(Options.AudioLog, frame, codec, remoteConnectionInfo));
+                Console.WriteLine(ProcessAudioLog(Options.AudioLog, frame, encoding, remoteConnectionInfo));
             };
             return new AudioTrack(depacketizer).Next(decoder).Next(sink);
         }
 
-        private VideoTrack CreateVideoTrack(VideoCodec codec, ConnectionInfo remoteConnectionInfo)
+        private VideoTrack CreateVideoTrack(VideoEncoding encoding, ConnectionInfo remoteConnectionInfo)
         {
-            var depacketizer = codec.CreateDepacketizer();
-            var decoder = codec.CreateDecoder();
+            var depacketizer = encoding.CreateDepacketizer();
+            var decoder = encoding.CreateDecoder();
             var sink = new NullVideoSink();
             sink.OnProcessFrame += (frame) =>
             {
-                Console.WriteLine(ProcessVideoLog(Options.VideoLog, frame, codec, remoteConnectionInfo));
+                Console.WriteLine(ProcessVideoLog(Options.VideoLog, frame, encoding, remoteConnectionInfo));
             };
             return new VideoTrack(depacketizer).Next(decoder).Next(sink);
         }

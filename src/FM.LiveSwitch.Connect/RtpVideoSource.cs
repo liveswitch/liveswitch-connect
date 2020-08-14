@@ -1,4 +1,6 @@
-﻿namespace FM.LiveSwitch.Connect
+﻿using System.Collections.Generic;
+
+namespace FM.LiveSwitch.Connect
 {
     class RtpVideoSource : VideoSource
     {
@@ -9,7 +11,12 @@
 
         public int Port { get { return _Reader.Port; } }
 
+        public bool NeedsParameterSets { get; set; }
+
+        public DataBuffer[] ParameterSets { get; set; }
+
         private RtpReader _Reader = null;
+        private List<RtpPacket> _Queue;
 
         public RtpVideoSource(VideoFormat format)
             : base(format)
@@ -29,17 +36,45 @@
 
         private void Initialize()
         {
-            _Reader.OnPacket += (payload, sequenceNumber, timestamp, marker) =>
+            _Queue = new List<RtpPacket>();
+
+            _Reader.OnPacket += (packet) =>
             {
-                RaiseFrame(new VideoFrame(new PacketizedVideoBuffer(-1, -1, payload, OutputFormat, new RtpPacketHeader
+                if (NeedsParameterSets)
                 {
-                    Marker = marker
-                }))
+                    _Queue.Add(packet);
+
+                    if (ParameterSets != null)
+                    {
+                        for (var i = ParameterSets.Length - 1; i >= 0; i--)
+                        {
+                            _Queue.Insert(0, new RtpPacket(ParameterSets[i], _Queue[0].SequenceNumber - 1, _Queue[0].Timestamp, false));
+                        }
+
+                        NeedsParameterSets = false;
+                        ParameterSets = null;
+
+                        _Queue.ForEach(RaisePacket);
+                        _Queue.Clear();
+                    }
+                }
+                else
                 {
-                    SequenceNumber = sequenceNumber,
-                    Timestamp = timestamp
-                });
+                    RaisePacket(packet);
+                }
             };
+        }
+
+        private void RaisePacket(RtpPacket packet)
+        {
+            RaiseFrame(new VideoFrame(new PacketizedVideoBuffer(-1, -1, packet.Payload, OutputFormat, new RtpPacketHeader
+            {
+                Marker = packet.Marker
+            }))
+            {
+                SequenceNumber = packet.SequenceNumber,
+                Timestamp = packet.Timestamp
+            });
         }
 
         protected override Future<object> DoStart()

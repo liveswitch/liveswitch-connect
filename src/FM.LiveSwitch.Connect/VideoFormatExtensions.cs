@@ -4,19 +4,19 @@ namespace FM.LiveSwitch.Connect
 {
     static class VideoFormatExtensions
     {
-        public static VideoCodec CreateCodec(this VideoFormat format)
+        public static VideoEncoding ToEncoding(this VideoFormat format)
         {
             if (format.Name == VideoFormat.Vp8Name)
             {
-                return VideoCodec.VP8;
+                return VideoEncoding.VP8;
             }
             if (format.Name == VideoFormat.Vp9Name)
             {
-                return VideoCodec.VP9;
+                return VideoEncoding.VP9;
             }
             if (format.Name == VideoFormat.H264Name)
             {
-                return VideoCodec.H264;
+                return VideoEncoding.H264;
             }
             throw new Exception("Unknown video format.");
         }

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
@@ -82,9 +81,9 @@ namespace FM.LiveSwitch.Connect
         private AudioTrack CreateAudioTrack(ConnectionInfo remoteConnectionInfo)
         {
             var tracks = new List<AudioTrack>();
-            foreach (var codec in ((AudioCodec[])Enum.GetValues(typeof(AudioCodec))).Where(x => x != AudioCodec.Any))
+            foreach (var encoding in (AudioEncoding[])Enum.GetValues(typeof(AudioEncoding)))
             {
-                tracks.Add(CreateAudioTrack(codec, remoteConnectionInfo));
+                tracks.Add(CreateAudioTrack(encoding, remoteConnectionInfo));
             }
             return new AudioTrack(tracks.ToArray());
         }
@@ -92,22 +91,22 @@ namespace FM.LiveSwitch.Connect
         private VideoTrack CreateVideoTrack(ConnectionInfo remoteConnectionInfo)
         {
             var tracks = new List<VideoTrack>();
-            foreach (var codec in ((VideoCodec[])Enum.GetValues(typeof(VideoCodec))).Where(x => x != VideoCodec.Any))
+            foreach (var encoding in (VideoEncoding[])Enum.GetValues(typeof(VideoEncoding)))
             {
-                if (Options.DisableOpenH264 && codec == VideoCodec.H264)
+                if (Options.DisableOpenH264 && encoding == VideoEncoding.H264)
                 {
                     continue;
                 }
-                tracks.Add(CreateVideoTrack(codec, remoteConnectionInfo));
+                tracks.Add(CreateVideoTrack(encoding, remoteConnectionInfo));
             }
             return new VideoTrack(tracks.ToArray());
         }
 
-        private AudioTrack CreateAudioTrack(AudioCodec codec, ConnectionInfo remoteConnectionInfo)
+        private AudioTrack CreateAudioTrack(AudioEncoding encoding, ConnectionInfo remoteConnectionInfo)
         {
             var socket = GetSocket(TransportAddress.IsIPv6(Options.AudioIPAddress));
             var remoteEndPoint = new IPEndPoint(IPAddress.Parse(Options.AudioIPAddress), Options.AudioPort);
-            var sink = codec.CreateNullSink(true);
+            var sink = encoding.CreateNullSink(true);
             sink.OnProcessFrame += (frame) =>
             {
                 var buffer = frame.LastBuffer;
@@ -123,11 +122,11 @@ namespace FM.LiveSwitch.Connect
             return new AudioTrack(sink);
         }
 
-        private VideoTrack CreateVideoTrack(VideoCodec codec, ConnectionInfo remoteConnectionInfo)
+        private VideoTrack CreateVideoTrack(VideoEncoding encoding, ConnectionInfo remoteConnectionInfo)
         {
             var socket = GetSocket(TransportAddress.IsIPv6(Options.VideoIPAddress));
             var remoteEndPoint = new IPEndPoint(IPAddress.Parse(Options.VideoIPAddress), Options.VideoPort);
-            var sink = codec.CreateNullSink(true);
+            var sink = encoding.CreateNullSink(true);
             sink.OnProcessFrame += (frame) =>
             {
                 var buffer = frame.LastBuffer;

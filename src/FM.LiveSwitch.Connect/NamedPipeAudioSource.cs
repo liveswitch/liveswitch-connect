@@ -121,6 +121,8 @@ namespace FM.LiveSwitch.Connect
 
         protected virtual void RaiseFramePayload(DataBuffer dataBuffer)
         {
+            dataBuffer.LittleEndian = OutputFormat.LittleEndian;
+
             RaiseFrame(new AudioFrame(FrameDuration, new AudioBuffer(dataBuffer, OutputFormat)));
         }
 

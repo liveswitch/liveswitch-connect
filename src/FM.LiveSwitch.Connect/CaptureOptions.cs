@@ -27,9 +27,9 @@ namespace FM.LiveSwitch.Connect
         public ImageFormat VideoFormat { get; set; }
 
         [Option("video-width", Required = false, HelpText = "The video width.")]
-        public int VideoWidth { get; set; }
+        public new int? VideoWidth { get; set; }
 
         [Option("video-height", Required = false, HelpText = "The video height.")]
-        public int VideoHeight { get; set; }
+        public new int? VideoHeight { get; set; }
     }
 }

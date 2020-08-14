@@ -4,8 +4,18 @@
     {
         string MediaId { get; }
 
-        int AudioBitrate { get; }
+        bool AudioTranscode { get; }
 
-        int VideoBitrate { get; }
+        bool VideoTranscode { get; }
+
+        int? AudioBitrate { get; }
+
+        int? VideoBitrate { get; }
+
+        int? VideoWidth { get; set; }
+
+        int? VideoHeight { get; set; }
+
+        double? VideoFrameRate { get; set; }
     }
 }

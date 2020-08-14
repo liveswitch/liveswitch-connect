@@ -31,6 +31,15 @@ namespace FM.LiveSwitch.Connect
         protected TVideoSource VideoSource { get; private set; }
         protected DataSource DataSource { get; private set; }
 
+        protected AudioDepacketizer AudioDepacketizer { get; private set; }
+        protected VideoPipe VideoDepacketizer { get; private set; }
+
+        protected AudioDecoder AudioDecoder { get; private set; }
+        protected VideoDecoder VideoDecoder { get; private set; }
+
+        protected ResetAudioPipe ResetAudioPipe { get; private set; }
+        protected ResetVideoPipe ResetVideoPipe { get; private set; }
+
         protected SoundConverter AudioConverter { get; private set; }
         protected ImageConverter VideoConverter { get; private set; }
 
@@ -142,7 +151,16 @@ namespace FM.LiveSwitch.Connect
             }
 
             AudioSynchronizationSource = Utility.GenerateSynchronizationSource();
-            AudioPipes = Options.GetAudioCodecs().Select(x => new IdentityAudioPipe(x.CreateFormat(true))).ToArray();
+            AudioPipes = Options.GetAudioEncodings().Select(audioEncoding =>
+            {
+                var identityAudioPipe = new IdentityAudioPipe(audioEncoding.CreateFormat(true));
+                if (Options.AudioBitrate.HasValue)
+                {
+                    identityAudioPipe.UpdateTargetOutputBitrate(Options.AudioBitrate.Value);
+                    identityAudioPipe.UpdateMaxOutputBitrate(Options.AudioBitrate.Value);
+                }
+                return identityAudioPipe;
+            }).ToArray();
             foreach (var pipe in AudioPipes)
             {
                 pipe.SynchronizationSource = AudioSynchronizationSource;
@@ -164,46 +182,74 @@ namespace FM.LiveSwitch.Connect
                 }
                 AudioFormat = inputFormat.Clone();
 
-                var pipe = null as AudioPipe;
+                AudioSource = CreateAudioSource();
+                AudioSource.SynchronizationSource = AudioSynchronizationSource;
+
+                var currentOutput = (IAudioOutput)AudioSource;
+
+                if (Options.AudioTranscode)
+                {
+                    if (currentOutput.OutputFormat.IsPacketized)
+                    {
+                        AudioDepacketizer = currentOutput.OutputFormat.ToEncoding().CreateDepacketizer();
+
+                        currentOutput.AddOutput(AudioDepacketizer);
+                        currentOutput = AudioDepacketizer;
+                    }
+
+                    if (currentOutput.OutputFormat.IsCompressed)
+                    {
+                        AudioDecoder = currentOutput.OutputFormat.ToEncoding().CreateDecoder();
+
+                        currentOutput.AddOutput(AudioDecoder);
+                        currentOutput = AudioDecoder;
+                    }
+
+                    ResetAudioPipe = new ResetAudioPipe(currentOutput.OutputFormat);
+                    currentOutput.AddOutput(ResetAudioPipe);
+                    currentOutput = ResetAudioPipe;
+                }
+
+                if (!currentOutput.OutputFormat.IsCompressed)
+                {
+                    AudioEncoder = AudioFormat.ToEncoding().CreateEncoder();
+
+                    if (!currentOutput.Config.IsEquivalent(AudioEncoder.InputConfig))
+                    {
+                        AudioConverter = new SoundConverter(currentOutput.Config, AudioEncoder.InputConfig);
+
+                        currentOutput.AddOutput(AudioConverter);
+                        currentOutput = AudioConverter;
+                    }
+
+                    currentOutput.AddOutput(AudioEncoder);
+                    currentOutput = AudioEncoder;
+                }
+
+                if (!currentOutput.OutputFormat.IsPacketized)
+                {
+                    AudioPacketizer = AudioFormat.ToEncoding().CreatePacketizer();
+
+                    currentOutput.AddOutput(AudioPacketizer);
+                    currentOutput = AudioPacketizer;
+                }
+
+                var streamInput = null as AudioPipe;
                 foreach (var input in AudioStream.Inputs)
                 {
                     if (input.OutputFormat.IsEquivalent(AudioFormat, true))
                     {
-                        pipe = input as AudioPipe;
+                        streamInput = input as AudioPipe;
                     }
                 }
 
-                AudioSource = CreateAudioSource();
-                AudioSource.SynchronizationSource = AudioSynchronizationSource;
-                if (AudioSource.OutputFormat.IsPacketized)
+                currentOutput.AddOutput(streamInput);
+
+                if (AudioEncoder != null && !AudioEncoder.OutputFormat.IsFixedBitrate && Options.AudioBitrate.HasValue)
                 {
-                    AudioSource.AddOutput(pipe);
+                    AudioEncoder.TargetBitrate = Options.AudioBitrate.Value;
                 }
-                else
-                {
-                    AudioPacketizer = AudioFormat.CreateCodec().CreatePacketizer();
-                    AudioPacketizer.AddOutput(pipe);
 
-                    if (AudioSource.OutputFormat.IsCompressed)
-                    {
-                        AudioSource.AddOutput(AudioPacketizer);
-                    }
-                    else
-                    {
-                        AudioEncoder = AudioFormat.CreateCodec().CreateEncoder();
-                        AudioEncoder.AddOutput(AudioPacketizer);
-
-                        AudioConverter = new SoundConverter(AudioSource.Config, AudioEncoder.InputConfig);
-                        AudioConverter.AddOutput(AudioEncoder);
-
-                        AudioSource.AddOutput(AudioConverter);
-
-                        if (!AudioEncoder.OutputFormat.IsFixedBitrate)
-                        {
-                            AudioEncoder.TargetBitrate = Options.AudioBitrate;
-                        }
-                    }
-                }
                 await AudioSource.Start();
                 DoStartAudioStream();
             }
@@ -217,6 +263,21 @@ namespace FM.LiveSwitch.Connect
                 {
                     DoStopAudioStream();
                     await AudioSource.Stop();
+                }
+                if (AudioDepacketizer != null)
+                {
+                    AudioDepacketizer.Destroy();
+                    AudioDepacketizer = null;
+                }
+                if (AudioDecoder != null)
+                {
+                    AudioDecoder.Destroy();
+                    AudioDecoder = null;
+                }
+                if (ResetAudioPipe != null)
+                {
+                    ResetAudioPipe.Destroy();
+                    ResetAudioPipe = null;
                 }
                 if (AudioConverter != null)
                 {
@@ -275,7 +336,26 @@ namespace FM.LiveSwitch.Connect
             }
 
             VideoSynchronizationSource = Utility.GenerateSynchronizationSource();
-            VideoPipes = Options.GetVideoCodecs().Select(x => new IdentityVideoPipe(x.CreateFormat(true))).ToArray();
+            VideoPipes = Options.GetVideoEncodings().Select(videoEncoding =>
+            {
+                var identityVideoPipe = new IdentityVideoPipe(videoEncoding.CreateFormat(true));
+                if (Options.VideoBitrate.HasValue)
+                {
+                    identityVideoPipe.UpdateTargetOutputBitrate(Options.VideoBitrate.Value);
+                    identityVideoPipe.UpdateMaxOutputBitrate(Options.VideoBitrate.Value);
+                }
+                if (Options.VideoWidth.HasValue && Options.VideoHeight.HasValue)
+                {
+                    identityVideoPipe.UpdateTargetOutputSize(new Size(Options.VideoWidth.Value, Options.VideoHeight.Value));
+                    identityVideoPipe.UpdateMaxOutputSize(new Size(Options.VideoWidth.Value, Options.VideoHeight.Value));
+                }
+                if (Options.VideoFrameRate.HasValue)
+                {
+                    identityVideoPipe.UpdateTargetOutputFrameRate(Options.VideoFrameRate.Value);
+                    identityVideoPipe.UpdateMaxOutputFrameRate(Options.VideoFrameRate.Value);
+                }
+                return identityVideoPipe;
+            }).ToArray();
             foreach (var pipe in VideoPipes)
             {
                 pipe.SynchronizationSource = VideoSynchronizationSource;
@@ -297,46 +377,74 @@ namespace FM.LiveSwitch.Connect
                 }
                 VideoFormat = inputFormat.Clone();
 
-                var pipe = null as VideoPipe;
+                VideoSource = CreateVideoSource();
+                VideoSource.SynchronizationSource = VideoSynchronizationSource;
+
+                var currentOutput = (IVideoOutput)VideoSource;
+
+                if (Options.VideoTranscode)
+                {
+                    if (currentOutput.OutputFormat.IsPacketized)
+                    {
+                        VideoDepacketizer = currentOutput.OutputFormat.ToEncoding().CreateDepacketizer();
+
+                        currentOutput.AddOutput(VideoDepacketizer);
+                        currentOutput = VideoDepacketizer;
+                    }
+
+                    if (currentOutput.OutputFormat.IsCompressed)
+                    {
+                        VideoDecoder = currentOutput.OutputFormat.ToEncoding().CreateDecoder();
+
+                        currentOutput.AddOutput(VideoDecoder);
+                        currentOutput = VideoDecoder;
+                    }
+
+                    ResetVideoPipe = new ResetVideoPipe(currentOutput.OutputFormat);
+                    currentOutput.AddOutput(ResetVideoPipe);
+                    currentOutput = ResetVideoPipe;
+                }
+
+                if (!currentOutput.OutputFormat.IsCompressed)
+                {
+                    VideoEncoder = VideoFormat.ToEncoding().CreateEncoder();
+
+                    if (!currentOutput.OutputFormat.IsEquivalent(VideoEncoder.InputFormat))
+                    {
+                        VideoConverter = new ImageConverter(currentOutput.OutputFormat, VideoEncoder.InputFormat);
+
+                        currentOutput.AddOutput(VideoConverter);
+                        currentOutput = VideoConverter;
+                    }
+
+                    currentOutput.AddOutput(VideoEncoder);
+                    currentOutput = VideoEncoder;
+                }
+
+                if (!currentOutput.OutputFormat.IsPacketized)
+                {
+                    VideoPacketizer = VideoFormat.ToEncoding().CreatePacketizer();
+
+                    currentOutput.AddOutput(VideoPacketizer);
+                    currentOutput = VideoPacketizer;
+                }
+
+                var streamInput = null as VideoPipe;
                 foreach (var input in VideoStream.Inputs)
                 {
                     if (input.OutputFormat.IsEquivalent(VideoFormat, true))
                     {
-                        pipe = input as VideoPipe;
+                        streamInput = input as VideoPipe;
                     }
                 }
 
-                VideoSource = CreateVideoSource();
-                VideoSource.SynchronizationSource = VideoSynchronizationSource;
-                if (VideoSource.OutputFormat.IsPacketized)
+                currentOutput.AddOutput(streamInput);
+
+                if (VideoEncoder != null && !VideoEncoder.OutputFormat.IsFixedBitrate && Options.VideoBitrate.HasValue)
                 {
-                    VideoSource.AddOutput(pipe);
+                    VideoEncoder.TargetBitrate = Options.VideoBitrate.Value;
                 }
-                else
-                {
-                    VideoPacketizer = VideoFormat.CreateCodec().CreatePacketizer();
-                    VideoPacketizer.AddOutput(pipe);
 
-                    if (VideoSource.OutputFormat.IsCompressed)
-                    {
-                        VideoSource.AddOutput(VideoPacketizer);
-                    }
-                    else
-                    {
-                        VideoEncoder = VideoFormat.CreateCodec().CreateEncoder();
-                        VideoEncoder.AddOutput(VideoPacketizer);
-
-                        VideoConverter = new ImageConverter(VideoSource.OutputFormat, VideoEncoder.InputFormat);
-                        VideoConverter.AddOutput(VideoEncoder);
-
-                        VideoSource.AddOutput(VideoConverter);
-
-                        if (!VideoEncoder.OutputFormat.IsFixedBitrate)
-                        {
-                            VideoEncoder.TargetBitrate = Options.VideoBitrate;
-                        }
-                    }
-                }
                 await VideoSource.Start();
                 DoStartVideoStream();
             }
@@ -350,6 +458,21 @@ namespace FM.LiveSwitch.Connect
                 {
                     DoStopVideoStream();
                     await VideoSource.Stop();
+                }
+                if (VideoDepacketizer != null)
+                {
+                    VideoDepacketizer.Destroy();
+                    VideoDepacketizer = null;
+                }
+                if (VideoDecoder != null)
+                {
+                    VideoDecoder.Destroy();
+                    VideoDecoder = null;
+                }
+                if (ResetVideoPipe != null)
+                {
+                    ResetVideoPipe.Destroy();
+                    ResetVideoPipe = null;
                 }
                 if (VideoConverter != null)
                 {

@@ -20,13 +20,13 @@ namespace FM.LiveSwitch.Connect
         [Option("video-format", Required = false, Default = ImageFormat.Bgr, HelpText = "The video format.")]
         public ImageFormat VideoFormat { get; set; }
 
-        [Option("video-width", Required = false, Default = 640, HelpText = "The video width. Must be a multiiple of 2.")]
-        public int VideoWidth { get; set; }
+        [Option("video-width", Required = false, Default = 640, HelpText = "The video width. Must be a multiple of 2.")]
+        public new int? VideoWidth { get; set; }
 
-        [Option("video-height", Required = false, Default = 480, HelpText = "The video height. Must be a multiiple of 2.")]
-        public int VideoHeight { get; set; }
+        [Option("video-height", Required = false, Default = 480, HelpText = "The video height. Must be a multiple of 2.")]
+        public new int? VideoHeight { get; set; }
 
         [Option("video-frame-rate", Required = false, Default = 30, HelpText = "The video frame rate. Minimum value is 1. Maximum value is 120.")]
-        public double VideoFrameRate { get; set; }
+        public new double? VideoFrameRate { get; set; }
     }
 }
