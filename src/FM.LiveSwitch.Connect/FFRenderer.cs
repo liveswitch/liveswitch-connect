@@ -158,42 +158,18 @@ namespace FM.LiveSwitch.Connect
                     {
                         sdpMediaDescription.AddMediaAttribute(new Sdp.Rtp.MapAttribute(sink.PayloadType, AudioFormat.OpusName, Opus.Format.DefaultClockRate, Opus.Format.DefaultChannelCount.ToString()));
                         sdpMediaDescription.AddMediaAttribute(new Sdp.FormatParametersAttribute(sink.PayloadType, "useinbandfec=1"));
-                        args.AddRange(new[]
-                        {
-                            $"-ar {config.ClockRate}",
-                            $"-ac {config.ChannelCount}",
-                            $"-c libopus",
-                        });
                     }
                     else if (RtpAudioFormat.IsG722)
                     {
                         sdpMediaDescription.AddMediaAttribute(new Sdp.Rtp.MapAttribute(sink.PayloadType, AudioFormat.G722Name, G722.Format.DefaultClockRate, G722.Format.DefaultChannelCount.ToString()));
-                        args.AddRange(new[]
-                        {
-                            $"-ar 16000",
-                            $"-ac 1",
-                            $"-c g722",
-                        });
                     }
                     else if (RtpAudioFormat.IsPcmu)
                     {
                         sdpMediaDescription.AddMediaAttribute(new Sdp.Rtp.MapAttribute(sink.PayloadType, AudioFormat.PcmuName, G711.Format.DefaultClockRate, G711.Format.DefaultChannelCount.ToString()));
-                        args.AddRange(new[]
-                        {
-                            $"-ar 8000",
-                            $"-ac 1",
-                            $"-c pcm_mulaw",
-                        });
                     }
                     else if (RtpAudioFormat.IsPcma)
                     {
                         sdpMediaDescription.AddMediaAttribute(new Sdp.Rtp.MapAttribute(sink.PayloadType, AudioFormat.PcmaName, G711.Format.DefaultClockRate, G711.Format.DefaultChannelCount.ToString()));
-                        args.AddRange(new[]
-                        {
-                            $"-ar 8000",
-                            $"-ac 1",
-                            $"-c pcm_alaw",
-                        });
                     }
                     else
                     {
@@ -249,18 +225,15 @@ namespace FM.LiveSwitch.Connect
                     if (RtpVideoFormat.IsVp8)
                     {
                         sdpMediaDescription.AddMediaAttribute(new Sdp.Rtp.MapAttribute(sink.PayloadType, VideoFormat.Vp8Name, VideoFormat.DefaultClockRate));
-                        args.Add("-c vp8");
                     }
                     else if (RtpVideoFormat.IsVp9)
                     {
                         sdpMediaDescription.AddMediaAttribute(new Sdp.Rtp.MapAttribute(sink.PayloadType, VideoFormat.Vp9Name, VideoFormat.DefaultClockRate));
-                        args.Add("-c vp9");
                     }
                     else if (RtpVideoFormat.IsH264)
                     {
                         sdpMediaDescription.AddMediaAttribute(new Sdp.Rtp.MapAttribute(sink.PayloadType, VideoFormat.H264Name, VideoFormat.DefaultClockRate));
                         sdpMediaDescription.AddMediaAttribute(new Sdp.FormatParametersAttribute(sink.PayloadType, "profile-level-id=42001f;level-asymmetry-allowed=1;packetization-mode=1"));
-                        args.Add("-c h264");
                     }
                     else
                     {
