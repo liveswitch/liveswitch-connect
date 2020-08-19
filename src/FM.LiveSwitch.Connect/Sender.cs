@@ -16,9 +16,6 @@ namespace FM.LiveSwitch.Connect
         private long AudioSynchronizationSource;
         private long VideoSynchronizationSource;
 
-        private AudioPipe[] AudioPipes;
-        private VideoPipe[] VideoPipes;
-
         protected AudioStream AudioStream { get; private set; }
         protected VideoStream VideoStream { get; private set; }
         protected DataStream DataStream { get; private set; }
@@ -49,7 +46,14 @@ namespace FM.LiveSwitch.Connect
         protected AudioPacketizer AudioPacketizer { get; private set; }
         protected VideoPacketizer VideoPacketizer { get; private set; }
 
+        protected Client Client { get; private set; }
+        protected Channel Channel { get; private set; }
         protected ManagedConnection Connection { get; private set; }
+
+        private AudioPipe[] AudioPipes;
+        private VideoPipe[] VideoPipes;
+
+        private Task Disconnected;
 
         public Sender(TOptions options)
         {
@@ -66,71 +70,131 @@ namespace FM.LiveSwitch.Connect
 
             try
             {
-                var client = Options.CreateClient();
-
-                Console.Error.WriteLine($"{GetType().Name} client '{client.Id}' created:{Environment.NewLine}{Descriptor.Format(client.GetDescriptors())}");
-
-                await client.Register(Options);
-                try
+                var exit = false;
+                while (!exit)
                 {
-                    var channel = await client.Join(Options);
+                    Client = Options.CreateClient();
+
+                    Console.Error.WriteLine($"{GetType().Name} client created:{Environment.NewLine}{Descriptor.Format(Client.GetDescriptors())}");
+
+                    await Client.Register(Options);
+
+                    Console.Error.WriteLine($"{GetType().Name} client registered: {Options.ApplicationId}");
+
                     try
                     {
-                        InitializeAudioStream();
-                        InitializeVideoStream();
-                        InitializeDataStream();
+                        Channel = await Client.Join(Options);
 
-                        Connection = Options.CreateConnection(channel, AudioStream, VideoStream, DataStream);
+                        Console.Error.WriteLine($"{GetType().Name} client joined: {Channel.Id}");
 
-                        Console.Error.WriteLine($"{GetType().Name} connection '{Connection.Id}' created:{Environment.NewLine}{Descriptor.Format(Connection.GetDescriptors())}");
-
-                        await Connection.Connect();
-
-                        await Task.WhenAll(
-                            StartAudioStream(),
-                            StartVideoStream(),
-                            StartDataStream());
-
-                        await Ready();
-
-                        // watch for exit signal
-                        var exitSignalledSource = new TaskCompletionSource<bool>();
-                        var exitSignalled = exitSignalledSource.Task;
-                        Console.CancelKeyPress += async (sender, e) =>
+                        try
                         {
-                            Console.Error.WriteLine("Exit signalled.");
+                            InitializeAudioStream();
+                            InitializeVideoStream();
+                            InitializeDataStream();
 
-                            e.Cancel = true;
+                            Console.Error.WriteLine($"{GetType().Name} streams initialized.");
+
+                            Connection = Options.CreateConnection(Channel, AudioStream, VideoStream, DataStream);
+
+                            Console.Error.WriteLine($"{GetType().Name} connection created:{Environment.NewLine}{Descriptor.Format(Connection.GetDescriptors())}");
+
+                            Disconnected = await Connection.Connect();
+
+                            Console.Error.WriteLine($"{GetType().Name} connection opened.");
+
+                            await Task.WhenAll(
+                                StartAudioStream(),
+                                StartVideoStream(),
+                                StartDataStream());
+
+                            Console.Error.WriteLine($"{GetType().Name} streams started.");
+
+                            await Ready();
+
+                            Console.Error.WriteLine($"{GetType().Name} is ready and waiting for exit signal or disconnect...");
+
+                            await Task.WhenAny(ExitSignal(), Disconnected);
+
+                            if (Connection.State == ConnectionState.Failed)
+                            {
+                                Console.Error.WriteLine($"{GetType().Name} connection failed. {Client.UnregisterException}");
+                            }
+                            else if (Client.UnregisterException != null)
+                            {
+                                Console.Error.WriteLine($"{GetType().Name} client failed. {Client.UnregisterException}");
+                            }
+                            else
+                            {
+                                if (Disconnected.IsCompletedSuccessfully)
+                                {
+                                    Console.Error.WriteLine($"{GetType().Name} connection was closed. {Client.UnregisterException}");
+                                }
+                                else
+                                {
+                                    Console.Error.WriteLine($"{GetType().Name} received exit signal.");
+                                }
+                                exit = true;
+                            }
 
                             await Unready();
+
+                            Console.Error.WriteLine($"{GetType().Name} is not ready.");
 
                             await Task.WhenAll(
                                 StopAudioStream(),
                                 StopVideoStream(),
                                 StopDataStream());
 
-                            // close connection gracefully
-                            await Connection.Disconnect();
+                            Console.Error.WriteLine($"{GetType().Name} streams stopped.");
+
+                            if (Connection.State == ConnectionState.Connected)
+                            {
+                                await Connection.Disconnect();
+
+                                Console.Error.WriteLine($"{GetType().Name} connection closed.");
+                            }
 
                             DestroyAudioStream();
                             DestroyVideoStream();
                             DestroyDataStream();
 
-                            exitSignalledSource.TrySetResult(true); // exit handling
-                        };
+                            Console.Error.WriteLine($"{GetType().Name} streams destroyed.");
 
-                        // wait for exit signal
-                        Console.Error.WriteLine("Waiting for exit signal...");
-                        await exitSignalled;
+                        }
+                        finally
+                        {
+                            if (Client.State == ClientState.Registered)
+                            {
+                                try
+                                {
+                                    await Client.Leave(Channel.Id);
+
+                                    Console.Error.WriteLine($"{GetType().Name} client left.");
+                                }
+                                catch (Exception ex)
+                                {
+                                    Console.Error.WriteLine($"Could not leave gracefully. {ex}");
+                                }
+                            }
+                        }
                     }
                     finally
                     {
-                        await client.Leave(channel.Id);
+                        if (Client.State == ClientState.Registered)
+                        {
+                            try
+                            {
+                                await Client.Unregister();
+
+                                Console.Error.WriteLine($"{GetType().Name} client unregistered.");
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.Error.WriteLine($"Could not unregister gracefully. {ex}");
+                            }
+                        }
                     }
-                }
-                finally
-                {
-                    await client.Unregister();
                 }
                 return 0;
             }
@@ -139,6 +203,19 @@ namespace FM.LiveSwitch.Connect
                 Console.Error.WriteLine(ex);
                 return -1;
             }
+        }
+
+        private Task ExitSignal()
+        {
+            var taskCompletionSource = new TaskCompletionSource<bool>();
+
+            Console.CancelKeyPress += (sender, e) =>
+            {
+                e.Cancel = true;
+                taskCompletionSource.TrySetResult(true);
+            };
+
+            return taskCompletionSource.Task;
         }
 
         #region Audio
@@ -161,6 +238,7 @@ namespace FM.LiveSwitch.Connect
                 }
                 return identityAudioPipe;
             }).ToArray();
+
             foreach (var pipe in AudioPipes)
             {
                 pipe.SynchronizationSource = AudioSynchronizationSource;
@@ -214,13 +292,10 @@ namespace FM.LiveSwitch.Connect
                 {
                     AudioEncoder = AudioFormat.ToEncoding().CreateEncoder();
 
-                    if (!currentOutput.Config.IsEquivalent(AudioEncoder.InputConfig))
-                    {
-                        AudioConverter = new SoundConverter(currentOutput.Config, AudioEncoder.InputConfig);
+                    AudioConverter = new SoundConverter(currentOutput.Config, AudioEncoder.InputConfig);
 
-                        currentOutput.AddOutput(AudioConverter);
-                        currentOutput = AudioConverter;
-                    }
+                    currentOutput.AddOutput(AudioConverter);
+                    currentOutput = AudioConverter;
 
                     currentOutput.AddOutput(AudioEncoder);
                     currentOutput = AudioEncoder;
@@ -257,48 +332,42 @@ namespace FM.LiveSwitch.Connect
 
         private async Task StopAudioStream()
         {
-            if (AudioStream != null)
+            if (AudioSource != null)
             {
-                if (AudioSource != null)
-                {
-                    DoStopAudioStream();
-                    await AudioSource.Stop();
-                }
-                if (AudioDepacketizer != null)
-                {
-                    AudioDepacketizer.Destroy();
-                    AudioDepacketizer = null;
-                }
-                if (AudioDecoder != null)
-                {
-                    AudioDecoder.Destroy();
-                    AudioDecoder = null;
-                }
-                if (ResetAudioPipe != null)
-                {
-                    ResetAudioPipe.Destroy();
-                    ResetAudioPipe = null;
-                }
-                if (AudioConverter != null)
-                {
-                    AudioConverter.Destroy();
-                    AudioConverter = null;
-                }
-                if (AudioEncoder != null)
-                {
-                    AudioEncoder.Destroy();
-                    AudioEncoder = null;
-                }
-                if (AudioPacketizer != null)
-                {
-                    AudioPacketizer.Destroy();
-                    AudioPacketizer = null;
-                }
-                if (AudioSource != null)
-                {
-                    AudioSource.Destroy();
-                    AudioSource = null;
-                }
+                DoStopAudioStream();
+                await AudioSource.Stop();
+                AudioSource.Destroy();
+                AudioSource = null;
+            }
+            if (AudioDepacketizer != null)
+            {
+                AudioDepacketizer.Destroy();
+                AudioDepacketizer = null;
+            }
+            if (AudioDecoder != null)
+            {
+                AudioDecoder.Destroy();
+                AudioDecoder = null;
+            }
+            if (ResetAudioPipe != null)
+            {
+                ResetAudioPipe.Destroy();
+                ResetAudioPipe = null;
+            }
+            if (AudioConverter != null)
+            {
+                AudioConverter.Destroy();
+                AudioConverter = null;
+            }
+            if (AudioEncoder != null)
+            {
+                AudioEncoder.Destroy();
+                AudioEncoder = null;
+            }
+            if (AudioPacketizer != null)
+            {
+                AudioPacketizer.Destroy();
+                AudioPacketizer = null;
             }
         }
 
@@ -307,15 +376,15 @@ namespace FM.LiveSwitch.Connect
             if (AudioStream != null)
             {
                 DoDestroyAudioStream();
-                if (AudioPipes != null)
-                {
-                    foreach (var pipe in AudioPipes)
-                    {
-                        pipe.Destroy();
-                    }
-                    AudioPipes = null;
-                }
                 AudioStream = null;
+            }
+            if (AudioPipes != null)
+            {
+                foreach (var pipe in AudioPipes)
+                {
+                    pipe.Destroy();
+                }
+                AudioPipes = null;
             }
         }
 
@@ -356,6 +425,7 @@ namespace FM.LiveSwitch.Connect
                 }
                 return identityVideoPipe;
             }).ToArray();
+
             foreach (var pipe in VideoPipes)
             {
                 pipe.SynchronizationSource = VideoSynchronizationSource;
@@ -409,13 +479,10 @@ namespace FM.LiveSwitch.Connect
                 {
                     VideoEncoder = VideoFormat.ToEncoding().CreateEncoder();
 
-                    if (!currentOutput.OutputFormat.IsEquivalent(VideoEncoder.InputFormat))
-                    {
-                        VideoConverter = new ImageConverter(currentOutput.OutputFormat, VideoEncoder.InputFormat);
+                    VideoConverter = new ImageConverter(currentOutput.OutputFormat, VideoEncoder.InputFormat);
 
-                        currentOutput.AddOutput(VideoConverter);
-                        currentOutput = VideoConverter;
-                    }
+                    currentOutput.AddOutput(VideoConverter);
+                    currentOutput = VideoConverter;
 
                     currentOutput.AddOutput(VideoEncoder);
                     currentOutput = VideoEncoder;
@@ -452,48 +519,42 @@ namespace FM.LiveSwitch.Connect
 
         private async Task StopVideoStream()
         {
-            if (VideoStream != null)
+            if (VideoSource != null)
             {
-                if (VideoSource != null)
-                {
-                    DoStopVideoStream();
-                    await VideoSource.Stop();
-                }
-                if (VideoDepacketizer != null)
-                {
-                    VideoDepacketizer.Destroy();
-                    VideoDepacketizer = null;
-                }
-                if (VideoDecoder != null)
-                {
-                    VideoDecoder.Destroy();
-                    VideoDecoder = null;
-                }
-                if (ResetVideoPipe != null)
-                {
-                    ResetVideoPipe.Destroy();
-                    ResetVideoPipe = null;
-                }
-                if (VideoConverter != null)
-                {
-                    VideoConverter.Destroy();
-                    VideoConverter = null;
-                }
-                if (VideoEncoder != null)
-                {
-                    VideoEncoder.Destroy();
-                    VideoEncoder = null;
-                }
-                if (VideoPacketizer != null)
-                {
-                    VideoPacketizer.Destroy();
-                    VideoPacketizer = null;
-                }
-                if (VideoSource != null)
-                {
-                    VideoSource.Destroy();
-                    VideoSource = null;
-                }
+                DoStopVideoStream();
+                await VideoSource.Stop();
+                VideoSource.Destroy();
+                VideoSource = null;
+            }
+            if (VideoDepacketizer != null)
+            {
+                VideoDepacketizer.Destroy();
+                VideoDepacketizer = null;
+            }
+            if (VideoDecoder != null)
+            {
+                VideoDecoder.Destroy();
+                VideoDecoder = null;
+            }
+            if (ResetVideoPipe != null)
+            {
+                ResetVideoPipe.Destroy();
+                ResetVideoPipe = null;
+            }
+            if (VideoConverter != null)
+            {
+                VideoConverter.Destroy();
+                VideoConverter = null;
+            }
+            if (VideoEncoder != null)
+            {
+                VideoEncoder.Destroy();
+                VideoEncoder = null;
+            }
+            if (VideoPacketizer != null)
+            {
+                VideoPacketizer.Destroy();
+                VideoPacketizer = null;
             }
         }
 
@@ -502,15 +563,15 @@ namespace FM.LiveSwitch.Connect
             if (VideoStream != null)
             {
                 DoDestroyVideoStream();
-                if (VideoPipes != null)
-                {
-                    foreach (var pipe in VideoPipes)
-                    {
-                        pipe.Destroy();
-                    }
-                    VideoPipes = null;
-                }
                 VideoStream = null;
+            }
+            if (VideoPipes != null)
+            {
+                foreach (var pipe in VideoPipes)
+                {
+                    pipe.Destroy();
+                }
+                VideoPipes = null;
             }
         }
 

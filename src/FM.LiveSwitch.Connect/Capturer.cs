@@ -11,12 +11,12 @@ namespace FM.LiveSwitch.Connect
 
         public Task<int> Capture()
         {
-            if (Options.AudioPipe == null && Options.VideoPipe == null)
+            if (Options.AudioPipe == null)
             {
-                Console.Error.WriteLine("--audio-pipe and/or --video-pipe must be specified.");
-                return Task.FromResult(1);
+                Console.Error.WriteLine("Setting --no-audio to true because --audio-pipe is not specified.");
+                Options.NoAudio = true;
             }
-            if (Options.AudioPipe != null)
+            else
             {
                 if (Options.AudioClockRate % 8000 != 0)
                 {
@@ -54,7 +54,12 @@ namespace FM.LiveSwitch.Connect
                     return Task.FromResult(1);
                 }
             }
-            if (Options.VideoPipe != null)
+            if (Options.VideoPipe == null)
+            {
+                Console.Error.WriteLine("Setting --no-video to true because --video-pipe is not specified.");
+                Options.NoVideo = true;
+            }
+            else
             {
                 if (!Options.VideoWidth.HasValue || Options.VideoWidth == 0)
                 {

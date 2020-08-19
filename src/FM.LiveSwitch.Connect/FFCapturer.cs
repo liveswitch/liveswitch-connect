@@ -79,7 +79,7 @@ namespace FM.LiveSwitch.Connect
                 var source = new PcmNamedPipeAudioSource($"ffcapture_pcm_{ShortId()}");
                 source.OnPipeConnected += () =>
                 {
-                    Console.Error.WriteLine("Video pipe connected.");
+                    Console.Error.WriteLine("Audio pipe connected.");
                 };
                 return source;
             }
@@ -107,6 +107,10 @@ namespace FM.LiveSwitch.Connect
         }
 
         private Process FFmpeg;
+        private Thread _Monitor;
+        private volatile bool _Done;
+        private string H264SdpFileName;
+
         private const int G722PacketSize = 320 + 12;
         private const int PcmuPacketSize = 320 + 12;
         private const int PcmaPacketSize = 320 + 12;
@@ -220,7 +224,6 @@ namespace FM.LiveSwitch.Connect
             }
 
             var readH264ParameterSets = false;
-            var sdpFileName = null as string;
             if (VideoSource != null)
             {
                 args.Add($"-map 0:v:0");
@@ -249,10 +252,10 @@ namespace FM.LiveSwitch.Connect
                         {
                             readH264ParameterSets = true;
                             source.NeedsParameterSets = true;
-                            sdpFileName = $"{VideoSource.Id}.sdp";
+                            H264SdpFileName = $"h264_{Utility.GenerateId()}.sdp";
                             args.AddRange(new[]
                             {
-                                $"-sdp_file {sdpFileName}",
+                                $"-sdp_file {H264SdpFileName}",
                             });
                         }
                     }
@@ -268,7 +271,7 @@ namespace FM.LiveSwitch.Connect
                                 $"-speed 16",
                                 $"-crf 10",
                                 $"-b:v {Options.VideoBitrate}k",
-                                $"-g {Options.FFEncodeKeyFrameInterval}",
+                                $"-g {Options.KeyFrameInterval}",
                             });
                         }
                         else if (RtpVideoFormat.IsVp9)
@@ -283,7 +286,7 @@ namespace FM.LiveSwitch.Connect
                                 $"-quality realtime",
                                 $"-speed 16",
                                 $"-b:v {Options.VideoBitrate}k -maxrate {Options.VideoBitrate}k",
-                                $"-g {Options.FFEncodeKeyFrameInterval}",
+                                $"-g {Options.KeyFrameInterval}",
                             });
                         }
                         else if (RtpVideoFormat.IsH264)
@@ -296,7 +299,7 @@ namespace FM.LiveSwitch.Connect
                                 $"-pix_fmt yuv420p",
                                 $"-tune zerolatency",
                                 $"-b:v {Options.VideoBitrate}k",
-                                $"-g {Options.FFEncodeKeyFrameInterval} -keyint_min {Options.FFEncodeKeyFrameInterval}",
+                                $"-g {Options.KeyFrameInterval} -keyint_min {Options.KeyFrameInterval}",
                             });
                         }
                         else
@@ -326,9 +329,26 @@ namespace FM.LiveSwitch.Connect
 
             FFmpeg = FFUtility.FFmpeg(string.Join(" ", args));
 
+            _Monitor = new Thread(() =>
+            {
+                while (!_Done)
+                {
+                    FFmpeg.WaitForExit();
+                    if (!_Done)
+                    {
+                        Console.Error.WriteLine("FFmpeg exited unexpectedly.");
+                        FFmpeg = FFUtility.FFmpeg(string.Join(" ", args));
+                    }
+                }
+            })
+            {
+                IsBackground = true
+            };
+            _Monitor.Start();
+
             if (readH264ParameterSets)
             {
-                ProcessParameterSets(sdpFileName);
+                ProcessParameterSets();
             }
 
             return ready;
@@ -336,27 +356,38 @@ namespace FM.LiveSwitch.Connect
 
         protected override Task Unready()
         {
+            _Done = true;
+
             if (FFmpeg != null)
             {
                 FFmpeg.StandardInput.Write('q');
                 FFmpeg.WaitForExit();
             }
 
+            try
+            {
+                File.Delete(H264SdpFileName);
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"H.264 SDP output file could not be deleted. {ex}");
+            }
+
             return base.Unready();
         }
 
-        private void ProcessParameterSets(string sdpFileName)
+        private void ProcessParameterSets()
         {
             // wait for SDP file to exist
             var cancelTimeout = new CancellationTokenSource();
             var timeout = Task.Delay(5000, cancelTimeout.Token);
-            while (!File.Exists(sdpFileName) && !timeout.IsCompletedSuccessfully)
+            while (!File.Exists(H264SdpFileName) && !timeout.IsCompletedSuccessfully)
             {
                 Thread.Sleep(10);
             }
             if (timeout.IsCompletedSuccessfully)
             {
-                throw new Exception("File containing H.264 parameter sets was not found.");
+                throw new Exception("H.264 SDP output file was not found.");
             }
             cancelTimeout.Cancel();
 
@@ -369,7 +400,7 @@ namespace FM.LiveSwitch.Connect
             {
                 try
                 {
-                    sdp = File.ReadAllText(sdpFileName);
+                    sdp = File.ReadAllText(H264SdpFileName);
                 }
                 catch (Exception ex)
                 {
@@ -378,7 +409,7 @@ namespace FM.LiveSwitch.Connect
             }
             if (timeout.IsCompletedSuccessfully)
             {
-                throw new Exception("File containing H.264 parameter sets could not be read.", readException);
+                throw new Exception("H.264 SDP output file could not be read.", readException);
             }
             cancelTimeout.Cancel();
 
@@ -396,19 +427,19 @@ namespace FM.LiveSwitch.Connect
             var sdpMessage = Sdp.Message.Parse(sdp);
             if (sdpMessage == null)
             {
-                throw new Exception("File containing H.264 parameter sets could not be parsed.");
+                throw new Exception("H.264 SDP output file could not be parsed.");
             }
 
             var sdpMediaDescription = sdpMessage.MediaDescriptions.FirstOrDefault();
             if (sdpMediaDescription?.Media?.MediaType != Sdp.MediaType.Video)
             {
-                throw new Exception("File containing H.264 parameter sets is missing video description.");
+                throw new Exception("H.264 SDP output file is missing video description.");
             }
 
             var rtpMapAttribute = sdpMediaDescription.GetRtpMapAttributes()?.FirstOrDefault();
             if (rtpMapAttribute?.FormatName != VideoFormat.H264Name)
             {
-                throw new Exception("File containing H.264 parameter sets is missing H.264 RTP map attribute.");
+                throw new Exception("H.264 SDP output file is missing H.264 RTP map attribute.");
             }
 
             var formatSpecificParametersString = rtpMapAttribute.RelatedFormatParametersAttribute?.FormatSpecificParameters;
@@ -426,15 +457,6 @@ namespace FM.LiveSwitch.Connect
 
                     ((RtpVideoSource)VideoSource).ParameterSets = parameterSets;
                 }
-            }
-
-            try
-            {
-                File.Delete(sdpFileName);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("File containing H.264 parameter sets could not be deleted.", ex);
             }
         }
 

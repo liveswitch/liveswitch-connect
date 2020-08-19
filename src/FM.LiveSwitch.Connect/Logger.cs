@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace FM.LiveSwitch.Connect
@@ -124,92 +123,24 @@ namespace FM.LiveSwitch.Connect
             return null;
         }
 
-        protected override AudioStream CreateAudioStream(ConnectionInfo remoteConnectionInfo)
+        protected override NullAudioSink CreateAudioSink()
         {
-            if (Options.NoAudio || !remoteConnectionInfo.HasAudio)
-            {
-                return null;
-            }
-
-            var track = CreateAudioTrack(remoteConnectionInfo);
-            var stream = new AudioStream(null, track);
-            stream.OnStateChange += () =>
-            {
-                if (stream.State == StreamState.Closed ||
-                    stream.State == StreamState.Failed)
-                {
-                    track.Destroy();
-                }
-            };
-            return stream;
-        }
-
-        protected override VideoStream CreateVideoStream(ConnectionInfo remoteConnectionInfo)
-        {
-            if (Options.NoVideo || !remoteConnectionInfo.HasVideo)
-            {
-                return null;
-            }
-
-            var track = CreateVideoTrack(remoteConnectionInfo);
-            var stream = new VideoStream(null, track);
-            stream.OnStateChange += () =>
-            {
-                if (stream.State == StreamState.Closed ||
-                    stream.State == StreamState.Failed)
-                {
-                    track.Destroy();
-                }
-            };
-            return stream;
-        }
-
-        private AudioTrack CreateAudioTrack(ConnectionInfo remoteConnectionInfo)
-        {
-            var tracks = new List<AudioTrack>();
-            foreach (var encoding in (AudioEncoding[])Enum.GetValues(typeof(AudioEncoding)))
-            {
-                tracks.Add(CreateAudioTrack(encoding, remoteConnectionInfo));
-            }
-            return new AudioTrack(tracks.ToArray());
-        }
-
-        private VideoTrack CreateVideoTrack(ConnectionInfo remoteConnectionInfo)
-        {
-            var tracks = new List<VideoTrack>();
-            foreach (var encoding in (VideoEncoding[])Enum.GetValues(typeof(VideoEncoding)))
-            {
-                if (Options.DisableOpenH264 && encoding == VideoEncoding.H264)
-                {
-                    continue;
-                }
-                tracks.Add(CreateVideoTrack(encoding, remoteConnectionInfo));
-            }
-            return new VideoTrack(tracks.ToArray());
-        }
-
-        private AudioTrack CreateAudioTrack(AudioEncoding encoding, ConnectionInfo remoteConnectionInfo)
-        {
-            var depacketizer = encoding.CreateDepacketizer();
-            var decoder = encoding.CreateDecoder();
             var sink = new NullAudioSink();
             sink.OnProcessFrame += (frame) =>
             {
-                Console.WriteLine(ProcessAudioLog(Options.AudioLog, frame, encoding, remoteConnectionInfo));
+                Console.WriteLine(ProcessAudioLog(Options.AudioLog, frame, AudioFormat.ToEncoding(), RemoteConnectionInfo));
             };
-            return new AudioTrack(depacketizer).Next(decoder).Next(sink);
+            return sink;
         }
 
-        private VideoTrack CreateVideoTrack(VideoEncoding encoding, ConnectionInfo remoteConnectionInfo)
+        protected override NullVideoSink CreateVideoSink()
         {
-            var depacketizer = encoding.CreateDepacketizer();
-            var decoder = encoding.CreateDecoder();
             var sink = new NullVideoSink();
             sink.OnProcessFrame += (frame) =>
             {
-                Console.WriteLine(ProcessVideoLog(Options.VideoLog, frame, encoding, remoteConnectionInfo));
+                Console.WriteLine(ProcessVideoLog(Options.VideoLog, frame, VideoFormat.ToEncoding(), RemoteConnectionInfo));
             };
-            return new VideoTrack(depacketizer).Next(decoder).Next(sink);
+            return sink;
         }
     }
 }
