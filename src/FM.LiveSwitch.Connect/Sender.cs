@@ -101,7 +101,7 @@ namespace FM.LiveSwitch.Connect
 
                             Disconnected = await Connection.Connect();
 
-                            Console.Error.WriteLine($"{GetType().Name} connection connected.");
+                            Console.Error.WriteLine($"{GetType().Name} connection opened.");
 
                             await Task.WhenAll(
                                 StartAudioStream(),
@@ -116,7 +116,15 @@ namespace FM.LiveSwitch.Connect
 
                             await Task.WhenAny(ExitSignal(), Disconnected);
 
-                            if (Client.UnregisterException == null)
+                            if (Connection.State == ConnectionState.Failed)
+                            {
+                                Console.Error.WriteLine($"{GetType().Name} connection failed. {Client.UnregisterException}");
+                            }
+                            else if (Client.UnregisterException != null)
+                            {
+                                Console.Error.WriteLine($"{GetType().Name} client failed. {Client.UnregisterException}");
+                            }
+                            else
                             {
                                 if (Disconnected.IsCompletedSuccessfully)
                                 {
@@ -127,10 +135,6 @@ namespace FM.LiveSwitch.Connect
                                     Console.Error.WriteLine($"{GetType().Name} received exit signal.");
                                 }
                                 exit = true;
-                            }
-                            else
-                            {
-                                Console.Error.WriteLine($"{GetType().Name} client was disconnected. {Client.UnregisterException}");
                             }
 
                             await Unready();
@@ -144,9 +148,12 @@ namespace FM.LiveSwitch.Connect
 
                             Console.Error.WriteLine($"{GetType().Name} streams stopped.");
 
-                            await Connection.Disconnect();
+                            if (Connection.State == ConnectionState.Connected)
+                            {
+                                await Connection.Disconnect();
 
-                            Console.Error.WriteLine($"{GetType().Name} connection disconnected.");
+                                Console.Error.WriteLine($"{GetType().Name} connection closed.");
+                            }
 
                             DestroyAudioStream();
                             DestroyVideoStream();
