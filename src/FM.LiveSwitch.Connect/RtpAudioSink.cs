@@ -35,8 +35,14 @@
         protected override void DoProcessFrame(AudioFrame frame, AudioBuffer inputBuffer)
         {
             var rtpHeaders = inputBuffer.RtpHeaders;
-            foreach (var rtpHeader in rtpHeaders)
+            var rtpPayloads = inputBuffer.DataBuffers;
+            for (var i = 0; i < rtpHeaders.Length; i++)
             {
+                var rtpHeader = rtpHeaders[i];
+                if (rtpHeader == null)
+                {
+                    rtpHeader = new RtpPacketHeader();
+                }
                 if (rtpHeader.SequenceNumber == -1)
                 {
                     rtpHeader.SequenceNumber = (int)(_SequenceNumber++ % (ushort.MaxValue + 1));
@@ -45,12 +51,7 @@
                 {
                     rtpHeader.Timestamp = frame.Timestamp % ((long)uint.MaxValue + 1);
                 }
-            }
-
-            var rtpPayloads = inputBuffer.DataBuffers;
-            for (var i = 0; i < rtpHeaders.Length; i++)
-            {
-                _Writer.Write(new RtpPacket(rtpPayloads[i], rtpHeaders[i].SequenceNumber, rtpHeaders[i].Timestamp, rtpHeaders[i].Marker)
+                _Writer.Write(new RtpPacket(rtpPayloads[i], rtpHeader.SequenceNumber, rtpHeader.Timestamp, rtpHeader.Marker)
                 {
                     PayloadType = PayloadType,
                     SynchronizationSource = SynchronizationSource
