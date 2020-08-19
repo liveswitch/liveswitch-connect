@@ -48,7 +48,7 @@ namespace FM.LiveSwitch.Connect
             {
                 if (IPAddress == null || Port == 0)
                 {
-                    Console.Error.WriteLine("---- NEED TO ADD A QUEUE TO AVOID THIS");
+                    Console.Error.WriteLine("IP address and port not set yet. Discarding packet.");
                     return false;
                 }
                 _IPEndPoint = new IPEndPoint(System.Net.IPAddress.Parse(IPAddress), Port);
@@ -57,8 +57,8 @@ namespace FM.LiveSwitch.Connect
             var header = new RtpPacketHeader
             {
                 Marker = packet.Marker,
-                Timestamp = packet.Timestamp % ((long)uint.MaxValue + 1),
-                SequenceNumber = (int)(packet.SequenceNumber % (ushort.MaxValue + 1)),
+                Timestamp = packet.Timestamp,
+                SequenceNumber = packet.SequenceNumber,
                 PayloadType = packet.PayloadType,
                 SynchronizationSource = packet.SynchronizationSource
             };

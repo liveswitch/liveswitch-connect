@@ -24,6 +24,7 @@
         public long SynchronizationSource { get; set; }
 
         private RtpWriter _Writer = null;
+        private long _SequenceNumber;
 
         public RtpAudioSink(AudioFormat format)
             : base(format)
@@ -34,6 +35,18 @@
         protected override void DoProcessFrame(AudioFrame frame, AudioBuffer inputBuffer)
         {
             var rtpHeaders = inputBuffer.RtpHeaders;
+            foreach (var rtpHeader in rtpHeaders)
+            {
+                if (rtpHeader.SequenceNumber == -1)
+                {
+                    rtpHeader.SequenceNumber = (int)(_SequenceNumber++ % (ushort.MaxValue + 1));
+                }
+                if (rtpHeader.Timestamp == -1)
+                {
+                    rtpHeader.Timestamp = frame.Timestamp % ((long)uint.MaxValue + 1);
+                }
+            }
+
             var rtpPayloads = inputBuffer.DataBuffers;
             for (var i = 0; i < rtpHeaders.Length; i++)
             {

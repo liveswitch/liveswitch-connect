@@ -28,6 +28,9 @@ namespace FM.LiveSwitch.Connect
         public int KeyFrameInterval { get; set; }
 
         private RtpWriter _Writer = null;
+        private int _KeyFrameIntervalCounter;
+        private long _LastTimestamp;
+        private long _SequenceNumber;
 
         public RtpVideoSink(VideoFormat format)
             : base(format)
@@ -35,29 +38,38 @@ namespace FM.LiveSwitch.Connect
             _Writer = new RtpWriter(format.ClockRate);
         }
 
-        private int KeyFrameIntervalCounter;
-        private long LastTimestamp;
-
         protected override void DoProcessFrame(VideoFrame frame, VideoBuffer inputBuffer)
         {
-            if (frame.Timestamp != LastTimestamp)
+            if (frame.Timestamp != _LastTimestamp)
             {
-                KeyFrameIntervalCounter++;
-                LastTimestamp = frame.Timestamp;
+                _KeyFrameIntervalCounter++;
+                _LastTimestamp = frame.Timestamp;
             }
 
-            if (KeyFrameIntervalCounter == KeyFrameInterval)
+            if (_KeyFrameIntervalCounter == KeyFrameInterval)
             {
                 Console.Error.WriteLine("Raising keyframe request.");
                 RaiseControlFrame(new FirControlFrame(new FirEntry(GetCcmSequenceNumber())));
-                KeyFrameIntervalCounter = 0;
+                _KeyFrameIntervalCounter = 0;
             }
 
             var rtpHeaders = inputBuffer.RtpHeaders;
+            foreach (var rtpHeader in rtpHeaders)
+            {
+                if (rtpHeader.SequenceNumber == -1)
+                {
+                    rtpHeader.SequenceNumber = (int)(_SequenceNumber++ % (ushort.MaxValue + 1));
+                }
+                if (rtpHeader.Timestamp == -1)
+                {
+                    rtpHeader.Timestamp = frame.Timestamp % ((long)uint.MaxValue + 1);
+                }
+            }
+
             var rtpPayloads = inputBuffer.DataBuffers;
             for (var i = 0; i < rtpHeaders.Length; i++)
             {
-                _Writer.Write(new RtpPacket(rtpPayloads[i], frame.SequenceNumber + i, frame.Timestamp, rtpHeaders[i].Marker)
+                _Writer.Write(new RtpPacket(rtpPayloads[i], rtpHeaders[i].SequenceNumber, rtpHeaders[i].Timestamp, rtpHeaders[i].Marker)
                 {
                     PayloadType = PayloadType,
                     SynchronizationSource = SynchronizationSource
