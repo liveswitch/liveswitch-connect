@@ -73,6 +73,8 @@ The `shell` verb starts an interactive shell that lets you monitor clients and c
   --application-id    Required. The application ID.
 
   --shared-secret     Required. The shared secret for the application ID.
+
+  --log-level         (Default: Error) The LiveSwitch log level.
 ```
 
 Once the `shell` is active:
@@ -152,15 +154,11 @@ The `capture` verb lets you capture local media from a named pipe and send it to
 
   --media-id                The local media ID.
 
-  --audio-bitrate           (Default: 32) The requested audio bitrate.
+  --audio-bitrate           The audio bitrate.
 
-  --video-bitrate           (Default: 1000) The requested video bitrate.
+  --video-bitrate           The video bitrate.
 
-  --gateway-url             Required. The gateway URL.
-
-  --application-id          Required. The application ID.
-
-  --shared-secret           Required. The shared secret for the application ID.
+  --video-frame-rate        The video frame-rate, if known, for signalling.
 
   --channel-id              Required. The channel ID.
 
@@ -195,6 +193,14 @@ The `capture` verb lets you capture local media from a named pipe and send it to
 
   --h264-decoder            (Default: Auto) The H.264 decoder to use for the
                             H.264 codec.
+
+  --gateway-url             Required. The gateway URL.
+
+  --application-id          Required. The application ID.
+
+  --shared-secret           Required. The shared secret for the application ID.
+
+  --log-level               (Default: Error) The LiveSwitch log level.
 ```
 
 ## FFCapture
@@ -209,21 +215,31 @@ The `ffcapture` verb lets you capture local media from FFmpeg and send it to a L
 
   --video-mode                    (Default: LSEncode) Where video is encoded.
 
+  --audio-encoding                The audio encoding of the input stream, if
+                                  different from audio-codec. Enables
+                                  transcoding if audio-mode is noencode or
+                                  ffencode.
+
+  --video-encoding                The video encoding of the input stream, if
+                                  different from video-codec. Enables
+                                  transcoding if video-mode is noencode or
+                                  ffencode.
+
   --ffencode-keyframe-interval    (Default: 30) The keyframe interval for video.
                                   Only used if video-mode is ffencode.
 
   --media-id                      The local media ID.
 
-  --audio-bitrate                 (Default: 32) The requested audio bitrate.
+  --audio-bitrate                 The audio bitrate.
 
-  --video-bitrate                 (Default: 1000) The requested video bitrate.
+  --video-bitrate                 The video bitrate.
 
-  --gateway-url                   Required. The gateway URL.
+  --video-width                   The video width, if known, for signalling.
 
-  --application-id                Required. The application ID.
+  --video-height                  The video height, if known, for signalling.
 
-  --shared-secret                 Required. The shared secret for the
-                                  application ID.
+  --video-frame-rate              The video frame-rate, if known, for
+                                  signalling.
 
   --channel-id                    Required. The channel ID.
 
@@ -258,6 +274,15 @@ The `ffcapture` verb lets you capture local media from FFmpeg and send it to a L
 
   --h264-decoder                  (Default: Auto) The H.264 decoder to use for the
                                   H.264 codec.
+
+  --gateway-url                   Required. The gateway URL.
+
+  --application-id                Required. The application ID.
+
+  --shared-secret                 Required. The shared secret for the
+                                  application ID.
+
+  --log-level                     (Default: Error) The LiveSwitch log level.
 ```
 
 ## Fake
@@ -281,10 +306,10 @@ The `fake` verb lets you generate fake media and send it to a LiveSwitch server.
 
   --video-format           (Default: Bgr) The video format.
 
-  --video-width            (Default: 640) The video width. Must be a multiiple
-                           of 2.
+  --video-width            (Default: 640) The video width. Must be a multiple of
+                           2.
 
-  --video-height           (Default: 480) The video height. Must be a multiiple
+  --video-height           (Default: 480) The video height. Must be a multiple
                            of 2.
 
   --video-frame-rate       (Default: 30) The video frame rate. Minimum value is
@@ -292,15 +317,9 @@ The `fake` verb lets you generate fake media and send it to a LiveSwitch server.
 
   --media-id               The local media ID.
 
-  --audio-bitrate          (Default: 32) The requested audio bitrate.
+  --audio-bitrate          The audio bitrate.
 
-  --video-bitrate          (Default: 1000) The requested video bitrate.
-
-  --gateway-url            Required. The gateway URL.
-
-  --application-id         Required. The application ID.
-
-  --shared-secret          Required. The shared secret for the application ID.
+  --video-bitrate          The video bitrate.
 
   --channel-id             Required. The channel ID.
 
@@ -335,6 +354,14 @@ The `fake` verb lets you generate fake media and send it to a LiveSwitch server.
 
   --h264-decoder           (Default: Auto) The H.264 decoder to use for the
                            H.264 codec.
+
+  --gateway-url            Required. The gateway URL.
+
+  --application-id         Required. The application ID.
+
+  --shared-secret          Required. The shared secret for the application ID.
+
+  --log-level              (Default: Error) The LiveSwitch log level.
 ```
 
 ## Play
@@ -349,15 +376,15 @@ The `play` verb lets you capture media from a local file (or pair of files) and 
 
   --media-id              The local media ID.
 
-  --audio-bitrate         (Default: 32) The requested audio bitrate.
+  --audio-bitrate         The audio bitrate.
 
-  --video-bitrate         (Default: 1000) The requested video bitrate.
+  --video-bitrate         The video bitrate.
 
-  --gateway-url           Required. The gateway URL.
+  --video-width           The video width, if known, for signalling.
 
-  --application-id        Required. The application ID.
+  --video-height          The video height, if known, for signalling.
 
-  --shared-secret         Required. The shared secret for the application ID.
+  --video-frame-rate      The video frame-rate, if known, for signalling.
 
   --channel-id            Required. The channel ID.
 
@@ -392,6 +419,14 @@ The `play` verb lets you capture media from a local file (or pair of files) and 
 
   --h264-decoder          (Default: Auto) The H.264 decoder to use for the
                           H.264 codec.
+
+  --gateway-url           Required. The gateway URL.
+
+  --application-id        Required. The application ID.
+
+  --shared-secret         Required. The shared secret for the application ID.
+
+  --log-level             (Default: Error) The LiveSwitch log level.
 ```
 
 ## Render
@@ -424,12 +459,6 @@ The `render` verb lets you render remote media from a LiveSwitch server to a nam
   --video-height            The video height.
 
   --connection-id           Required. The remote connection ID or 'mcu'.
-
-  --gateway-url             Required. The gateway URL.
-
-  --application-id          Required. The application ID.
-
-  --shared-secret           Required. The shared secret for the application ID.
 
   --channel-id              Required. The channel ID.
 
@@ -464,6 +493,14 @@ The `render` verb lets you render remote media from a LiveSwitch server to a nam
 
   --h264-decoder            (Default: Auto) The H.264 decoder to use for the
                             H.264 codec.
+
+  --gateway-url             Required. The gateway URL.
+
+  --application-id          Required. The application ID.
+
+  --shared-secret           Required. The shared secret for the application ID.
+
+  --log-level               (Default: Error) The LiveSwitch log level.
 ```
 
 ## FFRender
@@ -476,12 +513,6 @@ The `ffrender` verb lets you render remote media from a LiveSwitch server to FFm
 
   --connection-id         Required. The remote connection ID or 'mcu'.
 
-  --gateway-url           Required. The gateway URL.
-
-  --application-id        Required. The application ID.
-
-  --shared-secret         Required. The shared secret for the application ID.
-
   --channel-id            Required. The channel ID.
 
   --data-channel-label    The data channel label.
@@ -515,6 +546,14 @@ The `ffrender` verb lets you render remote media from a LiveSwitch server to FFm
 
   --h264-decoder          (Default: Auto) The H.264 decoder to use for the
                           H.264 codec.
+
+  --gateway-url           Required. The gateway URL.
+
+  --application-id        Required. The application ID.
+
+  --shared-secret         Required. The shared secret for the application ID.
+
+  --log-level             (Default: Error) The LiveSwitch log level.
 ```
 
 ## Log
@@ -524,35 +563,29 @@ The `log` verb lets you log remote media frame details from a LiveSwitch server 
 ### Usage
 ```
   --audio-log             (Default: audio: {duration}ms
-                          {codec}/{clockRate}/{channelCount} frame received
+                          {encoding}/{clockRate}/{channelCount} frame received
                           ({footprint} bytes) for SSRC {synchronizationSource}
                           and timestamp {timestamp}) The audio log template.
                           Uses curly-brace syntax. Valid variables: footprint,
                           duration, clockRate, channelCount, mediaStreamId,
                           rtpStreamId, sequenceNumber, synchronizationSource,
-                          systemTimestamp, timestamp, codec, applicationId,
+                          systemTimestamp, timestamp, encoding, applicationId,
                           channelId, userId, userAlias, deviceId, deviceAlias,
                           clientId, clientTag, connectionId, connectionTag,
                           mediaId
 
-  --video-log             (Default: video: {width}x{height} {codec} frame
+  --video-log             (Default: video: {width}x{height} {encoding} frame
                           received ({footprint} bytes) for SSRC
                           {synchronizationSource} and timestamp {timestamp}) The
                           video log template. Uses curly-brace syntax. Valid
                           variables: footprint, width, height, mediaStreamId,
                           rtpStreamId, sequenceNumber, synchronizationSource,
-                          systemTimestamp, timestamp, codec, applicationId,
+                          systemTimestamp, timestamp, encoding, applicationId,
                           channelId, userId, userAlias, deviceId, deviceAlias,
                           clientId, clientTag, connectionId, connectionTag,
                           mediaId
 
   --connection-id         Required. The remote connection ID or 'mcu'.
-
-  --gateway-url           Required. The gateway URL.
-
-  --application-id        Required. The application ID.
-
-  --shared-secret         Required. The shared secret for the application ID.
 
   --channel-id            Required. The channel ID.
 
@@ -587,6 +620,14 @@ The `log` verb lets you log remote media frame details from a LiveSwitch server 
 
   --h264-decoder          (Default: Auto) The H.264 decoder to use for the
                           H.264 codec.
+
+  --gateway-url           Required. The gateway URL.
+
+  --application-id        Required. The application ID.
+
+  --shared-secret         Required. The shared secret for the application ID.
+
+  --log-level             (Default: Error) The LiveSwitch log level.
 ```
 
 ## Record
@@ -609,12 +650,6 @@ The `record` verb lets you record remote media from a LiveSwitch server to a loc
 
   --connection-id         Required. The remote connection ID or 'mcu'.
 
-  --gateway-url           Required. The gateway URL.
-
-  --application-id        Required. The application ID.
-
-  --shared-secret         Required. The shared secret for the application ID.
-
   --channel-id            Required. The channel ID.
 
   --data-channel-label    The data channel label.
@@ -648,6 +683,14 @@ The `record` verb lets you record remote media from a LiveSwitch server to a loc
 
   --h264-decoder          (Default: Auto) The H.264 decoder to use for the
                           H.264 codec.
+
+  --gateway-url           Required. The gateway URL.
+
+  --application-id        Required. The application ID.
+
+  --shared-secret         Required. The shared secret for the application ID.
+
+  --log-level             (Default: Error) The LiveSwitch log level.
 ```
 
 ## Intercept
@@ -668,12 +711,6 @@ The `intercept` verb lets you forward audio and/or video packets to a specific d
 
   --connection-id         Required. The remote connection ID or 'mcu'.
 
-  --gateway-url           Required. The gateway URL.
-
-  --application-id        Required. The application ID.
-
-  --shared-secret         Required. The shared secret for the application ID.
-
   --channel-id            Required. The channel ID.
 
   --data-channel-label    The data channel label.
@@ -702,14 +739,20 @@ The `intercept` verb lets you forward audio and/or video packets to a specific d
   --video-codec           (Default: Any) The video codec to negotiate with
                           LiveSwitch.
 
-  --h264-encoder          (Default: Auto) The H.264 encoder to use for the
                           H.264 codec.
 
   --h264-decoder          (Default: Auto) The H.264 decoder to use for the
                           H.264 codec.
+
+  --gateway-url           Required. The gateway URL.
+  
+  --application-id        Required. The application ID.
+
+  --shared-secret         Required. The shared secret for the application ID.
+
+  --log-level             (Default: Error) The LiveSwitch log level.
 ```
 
-## Loopback Example
 
 Open the [LiveSwitch Demo](https://v1.liveswitch.fm/) in a web browser and join a channel. Take note of the `channel-id` from the join dialog and the `connection-id` from the console output.
 
@@ -894,6 +937,18 @@ Sample file taken from here: https://file-examples.com/index.php/sample-video-fi
 Note that `-stream_loop -1` plays the file on a loop, `-r 30` indicates 30fps and `-vf scale=640:480` scales to 640x480. You may need to tweak these depending on your file and output requirements.
 ```
 lsconnect ffcapture ... --input-args="-stream_loop -1 -i test.mp4 -r 30 -vf scale=640:480"
+```
+
+### Stream from RTMP (e.g. OBS)
+
+Assuming a 1920x1080@30fps screen capture stream from OBS out to an RTMP server, you can direct that stream to LiveSwitch efficiently. The `video-mode` is `noencode` so `ffmpeg` acts as a passthrough, forwarding the RTP packets through to `lsconnect` without decoding or modifying them. Because of this, we have to declare the `video-encoding`, which from OBS is typically `h264`. By declaring both a `video-encoding` and `video-codec`, we are also forcing transcoding, which allows us to respond to keyframe requests as remote clients access the feed more efficiently than can be done by relying on the OBS feed alone. In this case, we are selecting `vp8` as the `video-codec` to negotiate with the LiveSwitch server, which is efficient and broadly supported by WebRTC clients.
+
+If we know the `video-width`, `video-height`, and/or `video-frame-rate` ahead of time, it is helpful to declare them so this information can be signalled to the LiveSwitch server to assist with bitrate estimation and bandwidth adaptation. The `video-bitrate` can also be set if desired.
+```
+lsconnect ffcapture ... --input-args=-i rtmp://{server}/live/obs \
+  --video-mode noencode --video-encoding h264 --video-codec vp8 \
+  --video-width 1920 --video-height 1080 --video-frame-rate 30 \
+  --video-bitrate 3000
 ```
 
 ## Contact

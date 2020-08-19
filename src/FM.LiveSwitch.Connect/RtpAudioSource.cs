@@ -9,7 +9,9 @@
 
         public int Port { get { return _Reader.Port; } }
 
-        private RtpReader _Reader = null;
+        private RtpReader _Reader;
+        private RolloverContext _SequenceNumberRolloverContext;
+        private RolloverContext _TimestampRolloverContext;
 
         public RtpAudioSource(AudioFormat format)
             : base(format)
@@ -29,14 +31,27 @@
 
         private void Initialize()
         {
-            _Reader.OnPacket += (payload, sequenceNumber, timestamp, marker) =>
+            _SequenceNumberRolloverContext = new RolloverContext(16);
+            _TimestampRolloverContext = new RolloverContext(32);
+
+            _Reader.OnPacket += (packet) =>
             {
-                RaiseFrame(new AudioFrame(-1, new PacketizedAudioBuffer(payload, OutputFormat, new RtpPacketHeader()))
-                {
-                    SequenceNumber = sequenceNumber,
-                    Timestamp = timestamp
-                });
+                packet.Payload.LittleEndian = OutputFormat.LittleEndian;
+
+                RaisePacket(packet);
             };
+        }
+
+        private void RaisePacket(RtpPacket packet)
+        {
+            RaiseFrame(new AudioFrame(-1, new PacketizedAudioBuffer(packet.Payload, OutputFormat, new RtpPacketHeader
+            {
+                Marker = packet.Marker
+            }))
+            {
+                SequenceNumber = _SequenceNumberRolloverContext.GetIndex(packet.SequenceNumber),
+                Timestamp = _TimestampRolloverContext.GetIndex(packet.Timestamp)
+            });
         }
 
         protected override Future<object> DoStart()

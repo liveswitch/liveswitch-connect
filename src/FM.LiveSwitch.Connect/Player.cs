@@ -11,10 +11,15 @@ namespace FM.LiveSwitch.Connect
 
         public Task<int> Play()
         {
-            if (Options.AudioPath == null && Options.VideoPath == null)
+            if (Options.AudioPath == null)
             {
-                Console.Error.WriteLine("--audio-path and/or --video-path must be specified.");
-                return Task.FromResult(1);
+                Console.Error.WriteLine("Setting --no-audio to true because --audio-path is not specified.");
+                Options.NoAudio = true;
+            }
+            if (Options.VideoPath == null)
+            {
+                Console.Error.WriteLine("Setting --no-video to true because --video-path is not specified.");
+                Options.NoVideo = true;
             }
             return Send();
         }

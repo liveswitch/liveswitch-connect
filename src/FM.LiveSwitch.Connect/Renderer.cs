@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace FM.LiveSwitch.Connect
@@ -13,12 +11,12 @@ namespace FM.LiveSwitch.Connect
 
         public Task<int> Render()
         {
-            if (Options.AudioPipe == null && Options.VideoPipe == null)
+            if (Options.AudioPipe == null)
             {
-                Console.Error.WriteLine("--audio-pipe and/or --video-pipe must be specified.");
-                return Task.FromResult(1);
+                Console.Error.WriteLine("Setting --no-audio to true because --audio-pipe is not specified.");
+                Options.NoAudio = true;
             }
-            if (Options.AudioPipe != null)
+            else
             {
                 if (Options.AudioClockRate % 8000 != 0)
                 {
@@ -56,7 +54,12 @@ namespace FM.LiveSwitch.Connect
                     return Task.FromResult(1);
                 }
             }
-            if (Options.VideoPipe != null)
+            if (Options.VideoPipe == null)
+            {
+                Console.Error.WriteLine("Setting --no-video to true because --video-pipe is not specified.");
+                Options.NoVideo = true;
+            }
+            else
             {
                 if (Options.VideoWidth == 0)
                 {
@@ -82,109 +85,48 @@ namespace FM.LiveSwitch.Connect
             return Receive();
         }
 
-        protected override AudioStream CreateAudioStream(ConnectionInfo remoteConnectionInfo)
+        protected override NamedPipeAudioSink CreateAudioSink()
         {
-            if (Options.AudioPipe == null || !remoteConnectionInfo.HasAudio)
-            {
-                return null;
-            }
-
-            var track = CreateAudioTrack();
-            var stream = new AudioStream(null, track);
-            stream.OnStateChange += () =>
-            {
-                if (stream.State == StreamState.Closed ||
-                    stream.State == StreamState.Failed)
-                {
-                    track.Destroy();
-                }
-            };
-            return stream;
-        }
-
-        protected override VideoStream CreateVideoStream(ConnectionInfo remoteConnectionInfo)
-        {
-            if (Options.VideoPipe == null || !remoteConnectionInfo.HasVideo)
-            {
-                return null;
-            }
-
-            var track = CreateVideoTrack();
-            var stream = new VideoStream(null, track);
-            stream.OnStateChange += () =>
-            {
-                if (stream.State == StreamState.Closed ||
-                    stream.State == StreamState.Failed)
-                {
-                    track.Destroy();
-                }
-            };
-            return stream;
-        }
-
-        private AudioTrack CreateAudioTrack()
-        {
-            var tracks = new List<AudioTrack>();
-            foreach (var codec in ((AudioCodec[])Enum.GetValues(typeof(AudioCodec))).Where(x => x != AudioCodec.Any))
-            {
-                tracks.Add(CreateAudioTrack(codec));
-            }
-            return new AudioTrack(tracks.ToArray());
-        }
-
-        private VideoTrack CreateVideoTrack()
-        {
-            var tracks = new List<VideoTrack>();
-            foreach (var codec in ((VideoCodec[])Enum.GetValues(typeof(VideoCodec))).Where(x => x != VideoCodec.Any))
-            {
-                if (!Options.IsH264EncoderAvailable() && codec == VideoCodec.H264)
-                {
-                    continue;
-                }
-                if (Options.DisableNvidia && codec == VideoCodec.H265)
-                {
-                    continue;
-                }
-                tracks.Add(CreateVideoTrack(codec));
-            }
-            return new VideoTrack(tracks.ToArray());
-        }
-
-        private AudioTrack CreateAudioTrack(AudioCodec codec)
-        {
-            var depacketizer = codec.CreateDepacketizer();
-            var decoder = codec.CreateDecoder();
-            var converter = new SoundConverter(new AudioConfig(Options.AudioClockRate, Options.AudioChannelCount));
-            var reframer = new SoundReframer(new AudioConfig(Options.AudioClockRate, Options.AudioChannelCount), Options.AudioFrameDuration);
             var sink = new NamedPipeAudioSink(Options.AudioPipe, Options.Client);
             sink.OnPipeConnected += () =>
             {
                 Console.Error.WriteLine("Audio pipe connected.");
             };
-            return new AudioTrack(depacketizer).Next(decoder).Next(converter).Next(reframer).Next(sink);
+            return sink;
         }
 
-        private VideoTrack CreateVideoTrack(VideoCodec codec)
+        protected override NamedPipeVideoSink CreateVideoSink()
         {
-            var depacketizer = codec.CreateDepacketizer();
-            var decoder = codec.CreateDecoder(Options);
-            var converter = new Yuv.ImageConverter(Options.VideoFormat.CreateFormat());
-            converter.OnProcessFrame += (frame) =>
-            {
-                var buffer = frame.LastBuffer;
-                var scale = (double)Options.VideoWidth / frame.LastBuffer.Width;
-                if (scale != converter.TargetScale)
-                {
-                    converter.TargetScale = scale;
-                    Console.Error.WriteLine($"Video scale updated to {scale} (input frame size is {buffer.Width}x{buffer.Height}).");
-                }
-            };
             var sink = new NamedPipeVideoSink(Options.VideoPipe, Options.Client);
             sink.OnPipeConnected += () =>
             {
                 Console.Error.WriteLine("Video pipe connected.");
             };
-            return new VideoTrack(depacketizer).Next(decoder).Next(converter).Next(sink);
+            return sink;
+        }
+
+        protected override int GetAudioFrameDuration()
+        {
+            return Options.AudioFrameDuration;
+        }
+
+        protected override Task Ready()
+        {
+            var videoConverter = VideoConverter;
+            if (videoConverter != null)
+            {
+                videoConverter.OnProcessFrame += (frame) =>
+                {
+                    var buffer = frame.LastBuffer;
+                    var scale = (double)Options.VideoWidth / frame.LastBuffer.Width;
+                    if (scale != videoConverter.TargetScale)
+                    {
+                        videoConverter.TargetScale = scale;
+                        Console.Error.WriteLine($"Video scale updated to {scale} (input frame size is {buffer.Width}x{buffer.Height}).");
+                    }
+                };
+            }
+            return base.Ready();
         }
     }
 }

@@ -11,20 +11,20 @@ namespace FM.LiveSwitch.Connect
 
         public int Port { get; private set; }
 
-        public event Action<DataBuffer, long, long, bool> OnPacket;
+        public event Action<RtpPacket> OnPacket;
 
-        private UdpClient _Listener = null;
+        private UdpClient _Server;
 
         public RtpReader(int clockRate)
         {
             ClockRate = clockRate;
 
             var port = 49152;
-            while (_Listener == null)
+            while (_Server == null)
             {
                 try
                 {
-                    _Listener = CreateListener(port);
+                    _Server = CreateServer(port);
                 }
                 catch (SocketException ex)
                 {
@@ -43,12 +43,12 @@ namespace FM.LiveSwitch.Connect
         {
             ClockRate = clockRate;
 
-            _Listener = CreateListener(port);
+            _Server = CreateServer(port);
 
             Port = port;
         }
 
-        private UdpClient CreateListener(int port)
+        private UdpClient CreateServer(int port)
         {
             var listener = new UdpClient(AddressFamily.InterNetwork);
             listener.ExclusiveAddressUse = true;
@@ -58,10 +58,10 @@ namespace FM.LiveSwitch.Connect
 
         public void Destroy()
         {
-            if (_Listener != null)
+            if (_Server != null)
             {
-                _Listener.Dispose();
-                _Listener = null;
+                _Server.Dispose();
+                _Server = null;
             }
         }
 
@@ -94,7 +94,7 @@ namespace FM.LiveSwitch.Connect
                     try
                     {
                         _LoopActive = false;
-                        _Listener.Close();
+                        _Server.Close();
                         await _LoopTask;
                         promise.Resolve(null);
                     }
@@ -113,72 +113,38 @@ namespace FM.LiveSwitch.Connect
 
         private async Task Loop()
         {
-            var baseTimestamp = 0L;
-            var lastRtpTimestamp = -1L;
-            var baseSequenceNumber = 0L;
-            var lastRtpSequenceNumber = -1;
-            var firstSystemTimestamp = -1L;
-            var firstTimestamp = -1L;
-            while (_LoopActive)
+            var dispatchQueue = new DispatchQueue<UdpReceiveResult>(async (result) =>
             {
-                UdpReceiveResult result;
-                try
-                {
-                    result = await _Listener.ReceiveAsync();
-                }
-                catch (ObjectDisposedException)
-                {
-                    break;
-                }
-
                 var buffer = DataBuffer.Wrap(result.Buffer);
                 var header = RtpPacketHeader.ReadFrom(buffer);
-
-                var marker = header.Marker;
-                var rtpTimestamp = header.Timestamp;
-                var rtpSequenceNumber = header.SequenceNumber;
-
-                if (rtpTimestamp == 0 && lastRtpTimestamp != -1)
-                {
-                    baseTimestamp += uint.MaxValue + 1L;
-                }
-                lastRtpTimestamp = rtpTimestamp;
-
-                if (rtpSequenceNumber == 0 && lastRtpSequenceNumber != -1)
-                {
-                    baseSequenceNumber += ushort.MaxValue + 1;
-                }
-                lastRtpSequenceNumber = rtpSequenceNumber;
-
-                var timestamp = baseTimestamp + rtpTimestamp;
-                var sequenceNumber = baseSequenceNumber + rtpSequenceNumber;
-
-                var systemTimestamp = ManagedStopwatch.GetTimestamp();
-                if (firstSystemTimestamp == -1)
-                {
-                    firstSystemTimestamp = systemTimestamp;
-                    firstTimestamp = timestamp;
-                }
-                else
-                {
-                    var elapsedSystemTicks = systemTimestamp - firstSystemTimestamp;
-                    var elapsedTicks = (long)(((double)(timestamp - firstTimestamp) / ClockRate) * Constants.TicksPerSecond);
-                    if (elapsedTicks > elapsedSystemTicks)
-                    {
-                        // hold up
-                        await Task.Delay((int)((elapsedTicks - elapsedSystemTicks) / Constants.TicksPerMillisecond));
-                    }
-                }
-
                 try
                 {
-                    OnPacket?.Invoke(buffer.Subset(header.CalculateHeaderLength()), sequenceNumber, timestamp, marker);
+                    OnPacket?.Invoke(new RtpPacket(buffer.Subset(header.CalculateHeaderLength()), header.SequenceNumber, header.Timestamp, header.Marker)
+                    {
+                        PayloadType = header.PayloadType,
+                        SynchronizationSource = header.SynchronizationSource
+                    });
                 }
                 catch (Exception ex)
                 {
                     Console.Error.WriteLine($"Unexpected exception raising packet. {ex}");
                 }
+            });
+
+            while (_LoopActive)
+            {
+                try
+                {
+                    dispatchQueue.Enqueue(await _Server.ReceiveAsync());
+                }
+                catch (ObjectDisposedException)
+                {
+                    break;
+                }
             }
+
+            dispatchQueue.WaitForDrain();
+            dispatchQueue.Destroy();
         }
     }
 }

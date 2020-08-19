@@ -11,39 +11,6 @@ namespace FM.LiveSwitch.Connect
     {
         static void Main(string[] args)
         {
-            Log.AddProvider(new ErrorLogProvider(LogLevel.Error));
-
-            Console.Error.WriteLine("Checking for OpenH264...");
-            OpenH264.Utility.DownloadOpenH264(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)).GetAwaiter().GetResult();
-            var disableOpenH264 = true;
-            try
-            {
-                disableOpenH264 = !OpenH264.Utility.Initialize();
-                if (disableOpenH264)
-                {
-                    Console.Error.WriteLine("OpenH264 failed to initialize.");
-                }
-                else
-                {
-                    Console.Error.WriteLine("OpenH264 initialized.");
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.Error.WriteLine("OpenH264 failed to initialize.", ex);
-            }
-
-            Console.Error.WriteLine("Checking for Nvidia hardware support...");
-            var disableNvidia = !Nvidia.Utility.NvencSupported;
-            if (disableNvidia)
-            {
-                Console.Error.WriteLine("Nvidia hardware encoder/decoder support not detected.");
-            }
-            else
-            {
-                Console.Error.WriteLine("Nvidia hardware encoder/decoder is supported.");
-            }
-
             using var parser = new Parser((settings) =>
             {
                 settings.CaseInsensitiveEnumValues = true;
@@ -66,91 +33,81 @@ namespace FM.LiveSwitch.Connect
             result.MapResult(
                 (ShellOptions options) =>
                 {
-                    options.DisableOpenH264 = disableOpenH264;
-                    options.DisableNvidia = disableNvidia;
                     return Task.Run(async () =>
                     {
+                        Initialize(options);
                         return await new ShellRunner(options).Run();
                     }).GetAwaiter().GetResult();
                 },
                 (CaptureOptions options) =>
                 {
-                    options.DisableOpenH264 = disableOpenH264;
-                    options.DisableNvidia = disableNvidia;
                     return Task.Run(async () =>
                     {
+                        Initialize(options);
                         return await new Capturer(options).Capture();
                     }).GetAwaiter().GetResult();
                 },
                 (FFCaptureOptions options) =>
                 {
-                    options.DisableOpenH264 = disableOpenH264;
-                    options.DisableNvidia = disableNvidia;
                     return Task.Run(async () =>
                     {
+                        Initialize(options);
                         return await new FFCapturer(options).Capture();
                     }).GetAwaiter().GetResult();
                 },
                 (FakeOptions options) =>
                 {
-                    options.DisableOpenH264 = disableOpenH264;
-                    options.DisableNvidia = disableNvidia;
                     return Task.Run(async () =>
                     {
+                        Initialize(options);
                         return await new Faker(options).Fake();
                     }).GetAwaiter().GetResult();
                 },
                 (PlayOptions options) =>
                 {
-                    options.DisableOpenH264 = disableOpenH264;
-                    options.DisableNvidia = disableNvidia;
                     return Task.Run(async () =>
                     {
+                        Initialize(options);
                         return await new Player(options).Play();
                     }).GetAwaiter().GetResult();
                 },
                 (RenderOptions options) =>
                 {
-                    options.DisableOpenH264 = disableOpenH264;
-                    options.DisableNvidia = disableNvidia;
                     return Task.Run(async () =>
                     {
+                        Initialize(options);
                         return await new Renderer(options).Render();
                     }).GetAwaiter().GetResult();
                 },
                 (FFRenderOptions options) =>
                 {
-                    options.DisableOpenH264 = disableOpenH264;
-                    options.DisableNvidia = disableNvidia;
                     return Task.Run(async () =>
                     {
+                        Initialize(options);
                         return await new FFRenderer(options).Render();
                     }).GetAwaiter().GetResult();
                 },
                 (LogOptions options) =>
                 {
-                    options.DisableOpenH264 = disableOpenH264;
-                    options.DisableNvidia = disableNvidia;
                     return Task.Run(async () =>
                     {
+                        Initialize(options);
                         return await new Logger(options).Log();
                     }).GetAwaiter().GetResult();
                 },
                 (RecordOptions options) =>
                 {
-                    options.DisableOpenH264 = disableOpenH264;
-                    options.DisableNvidia = disableNvidia;
                     return Task.Run(async () =>
                     {
+                        Initialize(options);
                         return await new Recorder(options).Record();
                     }).GetAwaiter().GetResult();
                 },
                 (InterceptOptions options) =>
                 {
-                    options.DisableOpenH264 = disableOpenH264;
-                    options.DisableNvidia = disableNvidia;
                     return Task.Run(async () =>
                     {
+                        Initialize(options);
                         return await new Interceptor(options).Intercept();
                     }).GetAwaiter().GetResult();
                 },
@@ -162,6 +119,42 @@ namespace FM.LiveSwitch.Connect
                     Console.Error.Write(helpText);
                     return 1;
                 });
+        }
+
+        private static void Initialize(Options options)
+        {
+            Log.AddProvider(new ErrorLogProvider(options.LogLevel));
+
+            Console.Error.WriteLine("Checking for OpenH264...");
+            OpenH264.Utility.DownloadOpenH264(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)).GetAwaiter().GetResult();
+            options.DisableOpenH264 = true;
+            try
+            {
+                options.DisableOpenH264 = !OpenH264.Utility.Initialize();
+                if (options.DisableOpenH264)
+                {
+                    Console.Error.WriteLine("OpenH264 failed to initialize.");
+                }
+                else
+                {
+                    Console.Error.WriteLine("OpenH264 initialized.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"OpenH264 failed to initialize. {ex}");
+            }
+
+            Console.Error.WriteLine("Checking for Nvidia hardware acceleration...");
+            options.DisableNvidia = !Nvidia.Utility.NvencSupported;
+            if (options.DisableNvidia)
+            {
+                Console.Error.WriteLine("Nvidia hardware acceleration failed to initialize.");
+            }
+            else
+            {
+                Console.Error.WriteLine("Nvidia hardware acceleration initialized.");
+            }
         }
     }
 }

@@ -5,22 +5,22 @@ namespace FM.LiveSwitch.Connect
 {
     static class IConnectionOptionsExtensions
     {
-        public static AudioCodec[] GetAudioCodecs(this IConnectionOptions options)
+        public static AudioEncoding[] GetAudioEncodings(this IConnectionOptions options)
         {
             if (options.AudioCodec == AudioCodec.Any)
             {
-                return ((AudioCodec[])Enum.GetValues(typeof(AudioCodec))).Where(x => x != AudioCodec.Any).ToArray();
+                return ((AudioEncoding[])Enum.GetValues(typeof(AudioEncoding))).ToArray();
             }
-            return new[] { options.AudioCodec };
+            return new[] { options.AudioCodec.ToEncoding() };
         }
 
-        public static VideoCodec[] GetVideoCodecs(this IConnectionOptions options)
+        public static VideoEncoding[] GetVideoEncodings(this IConnectionOptions options)
         {
             if (options.VideoCodec == VideoCodec.Any)
             {
-                return ((VideoCodec[])Enum.GetValues(typeof(VideoCodec))).Where(x => x != VideoCodec.Any).ToArray();
+                return ((VideoEncoding[])Enum.GetValues(typeof(VideoEncoding))).ToArray();
             }
-            return new[] { options.VideoCodec };
+            return new[] { options.VideoCodec.ToEncoding() };
         }
 
         public static bool IsH264EncoderAvailable(this IConnectionOptions options)

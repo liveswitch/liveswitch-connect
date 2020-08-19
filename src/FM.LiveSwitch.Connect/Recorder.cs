@@ -1,12 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace FM.LiveSwitch.Connect
 {
-    class Recorder : Receiver<RecordOptions, LiveSwitch.Matroska.AudioSink, LiveSwitch.Matroska.VideoSink>
+    class Recorder : Receiver<RecordOptions, Matroska.AudioSink, Matroska.VideoSink>
     {
         public Recorder(RecordOptions options)
             : base(options)
@@ -46,16 +44,11 @@ namespace FM.LiveSwitch.Connect
                 .Replace("{mediaId}", remoteConnectionInfo.MediaId);
         }
 
-        protected override AudioStream CreateAudioStream(ConnectionInfo remoteConnectionInfo)
+        protected override Matroska.AudioSink CreateAudioSink()
         {
-            if (Options.NoAudio || !remoteConnectionInfo.HasAudio)
-            {
-                return null;
-            }
-
             var fileIndex = 0;
             var fileExtension = "mka";
-            var filePathWithoutExtension = ProcessFilePath(Path.Combine(Options.OutputPath, Options.OutputFileName), remoteConnectionInfo);
+            var filePathWithoutExtension = ProcessFilePath(Path.Combine(Options.OutputPath, Options.OutputFileName), RemoteConnectionInfo);
             var filePath = $"{filePathWithoutExtension}-{fileIndex}.{fileExtension}";
             while (File.Exists(filePath))
             {
@@ -64,32 +57,17 @@ namespace FM.LiveSwitch.Connect
 
             //TODO: should the JSON here follow the media server conventions?
             var jsonPath = filePath + ".json";
-            File.WriteAllText(jsonPath, remoteConnectionInfo.ToJson());
+            File.WriteAllText(jsonPath, RemoteConnectionInfo.ToJson());
             Console.WriteLine(jsonPath);
 
-            var track = CreateAudioTrack(filePath);
-            var stream = new AudioStream(null, track);
-            stream.OnStateChange += () =>
-            {
-                if (stream.State == StreamState.Closed ||
-                    stream.State == StreamState.Failed)
-                {
-                    track.Destroy();
-                }
-            };
-            return stream;
+            return new Matroska.AudioSink(filePath);
         }
 
-        protected override VideoStream CreateVideoStream(ConnectionInfo remoteConnectionInfo)
+        protected override Matroska.VideoSink CreateVideoSink()
         {
-            if (Options.NoVideo || !remoteConnectionInfo.HasVideo)
-            {
-                return null;
-            }
-
             var fileIndex = 0;
             var fileExtension = "mkv";
-            var filePathWithoutExtension = ProcessFilePath(Path.Combine(Options.OutputPath, Options.OutputFileName), remoteConnectionInfo);
+            var filePathWithoutExtension = ProcessFilePath(Path.Combine(Options.OutputPath, Options.OutputFileName), RemoteConnectionInfo);
             var filePath = $"{filePathWithoutExtension}-{fileIndex}.{fileExtension}";
             while (File.Exists(filePath))
             {
@@ -98,74 +76,10 @@ namespace FM.LiveSwitch.Connect
 
             //TODO: should the JSON here follow the media server conventions?
             var jsonPath = filePath + ".json";
-            File.WriteAllText(jsonPath, remoteConnectionInfo.ToJson());
+            File.WriteAllText(jsonPath, RemoteConnectionInfo.ToJson());
             Console.WriteLine(jsonPath);
 
-            var track = CreateVideoTrack(filePath);
-            var stream = new VideoStream(null, track);
-            stream.OnStateChange += () =>
-            {
-                if (stream.State == StreamState.Closed ||
-                    stream.State == StreamState.Failed)
-                {
-                    track.Destroy();
-                }
-            };
-            return stream;
-        }
-
-        private AudioTrack CreateAudioTrack(string filePath)
-        {
-            var tracks = new List<AudioTrack>();
-            foreach (var inputCodec in ((AudioCodec[])Enum.GetValues(typeof(AudioCodec))).Where(x => x != AudioCodec.Any))
-            {
-                var outputCodec = Options.AudioCodec == AudioCodec.Any ? inputCodec : Options.AudioCodec;
-                tracks.Add(CreateAudioTrack(inputCodec, outputCodec, filePath));
-            }
-            return new AudioTrack(tracks.ToArray());
-        }
-
-        private VideoTrack CreateVideoTrack(string filePath)
-        {
-            var tracks = new List<VideoTrack>();
-            foreach (var inputCodec in ((VideoCodec[])Enum.GetValues(typeof(VideoCodec))).Where(x => x != VideoCodec.Any))
-            {
-                var outputCodec = Options.VideoCodec == VideoCodec.Any ? inputCodec : Options.VideoCodec;
-                if (Options.DisableOpenH264 && (inputCodec == VideoCodec.H264 || outputCodec == VideoCodec.H264))
-                {
-                    continue;
-                }
-                tracks.Add(CreateVideoTrack(inputCodec, Options.VideoCodec == VideoCodec.Any ? inputCodec : Options.VideoCodec, filePath));
-            }
-            return new VideoTrack(tracks.ToArray());
-        }
-
-        private AudioTrack CreateAudioTrack(AudioCodec inputCodec, AudioCodec outputCodec, string filePath)
-        {
-            var depacketizer = inputCodec.CreateDepacketizer();
-            var sink = new LiveSwitch.Matroska.AudioSink(filePath);
-            if (inputCodec == outputCodec)
-            {
-                return new AudioTrack(depacketizer).Next(sink);
-            }
-
-            var decoder = inputCodec.CreateDecoder();
-            var encoder = outputCodec.CreateEncoder();
-            return new AudioTrack(depacketizer).Next(decoder).Next(new SoundConverter(encoder.InputConfig)).Next(encoder).Next(sink);
-        }
-
-        private VideoTrack CreateVideoTrack(VideoCodec inputCodec, VideoCodec outputCodec, string filePath)
-        {
-            var depacketizer = inputCodec.CreateDepacketizer();
-            var sink = new LiveSwitch.Matroska.VideoSink(filePath);
-            if (inputCodec == outputCodec)
-            {
-                return new VideoTrack(depacketizer).Next(sink);
-            }
-
-            var decoder = inputCodec.CreateDecoder(Options);
-            var encoder = outputCodec.CreateEncoder(Options);
-            return new VideoTrack(depacketizer).Next(decoder).Next(new Yuv.ImageConverter(encoder.InputFormat)).Next(encoder).Next(sink);
+            return new Matroska.VideoSink(filePath);
         }
     }
 }
