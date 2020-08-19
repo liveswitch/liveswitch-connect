@@ -8,7 +8,7 @@
         }
 
         public PcmNamedPipeAudioSink(string pipeName)
-            : base(pipeName)
+            : base(pipeName, false, new Pcm.Format(Opus.Format.DefaultConfig))
         { }
     }
 }

@@ -13,18 +13,18 @@ namespace FM.LiveSwitch.Connect
 
         public event Action<RtpPacket> OnPacket;
 
-        private UdpClient _Listener = null;
+        private UdpClient _Server;
 
         public RtpReader(int clockRate)
         {
             ClockRate = clockRate;
 
             var port = 49152;
-            while (_Listener == null)
+            while (_Server == null)
             {
                 try
                 {
-                    _Listener = CreateListener(port);
+                    _Server = CreateServer(port);
                 }
                 catch (SocketException ex)
                 {
@@ -43,12 +43,12 @@ namespace FM.LiveSwitch.Connect
         {
             ClockRate = clockRate;
 
-            _Listener = CreateListener(port);
+            _Server = CreateServer(port);
 
             Port = port;
         }
 
-        private UdpClient CreateListener(int port)
+        private UdpClient CreateServer(int port)
         {
             var listener = new UdpClient(AddressFamily.InterNetwork);
             listener.ExclusiveAddressUse = true;
@@ -58,10 +58,10 @@ namespace FM.LiveSwitch.Connect
 
         public void Destroy()
         {
-            if (_Listener != null)
+            if (_Server != null)
             {
-                _Listener.Dispose();
-                _Listener = null;
+                _Server.Dispose();
+                _Server = null;
             }
         }
 
@@ -94,7 +94,7 @@ namespace FM.LiveSwitch.Connect
                     try
                     {
                         _LoopActive = false;
-                        _Listener.Close();
+                        _Server.Close();
                         await _LoopTask;
                         promise.Resolve(null);
                     }
@@ -162,7 +162,11 @@ namespace FM.LiveSwitch.Connect
 
                 try
                 {
-                    OnPacket?.Invoke(new RtpPacket(buffer.Subset(header.CalculateHeaderLength()), sequenceNumber, timestamp, marker));
+                    OnPacket?.Invoke(new RtpPacket(buffer.Subset(header.CalculateHeaderLength()), sequenceNumber, timestamp, marker)
+                    {
+                        PayloadType = header.PayloadType,
+                        SynchronizationSource = header.SynchronizationSource
+                    });
                 }
                 catch (Exception ex)
                 {
@@ -174,7 +178,7 @@ namespace FM.LiveSwitch.Connect
             {
                 try
                 {
-                    dispatchQueue.Enqueue(await _Listener.ReceiveAsync());
+                    dispatchQueue.Enqueue(await _Server.ReceiveAsync());
                 }
                 catch (ObjectDisposedException)
                 {
