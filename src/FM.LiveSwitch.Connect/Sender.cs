@@ -70,71 +70,124 @@ namespace FM.LiveSwitch.Connect
 
             try
             {
-                Client = Options.CreateClient();
-
-                Console.Error.WriteLine($"{GetType().Name} client created:{Environment.NewLine}{Descriptor.Format(Client.GetDescriptors())}");
-
-                await Client.Register(Options);
-                try
+                var exit = false;
+                while (!exit)
                 {
-                    Channel = await Client.Join(Options);
+                    Client = Options.CreateClient();
+
+                    Console.Error.WriteLine($"{GetType().Name} client created:{Environment.NewLine}{Descriptor.Format(Client.GetDescriptors())}");
+
+                    await Client.Register(Options);
+
+                    Console.Error.WriteLine($"{GetType().Name} client registered: {Options.ApplicationId}");
+
                     try
                     {
-                        InitializeAudioStream();
-                        InitializeVideoStream();
-                        InitializeDataStream();
+                        Channel = await Client.Join(Options);
 
-                        Connection = Options.CreateConnection(Channel, AudioStream, VideoStream, DataStream);
+                        Console.Error.WriteLine($"{GetType().Name} client joined: {Channel.Id}");
 
-                        Console.Error.WriteLine($"{GetType().Name} connection created:{Environment.NewLine}{Descriptor.Format(Connection.GetDescriptors())}");
-
-                        Disconnected = await Connection.Connect();
-
-                        await Task.WhenAll(
-                            StartAudioStream(),
-                            StartVideoStream(),
-                            StartDataStream());
-
-                        await Ready();
-
-                        // watch for exit signal
-                        var exitSignalledSource = new TaskCompletionSource<bool>();
-                        var exitSignalled = exitSignalledSource.Task;
-                        Console.CancelKeyPress += async (sender, e) =>
+                        try
                         {
-                            Console.Error.WriteLine("Exit signalled.");
+                            InitializeAudioStream();
+                            InitializeVideoStream();
+                            InitializeDataStream();
 
-                            e.Cancel = true;
+                            Console.Error.WriteLine($"{GetType().Name} streams initialized.");
+
+                            Connection = Options.CreateConnection(Channel, AudioStream, VideoStream, DataStream);
+
+                            Console.Error.WriteLine($"{GetType().Name} connection created:{Environment.NewLine}{Descriptor.Format(Connection.GetDescriptors())}");
+
+                            Disconnected = await Connection.Connect();
+
+                            Console.Error.WriteLine($"{GetType().Name} connection connected.");
+
+                            await Task.WhenAll(
+                                StartAudioStream(),
+                                StartVideoStream(),
+                                StartDataStream());
+
+                            Console.Error.WriteLine($"{GetType().Name} streams started.");
+
+                            await Ready();
+
+                            Console.Error.WriteLine($"{GetType().Name} is ready and waiting for exit signal or disconnect...");
+
+                            await Task.WhenAny(ExitSignal(), Disconnected);
+
+                            if (Client.UnregisterException == null)
+                            {
+                                if (Disconnected.IsCompletedSuccessfully)
+                                {
+                                    Console.Error.WriteLine($"{GetType().Name} connection was closed. {Client.UnregisterException}");
+                                }
+                                else
+                                {
+                                    Console.Error.WriteLine($"{GetType().Name} received exit signal.");
+                                }
+                                exit = true;
+                            }
+                            else
+                            {
+                                Console.Error.WriteLine($"{GetType().Name} client was disconnected. {Client.UnregisterException}");
+                            }
 
                             await Unready();
+
+                            Console.Error.WriteLine($"{GetType().Name} is not ready.");
 
                             await Task.WhenAll(
                                 StopAudioStream(),
                                 StopVideoStream(),
                                 StopDataStream());
 
-                            // close connection gracefully
+                            Console.Error.WriteLine($"{GetType().Name} streams stopped.");
+
                             await Connection.Disconnect();
+
+                            Console.Error.WriteLine($"{GetType().Name} connection disconnected.");
 
                             DestroyAudioStream();
                             DestroyVideoStream();
                             DestroyDataStream();
 
-                            exitSignalledSource.TrySetResult(true); // exit handling
-                        };
+                            Console.Error.WriteLine($"{GetType().Name} streams destroyed.");
 
-                        // wait for exit signal
-                        Console.Error.WriteLine("Waiting for exit signal or disconnect...");
-                        await Task.WhenAny(exitSignalled, Disconnected);
+                        }
+                        finally
+                        {
+                            if (Client.State == ClientState.Registered)
+                            {
+                                try
+                                {
+                                    await Client.Leave(Channel.Id);
+
+                                    Console.Error.WriteLine($"{GetType().Name} client left.");
+                                }
+                                catch (Exception ex)
+                                {
+                                    Console.Error.WriteLine($"Could not leave gracefully. {ex}");
+                                }
+                            }
+                        }
                     }
                     finally
                     {
-                        await Client.Leave(Channel.Id);
+                        if (Client.State == ClientState.Registered)
+                        {
+                            try
+                            {
+                                await Client.Unregister();
+
+                                Console.Error.WriteLine($"{GetType().Name} client unregistered.");
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.Error.WriteLine($"Could not unregister gracefully. {ex}");
+                            }
+                        }
                     }
-                }
-                finally
-                {
-                    await Client.Unregister();
                 }
                 return 0;
             }
@@ -143,6 +196,19 @@ namespace FM.LiveSwitch.Connect
                 Console.Error.WriteLine(ex);
                 return -1;
             }
+        }
+
+        private Task ExitSignal()
+        {
+            var taskCompletionSource = new TaskCompletionSource<bool>();
+
+            Console.CancelKeyPress += (sender, e) =>
+            {
+                e.Cancel = true;
+                taskCompletionSource.TrySetResult(true);
+            };
+
+            return taskCompletionSource.Task;
         }
 
         #region Audio
