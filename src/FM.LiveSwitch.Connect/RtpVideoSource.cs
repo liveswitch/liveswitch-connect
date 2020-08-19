@@ -15,8 +15,10 @@ namespace FM.LiveSwitch.Connect
 
         public DataBuffer[] ParameterSets { get; set; }
 
-        private RtpReader _Reader = null;
+        private RtpReader _Reader;
         private List<RtpPacket> _Queue;
+        private RolloverContext _SequenceNumberRolloverContext;
+        private RolloverContext _TimestampRolloverContext;
 
         public RtpVideoSource(VideoFormat format)
             : base(format)
@@ -37,6 +39,8 @@ namespace FM.LiveSwitch.Connect
         private void Initialize()
         {
             _Queue = new List<RtpPacket>();
+            _SequenceNumberRolloverContext = new RolloverContext(16);
+            _TimestampRolloverContext = new RolloverContext(32);
 
             _Reader.OnPacket += (packet) =>
             {
@@ -72,8 +76,8 @@ namespace FM.LiveSwitch.Connect
                 Marker = packet.Marker
             }))
             {
-                SequenceNumber = packet.SequenceNumber,
-                Timestamp = packet.Timestamp
+                SequenceNumber = _SequenceNumberRolloverContext.GetIndex(packet.SequenceNumber),
+                Timestamp = _TimestampRolloverContext.GetIndex(packet.Timestamp)
             });
         }
 

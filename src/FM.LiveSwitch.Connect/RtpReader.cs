@@ -162,7 +162,7 @@ namespace FM.LiveSwitch.Connect
 
                 try
                 {
-                    OnPacket?.Invoke(new RtpPacket(buffer.Subset(header.CalculateHeaderLength()), sequenceNumber, timestamp, marker)
+                    OnPacket?.Invoke(new RtpPacket(buffer.Subset(header.CalculateHeaderLength()), header.SequenceNumber, header.Timestamp, header.Marker)
                     {
                         PayloadType = header.PayloadType,
                         SynchronizationSource = header.SynchronizationSource
