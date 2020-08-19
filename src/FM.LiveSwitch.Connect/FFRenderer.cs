@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace FM.LiveSwitch.Connect
@@ -112,6 +113,8 @@ namespace FM.LiveSwitch.Connect
         }
 
         private Process FFmpeg;
+        private Thread _Monitor;
+        private volatile bool _Done;
         private string AudioSdpFileName;
         private string VideoSdpFileName;
 
@@ -265,6 +268,23 @@ namespace FM.LiveSwitch.Connect
 
             FFmpeg = FFUtility.FFmpeg(string.Join(" ", args));
 
+            _Monitor = new Thread(() =>
+            {
+                while (!_Done)
+                {
+                    FFmpeg.WaitForExit();
+                    if (!_Done)
+                    {
+                        Console.Error.WriteLine("FFmpeg exited unexpectedly.");
+                        FFmpeg = FFUtility.FFmpeg(string.Join(" ", args));
+                    }
+                }
+            })
+            {
+                IsBackground = true
+            };
+            _Monitor.Start();
+
             if (AudioSink != null)
             {
                 AudioSink.Deactivated = false;
@@ -278,6 +298,8 @@ namespace FM.LiveSwitch.Connect
 
         protected override Task Unready()
         {
+            _Done = true;
+
             if (AudioSink != null)
             {
                 AudioSink.Deactivated = true;

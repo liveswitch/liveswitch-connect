@@ -107,6 +107,8 @@ namespace FM.LiveSwitch.Connect
         }
 
         private Process FFmpeg;
+        private Thread _Monitor;
+        private volatile bool _Done;
         private string H264SdpFileName;
 
         private const int G722PacketSize = 320 + 12;
@@ -327,6 +329,23 @@ namespace FM.LiveSwitch.Connect
 
             FFmpeg = FFUtility.FFmpeg(string.Join(" ", args));
 
+            _Monitor = new Thread(() =>
+            {
+                while (!_Done)
+                {
+                    FFmpeg.WaitForExit();
+                    if (!_Done)
+                    {
+                        Console.Error.WriteLine("FFmpeg exited unexpectedly.");
+                        FFmpeg = FFUtility.FFmpeg(string.Join(" ", args));
+                    }
+                }
+            })
+            {
+                IsBackground = true
+            };
+            _Monitor.Start();
+
             if (readH264ParameterSets)
             {
                 ProcessParameterSets();
@@ -337,6 +356,8 @@ namespace FM.LiveSwitch.Connect
 
         protected override Task Unready()
         {
+            _Done = true;
+
             if (FFmpeg != null)
             {
                 FFmpeg.StandardInput.Write('q');
