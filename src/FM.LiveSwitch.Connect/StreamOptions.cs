@@ -5,6 +5,10 @@ namespace FM.LiveSwitch.Connect
 {
     abstract class StreamOptions : Options, IConnectionOptions, IChannelOptions, IClientOptions
     {
+        public bool OpenH264Supported { get; set; }
+
+        public bool NvidiaSupported { get; set; }
+
         [Option("channel-id", Required = true, HelpText = "The channel ID.")]
         public string ChannelId { get; set; }
 

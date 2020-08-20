@@ -2,9 +2,9 @@
 {
     interface IConnectionOptions
     {
-        bool DisableOpenH264 { get; }
+        bool OpenH264Supported { get; }
 
-        bool DisableNvidia { get; }
+        bool NvidiaSupported { get; }
 
         string ConnectionTag { get; }
 

@@ -28,27 +28,21 @@ namespace FM.LiveSwitch.Connect
                 case VideoEncoding.VP9:
                     return new Vp9.Encoder();
                 case VideoEncoding.H264:
-                    if ((options.H264Encoder == H264Encoder.Auto || options.H264Encoder == H264Encoder.Nvidia) && !options.DisableNvidia)
+                    if (options.NvidiaSupported && (options.H264Encoder == H264Encoder.Auto || options.H264Encoder == H264Encoder.Nvidia))
                     {
                         return new Nvidia.H264.Encoder();
                     }
-                    else if ((options.H264Encoder == H264Encoder.Auto || options.H264Encoder == H264Encoder.OpenH264) && !options.DisableOpenH264)
+                    if (options.OpenH264Supported && (options.H264Encoder == H264Encoder.Auto || options.H264Encoder == H264Encoder.OpenH264))
                     {
                         return new OpenH264.Encoder();
                     }
-                    else
-                    {
-                        throw new Exception("H.264 video codec selected, but no encoders are enabled.");
-                    }
+                    throw new Exception("No H.264 encoders available.");
                 case VideoEncoding.H265:
-                    if (!options.DisableNvidia)
+                    if (options.NvidiaSupported)
                     {
                         return new Nvidia.H265.Encoder();
                     }
-                    else
-                    {
-                        throw new Exception("H.265 video codec selected, Nvidia hardware support is required but not detected.");
-                    }
+                    throw new Exception("No H.265 encoders available.");
                 default:
                     throw new Exception("Unknown video encoding.");
             }
@@ -63,27 +57,21 @@ namespace FM.LiveSwitch.Connect
                 case VideoEncoding.VP9:
                     return new Vp9.Decoder();
                 case VideoEncoding.H264:
-                    if ((options.H264Decoder == H264Decoder.Auto || options.H264Decoder == H264Decoder.Nvidia) && !options.DisableNvidia)
+                    if (options.NvidiaSupported && (options.H264Decoder == H264Decoder.Auto || options.H264Decoder == H264Decoder.Nvidia))
                     {
                         return new Nvidia.H264.Decoder();
                     }
-                    else if ((options.H264Decoder == H264Decoder.Auto || options.H264Decoder == H264Decoder.OpenH264) && !options.DisableOpenH264)
+                    if (options.OpenH264Supported && (options.H264Decoder == H264Decoder.Auto || options.H264Decoder == H264Decoder.OpenH264))
                     {
                         return new OpenH264.Decoder();
                     }
-                    else
-                    {
-                        throw new Exception("H.264 video codec selected, but no decoders are enabled");
-                    }
+                    throw new Exception("No H.264 decoders available.");
                 case VideoEncoding.H265:
-                    if (!options.DisableNvidia)
+                    if (options.NvidiaSupported)
                     {
                         return new Nvidia.H265.Decoder();
                     }
-                    else
-                    {
-                        throw new Exception("H.265 video codec selected, Nvidia hardware support is required but not detected.");
-                    }
+                    throw new Exception("No H.265 decoders available.");
                 default:
                     throw new Exception("Unknown video encoding.");
             }

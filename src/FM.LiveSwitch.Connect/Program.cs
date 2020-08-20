@@ -127,33 +127,39 @@ namespace FM.LiveSwitch.Connect
 
             Console.Error.WriteLine("Checking for OpenH264...");
             OpenH264.Utility.DownloadOpenH264(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)).GetAwaiter().GetResult();
-            options.DisableOpenH264 = true;
             try
             {
-                options.DisableOpenH264 = !OpenH264.Utility.Initialize();
-                if (options.DisableOpenH264)
+                options.OpenH264Supported = OpenH264.Utility.Initialize();
+                if (options.OpenH264Supported)
                 {
-                    Console.Error.WriteLine("OpenH264 failed to initialize.");
+                    Console.Error.WriteLine("OpenH264 is supported.");
                 }
                 else
                 {
-                    Console.Error.WriteLine("OpenH264 initialized.");
+                    Console.Error.WriteLine("OpenH264 is not supported.");
                 }
             }
             catch (Exception ex)
             {
-                Console.Error.WriteLine($"OpenH264 failed to initialize. {ex}");
+                Console.Error.WriteLine($"OpenH264 is not supported. {ex}");
             }
 
             Console.Error.WriteLine("Checking for Nvidia...");
-            options.DisableNvidia = !Nvidia.Utility.NvencSupported;
-            if (options.DisableNvidia)
+            try
             {
-                Console.Error.WriteLine("Nvidia failed to initialize.");
+                options.NvidiaSupported = Nvidia.Utility.NvencSupported;
+                if (options.NvidiaSupported)
+                {
+                    Console.Error.WriteLine("Nvidia is supported.");
+                }
+                else
+                {
+                    Console.Error.WriteLine("Nvidia is not supported.");
+                }
             }
-            else
+            catch (Exception ex)
             {
-                Console.Error.WriteLine("Nvidia initialized.");
+                Console.Error.WriteLine($"Nvidia is not supported. {ex}");
             }
         }
     }
