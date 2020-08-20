@@ -113,7 +113,7 @@ namespace FM.LiveSwitch.Connect
 
         private async Task Loop()
         {
-            var dispatchQueue = new DispatchQueue<UdpReceiveResult>(async (result) =>
+            var dispatchQueue = new DispatchQueue<UdpReceiveResult>((result) =>
             {
                 var buffer = DataBuffer.Wrap(result.Buffer);
                 var header = RtpPacketHeader.ReadFrom(buffer);

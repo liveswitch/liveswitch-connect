@@ -148,8 +148,6 @@ namespace FM.LiveSwitch.Connect
                 {
                     var sink = AudioSink as RtpAudioSink;
 
-                    args.Add("-protocol_whitelist file,crypto,udp,rtp");
-
                     sink.IPAddress = "127.0.0.1";
                     sink.Port = LockedRandomizer.Next(49162, 65536);
                     sink.PayloadType = 96;
@@ -179,6 +177,11 @@ namespace FM.LiveSwitch.Connect
                         throw new Exception("Unknown audio encoding.");
                     }
 
+                    if (Options.AudioBitrate.HasValue && !RtpAudioFormat.IsFixedBitrate)
+                    {
+                        sdpMediaDescription.AddBandwidth(new Sdp.Bandwidth(Sdp.BandwidthType.ApplicationSpecific, Options.AudioBitrate.Value));
+                    }
+
                     var sdpMessage = new Sdp.Message(new Sdp.Origin("127.0.0.1"), "lsconnect")
                     {
                         ConnectionData = new Sdp.ConnectionData("127.0.0.1")
@@ -196,7 +199,11 @@ namespace FM.LiveSwitch.Connect
 
                     Console.Error.WriteLine($"Audio SDP:{Environment.NewLine}{sdp}");
 
-                    args.Add($"-i {AudioSdpFileName}");
+                    args.AddRange(new[]
+                    {
+                        $"-protocol_whitelist file,crypto,udp,rtp",
+                        $"-i {AudioSdpFileName}"
+                    });
                 }
             }
 
@@ -215,8 +222,6 @@ namespace FM.LiveSwitch.Connect
                 else
                 {
                     var sink = VideoSink as RtpVideoSink;
-
-                    args.Add("-protocol_whitelist file,crypto,udp,rtp");
 
                     sink.IPAddress = "127.0.0.1";
                     sink.Port = LockedRandomizer.Next(49162, 65536);
@@ -243,6 +248,11 @@ namespace FM.LiveSwitch.Connect
                         throw new Exception("Unknown video format.");
                     }
 
+                    if (Options.VideoBitrate.HasValue && !RtpVideoFormat.IsFixedBitrate)
+                    {
+                        sdpMediaDescription.AddBandwidth(new Sdp.Bandwidth(Sdp.BandwidthType.ApplicationSpecific, Options.VideoBitrate.Value));
+                    }
+
                     var sdpMessage = new Sdp.Message(new Sdp.Origin("127.0.0.1"), "lsconnect")
                     {
                         ConnectionData = new Sdp.ConnectionData("127.0.0.1")
@@ -260,7 +270,11 @@ namespace FM.LiveSwitch.Connect
 
                     Console.Error.WriteLine($"Video SDP:{Environment.NewLine}{sdp}");
 
-                    args.Add($"-i {VideoSdpFileName}");
+                    args.AddRange(new[]
+                    {
+                        $"-protocol_whitelist file,crypto,udp,rtp",
+                        $"-i {VideoSdpFileName}"
+                    });
                 }
             }
 
