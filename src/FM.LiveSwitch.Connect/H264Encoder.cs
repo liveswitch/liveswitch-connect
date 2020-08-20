@@ -4,6 +4,6 @@
     {
         Auto,
         OpenH264,
-        NVENC
+        Nvidia
     }
 }

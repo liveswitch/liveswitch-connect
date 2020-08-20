@@ -28,7 +28,7 @@ namespace FM.LiveSwitch.Connect
                 case VideoEncoding.VP9:
                     return new Vp9.Encoder();
                 case VideoEncoding.H264:
-                    if ((options.H264Encoder == H264Encoder.Auto || options.H264Encoder == H264Encoder.NVENC) && !options.DisableNvidia)
+                    if ((options.H264Encoder == H264Encoder.Auto || options.H264Encoder == H264Encoder.Nvidia) && !options.DisableNvidia)
                     {
                         return new Nvidia.H264.Encoder();
                     }
@@ -63,7 +63,7 @@ namespace FM.LiveSwitch.Connect
                 case VideoEncoding.VP9:
                     return new Vp9.Decoder();
                 case VideoEncoding.H264:
-                    if ((options.H264Decoder == H264Decoder.Auto || options.H264Decoder == H264Decoder.NVDEC) && !options.DisableNvidia)
+                    if ((options.H264Decoder == H264Decoder.Auto || options.H264Decoder == H264Decoder.Nvidia) && !options.DisableNvidia)
                     {
                         return new Nvidia.H264.Decoder();
                     }

@@ -2,47 +2,32 @@
 {
     class MatroskaVideoSource : Matroska.VideoSource
     {
-        private PlayOptions Options;
+        protected IConnectionOptions Options { get; private set; }
 
-        public MatroskaVideoSource(PlayOptions options)
-            : base(options.VideoPath)
+        public MatroskaVideoSource(string path, IConnectionOptions options)
+            : base(path)
         {
             Options = options;
         }
 
         protected override VideoDecoder CreateVp8Decoder()
         {
-            return new Vp8.Decoder();
+            return VideoEncoding.VP8.CreateDecoder(Options);
         }
 
         protected override VideoDecoder CreateVp9Decoder()
         {
-            return new Vp9.Decoder();
+            return VideoEncoding.VP9.CreateDecoder(Options);
         }
 
         protected override VideoDecoder CreateH264Decoder()
         {
-            if ((Options.H264Decoder == H264Decoder.Auto || Options.H264Decoder == H264Decoder.NVDEC) && !Options.DisableNvidia)
-            {
-                return new Nvidia.H264.Decoder();
-            }
-            else if ((Options.H264Decoder == H264Decoder.Auto || Options.H264Decoder == H264Decoder.OpenH264) && !Options.DisableOpenH264)
-            {
-                return new OpenH264.Decoder();
-            }
-            else
-            {
-                return null;
-            }
+            return VideoEncoding.H264.CreateDecoder(Options);
         }
 
         protected override VideoDecoder CreateH265Decoder()
         {
-            if (!Options.DisableNvidia)
-            {
-                return new Nvidia.H265.Decoder();
-            }
-            return null;
+            return VideoEncoding.H265.CreateDecoder(Options);
         }
     }
 }

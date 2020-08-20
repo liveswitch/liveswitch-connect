@@ -2,9 +2,13 @@
 {
     class MatroskaAudioSource : Matroska.AudioSource
     {
-        public MatroskaAudioSource(string path)
+        protected IConnectionOptions Options { get; private set; }
+
+        public MatroskaAudioSource(string path, IConnectionOptions options)
             : base(path)
-        { }
+        {
+            Options = options;
+        }
 
         protected override AudioDecoder CreateOpusDecoder(AudioConfig config)
         {

@@ -12,19 +12,6 @@ namespace FM.LiveSwitch.Connect
 
         public Task<int> Record()
         {
-            if (!Options.NoVideo)
-            {
-                if (!Options.IsH264EncoderAvailable() && Options.VideoCodec == VideoCodec.H264)
-                {
-                    Console.Error.WriteLine("--video-codec cannot be H264. No H.264 encoder is available.");
-                    return Task.FromResult(1);
-                }
-                if (Options.DisableNvidia && Options.VideoCodec == VideoCodec.H265)
-                {
-                    Console.Error.WriteLine("--video-codec cannot be H265. Nvidia hardware support is unavailable.");
-                    return Task.FromResult(1);
-                }
-            }
             return Receive();
         }
 

@@ -145,15 +145,15 @@ namespace FM.LiveSwitch.Connect
                 Console.Error.WriteLine($"OpenH264 failed to initialize. {ex}");
             }
 
-            Console.Error.WriteLine("Checking for Nvidia hardware acceleration...");
+            Console.Error.WriteLine("Checking for Nvidia...");
             options.DisableNvidia = !Nvidia.Utility.NvencSupported;
             if (options.DisableNvidia)
             {
-                Console.Error.WriteLine("Nvidia hardware acceleration failed to initialize.");
+                Console.Error.WriteLine("Nvidia failed to initialize.");
             }
             else
             {
-                Console.Error.WriteLine("Nvidia hardware acceleration initialized.");
+                Console.Error.WriteLine("Nvidia initialized.");
             }
         }
     }

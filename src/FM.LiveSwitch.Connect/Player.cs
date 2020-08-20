@@ -26,12 +26,12 @@ namespace FM.LiveSwitch.Connect
 
         protected override MatroskaAudioSource CreateAudioSource()
         {
-            return new MatroskaAudioSource(Options.AudioPath);
+            return new MatroskaAudioSource(Options.AudioPath, Options);
         }
 
         protected override MatroskaVideoSource CreateVideoSource()
         {
-            return new MatroskaVideoSource(Options);
+            return new MatroskaVideoSource(Options.VideoPath, Options);
         }
     }
 }
