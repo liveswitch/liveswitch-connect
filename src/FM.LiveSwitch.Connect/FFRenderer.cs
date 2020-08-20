@@ -280,7 +280,15 @@ namespace FM.LiveSwitch.Connect
 
             args.Add(Options.OutputArgs);
 
-            FFmpeg = FFUtility.FFmpeg(string.Join(" ", args));
+            FFmpeg = FFUtility.FFmpeg(string.Join(" ", args), (line) =>
+            {
+                if (VideoSink != null && line.Contains("640x480, 90k tbr"))
+                {
+                    // the frame-rate has not been guessed correctly
+                    // signal exit so we can start again
+                    FFmpeg.StandardInput.Write('q');
+                }
+            });
 
             _Monitor = new Thread(() =>
             {
