@@ -736,6 +736,7 @@ The `intercept` verb lets you forward audio and/or video packets to a specific d
   --log-level             (Default: Error) The LiveSwitch log level.
 ```
 
+## Loopback Example
 
 Open the [LiveSwitch Demo](https://v1.liveswitch.fm/) in a web browser and join a channel. Take note of the `channel-id` from the join dialog and the `connection-id` from the console output.
 

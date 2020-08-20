@@ -126,6 +126,7 @@ namespace FM.LiveSwitch.Connect
                     }
                 };
             }
+
             return base.Ready();
         }
     }
