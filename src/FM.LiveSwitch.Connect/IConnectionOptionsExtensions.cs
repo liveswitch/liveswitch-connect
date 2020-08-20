@@ -22,41 +22,5 @@ namespace FM.LiveSwitch.Connect
             }
             return new[] { options.VideoCodec.ToEncoding() };
         }
-
-        public static bool CanEncodeH264(this IConnectionOptions options)
-        {
-            switch (options.H264Encoder)
-            {
-                case H264Encoder.OpenH264:
-                    return !options.DisableOpenH264;
-                case H264Encoder.Nvidia:
-                    return !options.DisableNvidia;
-                default:
-                    return !options.DisableOpenH264 || !options.DisableNvidia;
-            }
-        }
-
-        public static bool CanDecodeH264(this IConnectionOptions options)
-        {
-            switch (options.H264Decoder)
-            {
-                case H264Decoder.OpenH264:
-                    return !options.DisableOpenH264;
-                case H264Decoder.Nvidia:
-                    return !options.DisableNvidia;
-                default:
-                    return !options.DisableOpenH264 || !options.DisableNvidia;
-            }
-        }
-
-        public static bool CanEncodeH265(this IConnectionOptions options)
-        {
-            return !options.DisableNvidia;
-        }
-
-        public static bool CanDecodeH265(this IConnectionOptions options)
-        {
-            return !options.DisableNvidia;
-        }
     }
 }

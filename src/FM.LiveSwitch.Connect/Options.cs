@@ -4,6 +4,10 @@ namespace FM.LiveSwitch.Connect
 {
     abstract class Options
     {
+        public bool OpenH264Supported { get; set; }
+
+        public bool NvidiaSupported { get; set; }
+
         [Option("gateway-url", Required = true, HelpText = "The gateway URL.")]
         public string GatewayUrl { get; set; }
 

@@ -127,7 +127,7 @@ namespace FM.LiveSwitch.Connect
                 case VideoEncoding.H264:
                     return new H264.Format(H264.ProfileLevelId.Default, H264.PacketizationMode.Default) { IsPacketized = isPacketized };
                 case VideoEncoding.H265:
-                    return new H265.Format(H265.ProfileLevelId.Default) { IsPacketized = isPacketized };
+                    return new H265.Format() { IsPacketized = isPacketized };
                 default:
                     throw new Exception("Unknown video encoding.");
             }
