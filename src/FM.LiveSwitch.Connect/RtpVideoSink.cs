@@ -27,10 +27,13 @@ namespace FM.LiveSwitch.Connect
 
         public int KeyFrameInterval { get; set; }
 
+        public bool WaitForKeyFrame { get; set; }
+
         private RtpWriter _Writer = null;
         private int _KeyFrameIntervalCounter;
         private long _LastTimestamp;
         private long _SequenceNumber;
+        private volatile bool _Ready;
 
         public RtpVideoSink(VideoFormat format)
             : base(format)
@@ -53,28 +56,53 @@ namespace FM.LiveSwitch.Connect
                 _KeyFrameIntervalCounter = 0;
             }
 
-            var rtpHeaders = inputBuffer.RtpHeaders;
-            var rtpPayloads = inputBuffer.DataBuffers;
-            for (var i = 0; i < rtpHeaders.Length; i++)
+            if (!WaitForKeyFrame)
             {
-                var rtpHeader = rtpHeaders[i];
-                if (rtpHeader == null)
+                _Ready = true;
+            }
+
+            if (!_Ready)
+            {
+                // clone to check keyframe since H.264 keyframe test on 
+                // packetized data buffers is destructive in 1.9.x
+                var inputBufferClone = inputBuffer.Clone();
+                var dataBufferClones = new DataBuffer[inputBuffer.DataBuffers.Length];
+                for (var i = 0; i < dataBufferClones.Length; i++)
                 {
-                    rtpHeader = new RtpPacketHeader();
+                    dataBufferClones[i] = DataBuffer.Wrap(inputBuffer.DataBuffers[i].ToArray());
                 }
-                if (rtpHeader.SequenceNumber == -1)
+                inputBufferClone.DataBuffers = dataBufferClones;
+                if (inputBufferClone.IsKeyFrame)
                 {
-                    rtpHeader.SequenceNumber = (int)(_SequenceNumber++ % (ushort.MaxValue + 1));
+                    _Ready = true;
                 }
-                if (rtpHeader.Timestamp == -1)
+            }
+
+            if (_Ready)
+            {
+                var rtpHeaders = inputBuffer.RtpHeaders;
+                var rtpPayloads = inputBuffer.DataBuffers;
+                for (var i = 0; i < rtpHeaders.Length; i++)
                 {
-                    rtpHeader.Timestamp = frame.Timestamp % ((long)uint.MaxValue + 1);
+                    var rtpHeader = rtpHeaders[i];
+                    if (rtpHeader == null)
+                    {
+                        rtpHeader = new RtpPacketHeader();
+                    }
+                    if (rtpHeader.SequenceNumber == -1)
+                    {
+                        rtpHeader.SequenceNumber = (int)(_SequenceNumber++ % (ushort.MaxValue + 1));
+                    }
+                    if (rtpHeader.Timestamp == -1)
+                    {
+                        rtpHeader.Timestamp = frame.Timestamp % ((long)uint.MaxValue + 1);
+                    }
+                    _Writer.Write(new RtpPacket(rtpPayloads[i], rtpHeader.SequenceNumber, rtpHeader.Timestamp, rtpHeader.Marker)
+                    {
+                        PayloadType = PayloadType,
+                        SynchronizationSource = SynchronizationSource
+                    });
                 }
-                _Writer.Write(new RtpPacket(rtpPayloads[i], rtpHeader.SequenceNumber, rtpHeader.Timestamp, rtpHeader.Marker)
-                {
-                    PayloadType = PayloadType,
-                    SynchronizationSource = SynchronizationSource
-                });
             }
         }
 
