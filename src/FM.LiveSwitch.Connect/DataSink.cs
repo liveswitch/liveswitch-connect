@@ -15,5 +15,7 @@ namespace FM.LiveSwitch.Connect
                 Console.Error.WriteLine($"Cannot write binary message from data channel: {args.DataBytes.ToHexString()}");
             }
         }
+
+        public void Destroy() { }
     }
 }
