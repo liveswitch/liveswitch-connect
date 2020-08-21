@@ -284,7 +284,7 @@ namespace FM.LiveSwitch.Connect
 
             args.Add(Options.OutputArgs);
 
-            FFmpeg = FFUtility.FFmpeg(string.Join(" ", args), (line) =>
+            var onOutput = new Action<string>((line) =>
             {
                 if (VideoSink != null)
                 {
@@ -298,6 +298,8 @@ namespace FM.LiveSwitch.Connect
                 }
             });
 
+            FFmpeg = FFUtility.FFmpeg(string.Join(" ", args), onOutput);
+
             _Monitor = new Thread(() =>
             {
                 while (!_Done)
@@ -306,7 +308,7 @@ namespace FM.LiveSwitch.Connect
                     if (!_Done)
                     {
                         Console.Error.WriteLine("FFmpeg exited unexpectedly.");
-                        FFmpeg = FFUtility.FFmpeg(string.Join(" ", args));
+                        FFmpeg = FFUtility.FFmpeg(string.Join(" ", args), onOutput);
                     }
                 }
             })
