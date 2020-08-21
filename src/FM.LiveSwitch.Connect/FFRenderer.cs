@@ -288,11 +288,10 @@ namespace FM.LiveSwitch.Connect
             {
                 if (VideoSink != null)
                 {
-                    if (line.Contains("90k tbr") ||
-                        line.Contains(".sdp: Unknown error") ||
-                        line.Contains(".sdp: Invalid data"))
+                    if (line.Contains("90k tbr") ||             // video frame-rate has not been guessed correctly (90,000fps is too much)
+                        line.Contains(".sdp: Unknown error") || // input media has trigger an unknown error
+                        line.Contains(".sdp: Invalid data"))    // input media is not appreciated
                     {
-                        // the frame-rate has not been guessed correctly
                         // signal exit so we can start again
                         FFmpeg.StandardInput.Write('q');
                     }
