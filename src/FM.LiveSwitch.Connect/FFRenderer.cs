@@ -202,8 +202,8 @@ namespace FM.LiveSwitch.Connect
                     args.AddRange(new[]
                     {
                         $"-protocol_whitelist file,crypto,udp,rtp",
-                        $"-analyzeduration 60M",
-                        $"-probesize 60M",
+                        $"-analyzeduration 300M",
+                        $"-probesize 300M",
                         $"-i {AudioSdpFileName}"
                     });
                 }
@@ -275,8 +275,8 @@ namespace FM.LiveSwitch.Connect
                     args.AddRange(new[]
                     {
                         $"-protocol_whitelist file,crypto,udp,rtp",
-                        $"-analyzeduration 60M",
-                        $"-probesize 60M",
+                        $"-analyzeduration 300M",
+                        $"-probesize 300M",
                         $"-i {VideoSdpFileName}"
                     });
                 }
@@ -284,31 +284,20 @@ namespace FM.LiveSwitch.Connect
 
             args.Add(Options.OutputArgs);
 
-            var onOutput = new Action<string>((line) =>
-            {
-                if (VideoSink != null)
-                {
-                    if (line.Contains("90k tbr") ||             // video frame-rate has not been guessed correctly (90,000fps is too much)
-                        line.Contains(".sdp: Unknown error") || // input media has trigger an unknown error
-                        line.Contains(".sdp: Invalid data"))    // input media is not appreciated
-                    {
-                        // signal exit so we can start again
-                        FFmpeg.StandardInput.Write('q');
-                    }
-                }
-            });
-
-            FFmpeg = FFUtility.FFmpeg(string.Join(" ", args), onOutput);
+            FFmpeg = FFUtility.FFmpeg(string.Join(" ", args), ProcessFFmpegOutput);
+            Activate();
 
             _Monitor = new Thread(() =>
             {
                 while (!_Done)
                 {
                     FFmpeg.WaitForExit();
+                    Deactivate();
                     if (!_Done)
                     {
                         Console.Error.WriteLine("FFmpeg exited unexpectedly.");
-                        FFmpeg = FFUtility.FFmpeg(string.Join(" ", args), onOutput);
+                        FFmpeg = FFUtility.FFmpeg(string.Join(" ", args), ProcessFFmpegOutput);
+                        Activate();
                     }
                 }
             })
@@ -316,15 +305,34 @@ namespace FM.LiveSwitch.Connect
                 IsBackground = true
             };
             _Monitor.Start();
+        }
 
-            if (AudioSink != null)
+        private void ProcessFFmpegOutput(string line)
+        {
+            var restartFFmpeg = false;
+            if (AudioSink != null && Options.AudioMode == FFRenderMode.NoDecode)
             {
-                AudioSink.Deactivated = false;
+                if (line.Contains(".sdp: Unknown error") || // input media has triggered an unknown error
+                    line.Contains(".sdp: Invalid data"))    // input media is not appreciated
+                {
+                    restartFFmpeg = true;
+                }
             }
 
-            if (VideoSink != null)
+            if (VideoSink != null && Options.VideoMode == FFRenderMode.NoDecode)
             {
-                VideoSink.Deactivated = false;
+                if (line.Contains("90k tbr") ||             // video frame-rate has not been guessed correctly (90,000fps is too much)
+                    line.Contains(".sdp: Unknown error") || // input media has triggered an unknown error
+                    line.Contains(".sdp: Invalid data"))    // input media is not appreciated
+                {
+                    restartFFmpeg = true;
+                }
+            }
+
+            // signal exit so we can start again
+            if (restartFFmpeg)
+            {
+                FFmpeg.StandardInput.Write('q');
             }
         }
 
@@ -332,15 +340,7 @@ namespace FM.LiveSwitch.Connect
         {
             _Done = true;
 
-            if (AudioSink != null)
-            {
-                AudioSink.Deactivated = true;
-            }
-
-            if (VideoSink != null)
-            {
-                VideoSink.Deactivated = true;
-            }
+            Deactivate();
 
             if (FFmpeg != null)
             {
@@ -373,6 +373,32 @@ namespace FM.LiveSwitch.Connect
             }
 
             return base.Unready();
+        }
+
+        private void Deactivate()
+        {
+            if (AudioSink != null)
+            {
+                AudioSink.Deactivated = true;
+            }
+
+            if (VideoSink != null)
+            {
+                VideoSink.Deactivated = true;
+            }
+        }
+
+        private void Activate()
+        {
+            if (AudioSink != null)
+            {
+                AudioSink.Deactivated = false;
+            }
+
+            if (VideoSink != null)
+            {
+                VideoSink.Deactivated = false;
+            }
         }
     }
 }
