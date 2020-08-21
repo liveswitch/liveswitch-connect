@@ -202,6 +202,8 @@ namespace FM.LiveSwitch.Connect
                     args.AddRange(new[]
                     {
                         $"-protocol_whitelist file,crypto,udp,rtp",
+                        $"-analyzeduration 60M",
+                        $"-probesize 60M",
                         $"-i {AudioSdpFileName}"
                     });
                 }
@@ -273,6 +275,8 @@ namespace FM.LiveSwitch.Connect
                     args.AddRange(new[]
                     {
                         $"-protocol_whitelist file,crypto,udp,rtp",
+                        $"-analyzeduration 60M",
+                        $"-probesize 60M",
                         $"-i {VideoSdpFileName}"
                     });
                 }
@@ -282,7 +286,7 @@ namespace FM.LiveSwitch.Connect
 
             FFmpeg = FFUtility.FFmpeg(string.Join(" ", args), (line) =>
             {
-                if (VideoSink != null && line.Contains("640x480, 90k tbr"))
+                if (VideoSink != null && line.Contains("90k tbr"))
                 {
                     // the frame-rate has not been guessed correctly
                     // signal exit so we can start again
