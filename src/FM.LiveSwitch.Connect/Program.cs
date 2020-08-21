@@ -123,27 +123,36 @@ namespace FM.LiveSwitch.Connect
 
         private static void Initialize(Options options)
         {
-            Log.AddProvider(new ErrorLogProvider(options.LogLevel));
-
             Console.Error.WriteLine("Checking for OpenH264...");
-            OpenH264.Utility.DownloadOpenH264(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)).GetAwaiter().GetResult();
             options.DisableOpenH264 = true;
             try
             {
                 options.DisableOpenH264 = !OpenH264.Utility.Initialize();
-                if (options.DisableOpenH264)
-                {
-                    Console.Error.WriteLine("OpenH264 failed to initialize.");
-                }
-                else
-                {
-                    Console.Error.WriteLine("OpenH264 initialized.");
-                }
             }
-            catch (Exception ex)
+            catch { }
+
+            if (options.DisableOpenH264)
             {
-                Console.Error.WriteLine($"OpenH264 failed to initialize. {ex}");
+                OpenH264.Utility.DownloadOpenH264(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)).GetAwaiter().GetResult();
+                try
+                {
+                    options.DisableOpenH264 = !OpenH264.Utility.Initialize();
+                    if (options.DisableOpenH264)
+                    {
+                        Console.Error.WriteLine("OpenH264 failed to initialize.");
+                    }
+                    else
+                    {
+                        Console.Error.WriteLine("OpenH264 initialized.");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.Error.WriteLine($"OpenH264 failed to initialize. {ex}");
+                }
             }
+
+            Log.AddProvider(new ErrorLogProvider(options.LogLevel));
         }
     }
 }
