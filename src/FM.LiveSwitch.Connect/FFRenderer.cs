@@ -286,11 +286,16 @@ namespace FM.LiveSwitch.Connect
 
             FFmpeg = FFUtility.FFmpeg(string.Join(" ", args), (line) =>
             {
-                if (VideoSink != null && line.Contains("90k tbr"))
+                if (VideoSink != null)
                 {
-                    // the frame-rate has not been guessed correctly
-                    // signal exit so we can start again
-                    FFmpeg.StandardInput.Write('q');
+                    if (line.Contains("90k tbr") ||
+                        line.Contains(".sdp: Unknown error") ||
+                        line.Contains(".sdp: Invalid data"))
+                    {
+                        // the frame-rate has not been guessed correctly
+                        // signal exit so we can start again
+                        FFmpeg.StandardInput.Write('q');
+                    }
                 }
             });
 
