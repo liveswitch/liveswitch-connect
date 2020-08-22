@@ -89,19 +89,35 @@ namespace FM.LiveSwitch.Connect
 
                         try
                         {
-                            InitializeAudioStream();
-                            InitializeVideoStream();
-                            InitializeDataStream();
+                            var connected = false;
+                            while (!connected)
+                            {
+                                InitializeAudioStream();
+                                InitializeVideoStream();
+                                InitializeDataStream();
 
-                            Console.Error.WriteLine($"{GetType().Name} streams initialized.");
+                                Console.Error.WriteLine($"{GetType().Name} streams initialized.");
 
-                            Connection = Options.CreateConnection(Channel, AudioStream, VideoStream, DataStream);
+                                Connection = Options.CreateConnection(Channel, AudioStream, VideoStream, DataStream);
 
-                            Console.Error.WriteLine($"{GetType().Name} connection created:{Environment.NewLine}{Descriptor.Format(Connection.GetDescriptors())}");
+                                Console.Error.WriteLine($"{GetType().Name} connection created:{Environment.NewLine}{Descriptor.Format(Connection.GetDescriptors())}");
 
-                            Disconnected = await Connection.Connect();
+                                try
+                                {
+                                    Disconnected = await Connection.Connect();
+                                    connected = true;
+                                }
+                                catch (Exception ex)
+                                {
+                                    Console.Error.WriteLine($"{GetType().Name} connection failed. {ex}");
 
-                            Console.Error.WriteLine($"{GetType().Name} connection opened.");
+                                    DestroyAudioStream();
+                                    DestroyVideoStream();
+                                    DestroyDataStream();
+                                }
+                            }
+
+                            Console.Error.WriteLine($"{GetType().Name} connection connected.");
 
                             await Task.WhenAll(
                                 StartAudioStream(),
@@ -152,7 +168,7 @@ namespace FM.LiveSwitch.Connect
                             {
                                 await Connection.Disconnect();
 
-                                Console.Error.WriteLine($"{GetType().Name} connection closed.");
+                                Console.Error.WriteLine($"{GetType().Name} connection disconnected.");
                             }
 
                             DestroyAudioStream();
