@@ -182,7 +182,7 @@ namespace FM.LiveSwitch.Connect
                         sdpMediaDescription.AddBandwidth(new Sdp.Bandwidth(Sdp.BandwidthType.ApplicationSpecific, Options.AudioBitrate.Value));
                     }
 
-                    var sdpMessage = new Sdp.Message(new Sdp.Origin("127.0.0.1"), "lsconnect")
+                    var sdpMessage = new Sdp.Message(new Sdp.Origin("127.0.0.1"), "liveswitch-audio")
                     {
                         ConnectionData = new Sdp.ConnectionData("127.0.0.1")
                     };
@@ -202,8 +202,6 @@ namespace FM.LiveSwitch.Connect
                     args.AddRange(new[]
                     {
                         $"-protocol_whitelist file,crypto,udp,rtp",
-                        $"-analyzeduration 300M",
-                        $"-probesize 300M",
                         $"-i {AudioSdpFileName}"
                     });
                 }
@@ -231,6 +229,10 @@ namespace FM.LiveSwitch.Connect
 
                     var sdpMediaDescription = new Sdp.MediaDescription(new Sdp.Media(Sdp.MediaType.Video, sink.Port, Sdp.Rtp.Media.RtpAvpTransportProtocol, sink.PayloadType.ToString()));
                     sdpMediaDescription.AddMediaAttribute(new Sdp.SendReceiveAttribute());
+                    if (Options.VideoFrameRate.HasValue)
+                    {
+                        sdpMediaDescription.AddMediaAttribute(new Sdp.FrameRateAttribute(Options.VideoFrameRate.ToString()));
+                    }
 
                     if (RtpVideoFormat.IsVp8)
                     {
@@ -255,7 +257,7 @@ namespace FM.LiveSwitch.Connect
                         sdpMediaDescription.AddBandwidth(new Sdp.Bandwidth(Sdp.BandwidthType.ApplicationSpecific, Options.VideoBitrate.Value));
                     }
 
-                    var sdpMessage = new Sdp.Message(new Sdp.Origin("127.0.0.1"), "lsconnect")
+                    var sdpMessage = new Sdp.Message(new Sdp.Origin("127.0.0.1"), "liveswitch-video")
                     {
                         ConnectionData = new Sdp.ConnectionData("127.0.0.1")
                     };
@@ -272,12 +274,15 @@ namespace FM.LiveSwitch.Connect
 
                     Console.Error.WriteLine($"Video SDP:{Environment.NewLine}{sdp}");
 
+                    if (Options.VideoFrameRate.HasValue)
+                    {
+                        args.Add($"-r {Options.VideoFrameRate}");
+                    }
+
                     args.AddRange(new[]
                     {
                         $"-protocol_whitelist file,crypto,udp,rtp",
-                        $"-analyzeduration 300M",
-                        $"-probesize 300M",
-                        $"-i {VideoSdpFileName}"
+                        $"-i {VideoSdpFileName}",
                     });
                 }
             }
@@ -321,8 +326,7 @@ namespace FM.LiveSwitch.Connect
 
             if (VideoSink != null && Options.VideoMode == FFRenderMode.NoDecode)
             {
-                if (line.Contains("90k tbr") ||             // video frame-rate has not been guessed correctly (90,000fps is too much)
-                    line.Contains(".sdp: Unknown error") || // input media has triggered an unknown error
+                if (line.Contains(".sdp: Unknown error") || // input media has triggered an unknown error
                     line.Contains(".sdp: Invalid data"))    // input media is not appreciated
                 {
                     restartFFmpeg = true;
