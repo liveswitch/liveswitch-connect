@@ -125,7 +125,7 @@ namespace FM.LiveSwitch.Connect
 
         protected override NullAudioSink CreateAudioSink()
         {
-            var sink = new NullAudioSink();
+            var sink = new NullAudioSink(AudioFormat);
             sink.OnProcessFrame += (frame) =>
             {
                 Console.WriteLine(ProcessAudioLog(Options.AudioLog, frame, AudioFormat.ToEncoding(), RemoteConnectionInfo));
@@ -135,7 +135,7 @@ namespace FM.LiveSwitch.Connect
 
         protected override NullVideoSink CreateVideoSink()
         {
-            var sink = new NullVideoSink();
+            var sink = new NullVideoSink(VideoFormat);
             sink.OnProcessFrame += (frame) =>
             {
                 Console.WriteLine(ProcessVideoLog(Options.VideoLog, frame, VideoFormat.ToEncoding(), RemoteConnectionInfo));

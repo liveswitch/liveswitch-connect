@@ -88,7 +88,7 @@ namespace FM.LiveSwitch.Connect
 
         protected override NamedPipeAudioSink CreateAudioSink()
         {
-            var sink = new NamedPipeAudioSink(Options.AudioPipe, Options.Client);
+            var sink = new NamedPipeAudioSink(Options.AudioPipe, Options.Client, new Pcm.Format(Options.AudioClockRate, Options.AudioChannelCount));
             sink.OnPipeConnected += () =>
             {
                 Console.Error.WriteLine("Audio pipe connected.");
@@ -98,7 +98,7 @@ namespace FM.LiveSwitch.Connect
 
         protected override NamedPipeVideoSink CreateVideoSink()
         {
-            var sink = new NamedPipeVideoSink(Options.VideoPipe, Options.Client);
+            var sink = new NamedPipeVideoSink(Options.VideoPipe, Options.Client, VideoFormat.I420);
             sink.OnPipeConnected += () =>
             {
                 Console.Error.WriteLine("Video pipe connected.");
