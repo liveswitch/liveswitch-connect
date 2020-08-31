@@ -26,6 +26,10 @@ namespace FM.LiveSwitch.Connect
             {
                 descriptors.Add(new Descriptor("Application ID", client.ApplicationId));
             }
+            if (client.Region != null)
+            {
+                descriptors.Add(new Descriptor("Region", client.Region));
+            }
             if (client.UserId != null)
             {
                 descriptors.Add(new Descriptor("User ID", client.UserId));
