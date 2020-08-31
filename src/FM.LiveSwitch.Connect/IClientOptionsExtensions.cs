@@ -7,7 +7,7 @@ namespace FM.LiveSwitch.Connect
     {
         public static Client CreateClient(this IClientOptions options, bool logState = true)
         {
-            var client = new Client(options.GatewayUrl, options.ApplicationId, options.UserId, options.DeviceId, null, options.ClientRoles.ToArray())
+            var client = new Client(options.GatewayUrl, options.ApplicationId, options.UserId, options.DeviceId, null, options.ClientRoles.ToArray(), options.Region)
             {
                 UserAlias = options.UserAlias,
                 DeviceAlias = options.DeviceAlias,

@@ -10,6 +10,8 @@ namespace FM.LiveSwitch.Connect
 
         string SharedSecret { get; }
 
+        string Region { get; }
+
         string UserId { get; }
 
         string UserAlias { get; }
