@@ -22,5 +22,8 @@ namespace FM.LiveSwitch.Connect
 
         [Option("keyframe-interval", Required = false, Default = 60, HelpText = "The keyframe interval for video, in frames. Only used if video-mode is nodecode.")]
         public int KeyFrameInterval { get; set; }
+
+        [Option("video-frame-rate", Required = false, HelpText = "The video frame rate in frames per second, if known. Only used if video-mode is nodecode.")]
+        public int? VideoFrameRate { get; set; }
     }
 }

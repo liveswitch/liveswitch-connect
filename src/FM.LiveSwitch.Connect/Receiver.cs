@@ -96,17 +96,33 @@ namespace FM.LiveSwitch.Connect
 
                             Console.Error.WriteLine($"{GetType().Name} has remote connection:{Environment.NewLine}{Descriptor.Format(RemoteConnectionInfo.GetDescriptors())}");
 
-                            InitializeAudioStream();
-                            InitializeVideoStream();
-                            InitializeDataStream();
+                            var connected = false;
+                            while (!connected)
+                            {
+                                InitializeAudioStream();
+                                InitializeVideoStream();
+                                InitializeDataStream();
 
-                            Console.Error.WriteLine($"{GetType().Name} streams initialized.");
+                                Console.Error.WriteLine($"{GetType().Name} streams initialized.");
 
-                            Connection = Options.CreateConnection(Channel, RemoteConnectionInfo, AudioStream, VideoStream, DataStream);
+                                Connection = Options.CreateConnection(Channel, RemoteConnectionInfo, AudioStream, VideoStream, DataStream);
 
-                            Console.Error.WriteLine($"{GetType().Name} connection created:{Environment.NewLine}{Descriptor.Format(Connection.GetDescriptors())}");
+                                Console.Error.WriteLine($"{GetType().Name} connection created:{Environment.NewLine}{Descriptor.Format(Connection.GetDescriptors())}");
 
-                            Disconnected = await Connection.Connect();
+                                try
+                                {
+                                    Disconnected = await Connection.Connect();
+                                    connected = true;
+                                }
+                                catch (Exception ex)
+                                {
+                                    Console.Error.WriteLine($"{GetType().Name} connection failed. {ex}");
+
+                                    DestroyAudioStream();
+                                    DestroyVideoStream();
+                                    DestroyDataStream();
+                                }
+                            }
 
                             Console.Error.WriteLine($"{GetType().Name} connection connected.");
 
@@ -125,7 +141,7 @@ namespace FM.LiveSwitch.Connect
 
                             if (Connection.State == ConnectionState.Failed)
                             {
-                                Console.Error.WriteLine($"{GetType().Name} connection failed. {Client.UnregisterException}");
+                                Console.Error.WriteLine($"{GetType().Name} connection failed. {Connection.Error?.Exception}");
                             }
                             else if (Client.UnregisterException != null)
                             {
