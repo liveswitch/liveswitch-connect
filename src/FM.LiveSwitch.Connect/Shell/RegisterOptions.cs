@@ -12,6 +12,9 @@ namespace FM.LiveSwitch.Connect.Shell
 
         public string SharedSecret { get; set; }
 
+        [Option("user-id", Required = false, HelpText = "The local region.")]
+        public string Region { get; set; }
+
         [Option("user-id", Required = false, HelpText = "The local user ID.")]
         public string UserId { get; set; }
 

@@ -7,7 +7,7 @@ namespace FM.LiveSwitch.Connect
     {
         public static async Task Register(this Client client, IClientOptions options)
         {
-            await client.Register(Token.GenerateClientRegisterToken(client, new ChannelClaim[0], options.SharedSecret));
+            await client.Register(Token.GenerateClientRegisterToken(client, new ChannelClaim[0], options.SharedSecret, options.Region));
         }
 
         public static async Task<Channel> Join(this Client client, IChannelOptions options)
@@ -25,6 +25,10 @@ namespace FM.LiveSwitch.Connect
             if (client.ApplicationId != null)
             {
                 descriptors.Add(new Descriptor("Application ID", client.ApplicationId));
+            }
+            if (client.Region != null)
+            {
+                descriptors.Add(new Descriptor("Region", client.Region));
             }
             if (client.UserId != null)
             {
