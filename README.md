@@ -899,6 +899,14 @@ lsconnect ffcapture ... --input-args=-i rtmp://{server}/live/obs \
   --video-bitrate 3000
 ```
 
+### Stream from LiveSwitch to an RTMP server (e.g. YouTube)
+
+You can stream the content in a LiveSwitch channel to an RTMP server. The following is an example of how to stream to YouTube's RTMP server.
+
+```
+lsconnect ffrender ... --output-args="-f flv rtmp://a.rtmp.youtube.com/live2/<YouTube Stream Key>"
+```
+
 ## Contact
 
 To learn more, visit [frozenmountain.com](https://www.frozenmountain.com) or [liveswitch.io](https://www.liveswitch.io).
