@@ -21,21 +21,31 @@ namespace FM.LiveSwitch.Connect
             }
         }
 
-        public static AudioEncoder CreateEncoder(this AudioEncoding encoding)
+        public static AudioEncoder CreateEncoder(this AudioEncoding encoding, int? targetBitrate = null)
         {
+            AudioEncoder encoder = null;
             switch (encoding)
             {
                 case AudioEncoding.Opus:
-                    return new Opus.Encoder();
+                    encoder = new Opus.Encoder();
+                    break;
                 case AudioEncoding.G722:
-                    return new G722.Encoder();
+                    encoder = new G722.Encoder();
+                    break;
                 case AudioEncoding.PCMU:
-                    return new Pcmu.Encoder();
+                   encoder = new Pcmu.Encoder();
+                    break;
                 case AudioEncoding.PCMA:
-                    return new Pcma.Encoder();
+                    encoder = new Pcma.Encoder();
+                    break;
                 default:
                     throw new Exception("Unknown audio encoding.");
             }
+            if (targetBitrate.HasValue)
+            {
+                encoder.TargetBitrate = targetBitrate.Value;
+            }
+            return encoder;
         }
 
         public static AudioDecoder CreateDecoder(this AudioEncoding encoding)

@@ -340,7 +340,7 @@ namespace FM.LiveSwitch.Connect
 
                     if (currentInput.InputFormat.IsCompressed)
                     {
-                        AudioEncoder = currentInput.InputFormat.ToEncoding().CreateEncoder();
+                        AudioEncoder = currentInput.InputFormat.ToEncoding().CreateEncoder(Options.AudioBitrate);
 
                         currentInput.AddInput(AudioEncoder);
                         currentInput = AudioEncoder;

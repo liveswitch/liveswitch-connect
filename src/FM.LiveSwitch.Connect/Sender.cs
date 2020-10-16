@@ -306,7 +306,7 @@ namespace FM.LiveSwitch.Connect
 
                 if (!currentOutput.OutputFormat.IsCompressed)
                 {
-                    AudioEncoder = AudioFormat.ToEncoding().CreateEncoder();
+                    AudioEncoder = AudioFormat.ToEncoding().CreateEncoder(Options.AudioBitrate);
 
                     AudioConverter = new SoundConverter(currentOutput.Config, AudioEncoder.InputConfig);
 
