@@ -11,7 +11,7 @@ Requires .NET Core 3.1 or newer.
 Use `dotnet publish` to create a single, self-contained file for a specific platform/architecture:
 
 ### Windows
-```
+```shell
 dotnet publish -r win-x64 -c Release /p:PublishSingleFile=true /p:PublishTrimmed=true -o win
 ```
 
@@ -27,7 +27,7 @@ dotnet publish -r linux-x64 -c Release /p:PublishSingleFile=true /p:PublishTrimm
 
 Alternatively, use `dotnet build` to create a platform-agnostic bundle (the .NET Core runtime must be installed):
 
-```
+```shell
 dotnet build
 ```
 
@@ -35,12 +35,13 @@ Using this approach will generate a library instead of an executable. Use `dotne
 
 ## Usage
 
-```
+```shell
 lsconnect [verb] [options]
 ```
 
 ### Verbs
-```
+
+```shell
   shell        Starts an interactive shell.
 
   capture      Captures local media from a named pipe.
@@ -62,12 +63,11 @@ lsconnect [verb] [options]
   intercept    Forwards packets for lawful intercept.
 ```
 
-## Shell
+## shell
 
 The `shell` verb starts an interactive shell that lets you monitor clients and connections in a LiveSwitch Server.
 
-### Usage
-```
+```shell
   --gateway-url       Required. The gateway URL.
 
   --application-id    Required. The application ID.
@@ -79,7 +79,7 @@ The `shell` verb starts an interactive shell that lets you monitor clients and c
 
 Once the `shell` is active:
 
-```
+```shell
   register    Registers a client.
 
   exit        Exits the shell.
@@ -87,7 +87,7 @@ Once the `shell` is active:
 
 After you `register`:
 
-```
+```shell
   unregister    Unregisters the client.
 
   join          Joins a channel.
@@ -97,7 +97,7 @@ After you `register`:
 
 After you `join` a channel (e.g. `join my-channel-id`):
 
-```
+```shell
   leave          Leaves the channel.
 
   clients        Prints remote client details to stdout.
@@ -109,7 +109,7 @@ After you `join` a channel (e.g. `join my-channel-id`):
 
 The `clients` verb has additional options:
 
-```
+```shell
   --ids        Print IDs only.
 
   --listen     Listen for join/leave events. (Press Q to stop.)
@@ -117,18 +117,17 @@ The `clients` verb has additional options:
 
 The `connections` verb has additional options as well:
 
-```
+```shell
   --ids        Print IDs only.
 
   --listen     Listen for open/close events. (Press Q to stop.)
 ```
 
-## Capture
+## capture
 
 The `capture` verb lets you capture local media from a named pipe and send it to a LiveSwitch server.
 
-### Usage
-```
+```shell
   --audio-pipe              The named pipe for audio.
 
   --video-pipe              The named pipe for video.
@@ -197,12 +196,11 @@ The `capture` verb lets you capture local media from a named pipe and send it to
   --log-level               (Default: Error) The LiveSwitch log level.
 ```
 
-## FFCapture
+## ffcapture
 
 The `ffcapture` verb lets you capture local media from FFmpeg and send it to a LiveSwitch server.
 
-### Usage
-```
+```shell
   --input-args                    Required. The FFmpeg input arguments.
 
   --audio-mode                    (Default: LSEncode) Where audio is encoded.
@@ -273,12 +271,11 @@ The `ffcapture` verb lets you capture local media from FFmpeg and send it to a L
   --log-level                     (Default: Error) The LiveSwitch log level.
 ```
 
-## Fake
+## fake
 
 The `fake` verb lets you generate fake media and send it to a LiveSwitch server. Audio is generated as a continuous tone following the argument provided. Video is generated as a sequence of solid-fill images that rotate through the colour wheel.
 
-### Usage
-```
+```shell
   --audio-clock-rate       (Default: 48000) The audio clock rate in Hz. Must be
                            a multiple of 8000. Minimum value is 8000. Maximum
                            value is 96000.
@@ -346,12 +343,11 @@ The `fake` verb lets you generate fake media and send it to a LiveSwitch server.
   --log-level              (Default: Error) The LiveSwitch log level.
 ```
 
-## Play
+## play
 
 The `play` verb lets you capture media from a local file (or pair of files) and send it to a LiveSwitch server. Note that this is specifically for files that have been recorded in the recording format of `lsconnect` or LiveSwitch itself. To stream arbitrary media, use `ffcapture`. For details, see `Stream from an arbitrary mp4 file` below.
 
-### Usage
-```
+```shell
   --audio-path            The audio file path.
 
   --video-path            The video file path.
@@ -405,12 +401,11 @@ The `play` verb lets you capture media from a local file (or pair of files) and 
   --log-level             (Default: Error) The LiveSwitch log level.
 ```
 
-## Render
+## render
 
 The `render` verb lets you render remote media from a LiveSwitch server to a named pipe.
 
-### Usage
-```
+```shell
   --audio-pipe              The named pipe for audio.
 
   --video-pipe              The named pipe for video.
@@ -473,12 +468,11 @@ The `render` verb lets you render remote media from a LiveSwitch server to a nam
   --log-level               (Default: Error) The LiveSwitch log level.
 ```
 
-## FFRender
+## ffrender
 
 The `ffrender` verb lets you render remote media from a LiveSwitch server to FFmpeg.
 
-### Usage
-```
+```shell
   --output-args           Required. The FFmpeg output arguments.
 
   --connection-id         Required. The remote connection ID or 'mcu'.
@@ -520,12 +514,11 @@ The `ffrender` verb lets you render remote media from a LiveSwitch server to FFm
   --log-level             (Default: Error) The LiveSwitch log level.
 ```
 
-## Log
+## log
 
 The `log` verb lets you log remote media frame details from a LiveSwitch server to standard output (stdout).
 
-### Usage
-```
+```shell
   --audio-log             (Default: audio: {duration}ms
                           {encoding}/{clockRate}/{channelCount} frame received
                           ({footprint} bytes) for SSRC {synchronizationSource}
@@ -588,12 +581,11 @@ The `log` verb lets you log remote media frame details from a LiveSwitch server 
   --log-level             (Default: Error) The LiveSwitch log level.
 ```
 
-## Record
+## record
 
 The `record` verb lets you record remote media from a LiveSwitch server to a local pair or files.
 
-### Usage
-```
+```shell
   --output-path           (Default: .) The output path for the recordings. Uses
                           curly-brace syntax. Valid variables: applicationId,
                           channelId, userId, userAlias, deviceId, deviceAlias,
@@ -645,12 +637,11 @@ The `record` verb lets you record remote media from a LiveSwitch server to a loc
   --log-level             (Default: Error) The LiveSwitch log level.
 ```
 
-## Intercept
+## intercept
 
 The `intercept` verb lets you forward audio and/or video packets to a specific destination IP addreress and port to allow for lawful intercept via packet tracing.
 
-### Usage
-```
+```shell
   --audio-port            The destination port for audio packets.
 
   --video-port            The destination port for video packets.
@@ -704,51 +695,51 @@ The `intercept` verb lets you forward audio and/or video packets to a specific d
 
 Open the [LiveSwitch Demo](https://v1.liveswitch.fm/) in a web browser and join a channel. Take note of the `channel-id` from the join dialog and the `connection-id` from the console output.
 
-Run `lsconnect render` with the following arguments:
+Open a terminal and run `lsconnect render` with the following arguments:
 
-- `--gateway-url` https://v1.liveswitch.fm:8443/sync
-- `--application-id` my-app-id
-- `--shared-secret` --replaceThisWithYourOwnSharedSecret--
-- `--audio-pipe` my-audio-pipe
-- `--video-pipe` my-video-pipe
-- `--channel-id` (the channel ID from your web browser)
-- `--connection-id` (the connection ID from your web browser)
+-   `--gateway-url` https://v1.liveswitch.fm:8443/sync
+-   `--application-id` my-app-id
+-   `--shared-secret` --replaceThisWithYourOwnSharedSecret--
+-   `--audio-pipe` my-audio-pipe
+-   `--video-pipe` my-video-pipe
+-   `--channel-id` (the channel ID from your web browser)
+-   `--connection-id` (the connection ID from your web browser)
 
-```
+```shell
 lsconnect render --gateway-url https://v1.liveswitch.fm:8443/sync --application-id my-app-id --shared-secret=--replaceThisWithYourOwnSharedSecret-- --audio-pipe my-audio-pipe --video-pipe my-video-pipe --channel-id {CHANNEL_ID} --connection-id {CONNECTION_ID}
 ```
 
 You should see logs indicating that:
 
-1. A renderer client has been registered.
-1. The remote connection has been found.
-1. A renderer connection has been connected.
+1.  A renderer client has been registered.
+2.  The remote connection has been found.
+3.  A renderer connection has been connected.
 
 `lsconnect render` is now waiting for either:
 
-1. An exit signal (e.g. Ctrl+C)
-1. The remote connection to disconnect.
+1.  An exit signal (e.g. Ctrl+C)
+2.  The remote connection to disconnect.
 
 Either of these will result in a graceful disconnection from LiveSwitch.
 
-Now run `lsconnect capture` in a new console tab with the following arguments:
+Open a new terminal and run `lsconnect capture` in a new console tab with the following arguments:
 
-- `--gateway-url` https://v1.liveswitch.fm:8443/sync
-- `--application-id` my-app-id
-- `--shared-secret` --replaceThisWithYourOwnSharedSecret--
-- `--audio-pipe` my-audio-pipe
-- `--video-pipe` my-video-pipe
-- `--channel-id` (the channel ID from your web browser)
+-   `--gateway-url` https://v1.liveswitch.fm:8443/sync
+-   `--application-id` my-app-id
+-   `--shared-secret` --replaceThisWithYourOwnSharedSecret--
+-   `--audio-pipe` my-audio-pipe
+-   `--video-pipe` my-video-pipe
+-   `--channel-id` (the channel ID from your web browser)
 
-```
+```shell
 lsconnect capture --gateway-url https://v1.liveswitch.fm:8443/sync --application-id my-app-id --shared-secret=--replaceThisWithYourOwnSharedSecret-- --audio-pipe my-audio-pipe --video-pipe my-video-pipe --channel-id {CHANNEL_ID}
 ```
 
 You should see logs indicating that:
 
-1. A capturer client has been registered.
-1. A capturer connection has been connected.
-1. The audio and video pipes are connected. (You should see this in the first console tab as well.)
+1.  A capturer client has been registered.
+2.  A capturer connection has been connected.
+3.  The audio and video pipes are connected. (You should see this in the first console tab as well.)
 
 `lsconnect capture` is now waiting for an exit signal (e.g. Ctrl+C), at which point it will gracefully disconnect from LiveSwitch.
 
@@ -770,38 +761,34 @@ Let's put `ffmpeg` between `lsconnect render` and `lsconnect capture`.
 
 Open the [LiveSwitch Demo](https://v1.liveswitch.fm/) in a web browser and join a channel. Take note of the `channel-id` from the join dialog and the `connection-id` from the console output.
 
-### Console Tab 1
+Open a terminal and use `lsconnect` to render to pipes named `audio-in` and `video-in`:
 
-Let's render to pipes named `audio-in` and `video-in`:
-```
+```shell
 lsconnect render ... --audio-pipe audio-in --video-pipe video-in
 ```
 
-We are now waiting for a client connection from `ffmpeg` to these input pipes.
+Open a new terminal and use `lsconnect` to capture from pipes named `audio-out` and `video-out`:
 
-### Console Tab 2
-
-Let's capture from pipes named `audio-out` and `video-out`:
-```
+```shell
 lsconnect capture ... --audio-pipe audio-out --video-pipe video-out --server
 ```
 
 > Note the `--server` flag!
 
-We are now waiting for a client connection from `ffmpeg` to these output pipes.
+We are now waiting for a client connection from `ffmpeg` to these pipes.
 
-### Console Tab 3
+Finally, open another terminal and connect `audio-in` to `audio-out` and `video-in` to `video-out` using `ffmpeg`:
 
-Let's connect `audio-in` to `audio-out` and `video-in` to `video-out` using `ffmpeg`:
+**Linux**
 
-#### Windows:
-```
-ffmpeg -y -f s16le -i \\.\pipe\audio-1 -f rawvideo -video_size 640x480 -pix_fmt bgr24 -i \\.\pipe\video-1 -f s16le \\.\pipe\audio-2 -f rawvideo \\.\pipe\video-2
-```
-
-#### Linux:
-```
+```shell
 ffmpeg -y -f s16le -i unix://tmp/CoreFxPipe_audio-1 -f rawvideo -video_size 640x480 -pix_fmt bgr24 -i unix://tmp/CoreFxPipe_video-1 -f s16le unix://tmp/CoreFxPipe_audio-2 -f rawvideo unix://tmp/CoreFxPipe_video-2
+```
+
+**Windows**
+
+```shell
+ffmpeg -y -f s16le -i \\.\pipe\audio-1 -f rawvideo -video_size 640x480 -pix_fmt bgr24 -i \\.\pipe\video-1 -f s16le \\.\pipe\audio-2 -f rawvideo \\.\pipe\video-2
 ```
 
 Audio and video should now be flowing!
@@ -812,17 +799,15 @@ Audio and video should now be flowing!
 
 > `bgr24` indicates 24-bit BGR images and `rawvideo` indicates raw media frames without headers.
 
-
 ## FFmpeg RTSP Example (Simple)
 
 Let's use `ffmpeg` to inject a live RTSP stream into LiveSwitch using the `ffcapture` verb.
 
 Open the [LiveSwitch Demo](https://v1.liveswitch.fm/) in a web browser and join a channel. Take note of the `channel-id` from the join dialog and the `connection-id` from the console output.
 
-### Console Tab
+Open a terminal and use `lsconnect ffcapture` to connect a live RTSP feed:
 
-Let's provide `ffmpeg` arguments to connect a live RTSP feed:
-```
+```shell
 lsconnect ffcapture ... --input-args="-rtsp_transport tcp -i rtsp://3.84.6.190/vod/mp4:BigBuckBunny_115k.mov"
 ```
 
@@ -834,76 +819,79 @@ Let's use `ffmpeg` to inject a live RTSP stream into LiveSwitch using the `captu
 
 Open the [LiveSwitch Demo](https://v1.liveswitch.fm/) in a web browser and join a channel. Take note of the `channel-id` from the join dialog and the `connection-id` from the console output.
 
-### Console Tab 1
+Open a terminal and use `lsconnect` to capture from pipes named `audio-rtsp` and `video-rtsp`:
 
-Let's capture from pipes named `audio-rtsp` and `video-rtsp`:
-```
+```shell
 lsconnect capture ... --audio-pipe audio-rtsp --video-pipe video-rtsp --server
 ```
 
 > Note the `--server` flag!
 
-We are now waiting for a client connection from `ffmpeg` to these output pipes.
+We are now waiting for a client connection from `ffmpeg` to these pipes.
 
-### Console Tab 2
+Open a new terminal and use `ffmpeg` to direct a live RTSP feed to these pipes:
 
-Let's connect a live RTSP feed to `audio-out` and `video-out` using `ffmpeg`:
+**Linux**
 
-#### Windows:
-```
-ffmpeg -y -rtsp_transport tcp -i rtsp://3.84.6.190/vod/mp4:BigBuckBunny_115k.mov -map 0:0 -f s16le -ar 48000 -ac 2 \\.\pipe\audio-rtsp -map 0:1 -f rawvideo -video_size 240x160 -pix_fmt bgr24 \\.\pipe\video-rtsp
-```
-
-#### Linux:
-```
+```shell
 ffmpeg -y -rtsp_transport tcp -i rtsp://3.84.6.190/vod/mp4:BigBuckBunny_115k.mov -map 0:0 -f s16le -ar 48000 -ac 2 unix://tmp/CoreFxPipe_audio-rtsp -map 0:1 -f rawvideo -video_size 240x160 -pix_fmt bgr24 unix://tmp/CoreFxPipe_video-rtsp
+```
+
+**Windows**
+
+```shell
+ffmpeg -y -rtsp_transport tcp -i rtsp://3.84.6.190/vod/mp4:BigBuckBunny_115k.mov -map 0:0 -f s16le -ar 48000 -ac 2 \\.\pipe\audio-rtsp -map 0:1 -f rawvideo -video_size 240x160 -pix_fmt bgr24 \\.\pipe\video-rtsp
 ```
 
 Audio and video should now be flowing!
 
-## Other Examples
+## Screen share from Windows
 
-### Stream your screen from Windows
-```
+```shell
 lsconnect ffcapture ... --input-args="-f gdigrab -framerate 30 -i desktop" --no-audio
 ```
 
-### Stream your screen from macOS
+## Screen share from macOS
 
 Get the device index for the screen to share:
-```
+
+```shell
 ffmpeg -f avfoundation -list_devices true -i ""
 ```
 
 Replace "2" with your device index from above:
-```
+
+```shell
 lsconnect ffcapture ... --input-args="-f avfoundation -i \"2\" -r 30 -vf scale=1536:960" --no-audio
 ```
 
-### Stream from an arbitrary mp4 file
+## Stream an MP4 file
+
 Sample file taken from here: https://file-examples.com/index.php/sample-video-files/
 Note that `-stream_loop -1` plays the file on a loop, `-r 30` indicates 30fps and `-vf scale=640:480` scales to 640x480. You may need to tweak these depending on your file and output requirements.
-```
+
+```shell
 lsconnect ffcapture ... --input-args="-stream_loop -1 -i test.mp4 -r 30 -vf scale=640:480"
 ```
 
-### Stream from RTMP (e.g. OBS)
+## Broadcast an RTMP stream from OBS
 
 Assuming a 1920x1080@30fps screen capture stream from OBS out to an RTMP server, you can direct that stream to LiveSwitch efficiently. The `video-mode` is `noencode` so `ffmpeg` acts as a passthrough, forwarding the RTP packets through to `lsconnect` without decoding or modifying them. Because of this, we have to declare the `video-encoding`, which from OBS is typically `h264`. By declaring both a `video-encoding` and `video-codec`, we are also forcing transcoding, which allows us to respond to keyframe requests as remote clients access the feed more efficiently than can be done by relying on the OBS feed alone. In this case, we are selecting `vp8` as the `video-codec` to negotiate with the LiveSwitch server, which is efficient and broadly supported by WebRTC clients.
 
 If we know the `video-width`, `video-height`, and/or `video-frame-rate` ahead of time, it is helpful to declare them so this information can be signalled to the LiveSwitch server to assist with bitrate estimation and bandwidth adaptation. The `video-bitrate` can also be set if desired.
-```
+
+```shell
 lsconnect ffcapture ... --input-args=-i rtmp://{server}/live/obs \
   --video-mode noencode --video-encoding h264 --video-codec vp8 \
   --video-width 1920 --video-height 1080 --video-frame-rate 30 \
   --video-bitrate 3000
 ```
 
-### Stream from LiveSwitch to an RTMP server (e.g. YouTube)
+## Stream from LiveSwitch to an RTMP server (e.g. YouTube)
 
 You can stream the content in a LiveSwitch channel to an RTMP server. The following is an example of how to stream to YouTube's RTMP server.
 
-```
+```shell
 lsconnect ffrender ... --output-args="-f flv rtmp://a.rtmp.youtube.com/live2/<YouTube Stream Key>"
 ```
 
