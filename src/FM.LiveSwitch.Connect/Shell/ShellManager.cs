@@ -213,7 +213,7 @@ namespace FM.LiveSwitch.Connect.Shell
                             break;
                         }
                     }
-                });
+                }).ConfigureAwait(false);
 
                 _Channel.OnRemoteUpstreamConnectionOpen -= onRemoteUpstreamConnectionOpen;
                 _Channel.OnRemoteUpstreamConnectionClose -= onRemoteUpstreamConnectionClose;

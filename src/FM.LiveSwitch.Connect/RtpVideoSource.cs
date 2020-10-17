@@ -15,7 +15,7 @@ namespace FM.LiveSwitch.Connect
 
         public DataBuffer[] ParameterSets { get; set; }
 
-        private RtpReader _Reader;
+        private readonly RtpReader _Reader;
         private List<RtpPacket> _Queue;
         private RolloverContext _SequenceNumberRolloverContext;
         private RolloverContext _TimestampRolloverContext;

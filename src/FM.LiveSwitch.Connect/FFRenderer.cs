@@ -113,7 +113,6 @@ namespace FM.LiveSwitch.Connect
         }
 
         private Process FFmpeg;
-        private Thread _Monitor;
         private volatile bool _Done;
         private string AudioSdpFileName;
         private string VideoSdpFileName;
@@ -292,7 +291,7 @@ namespace FM.LiveSwitch.Connect
             FFmpeg = FFUtility.FFmpeg(string.Join(" ", args), ProcessFFmpegOutput);
             Activate();
 
-            _Monitor = new Thread(() =>
+            var monitor = new Thread(() =>
             {
                 while (!_Done)
                 {
@@ -309,7 +308,7 @@ namespace FM.LiveSwitch.Connect
             {
                 IsBackground = true
             };
-            _Monitor.Start();
+            monitor.Start();
         }
 
         private void ProcessFFmpegOutput(string line)

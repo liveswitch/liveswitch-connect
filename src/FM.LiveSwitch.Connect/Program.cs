@@ -129,7 +129,11 @@ namespace FM.LiveSwitch.Connect
             {
                 options.DisableOpenH264 = !OpenH264.Utility.Initialize();
             }
-            catch { }
+            catch
+            {
+                // Do nothing. An exception indicates that the default
+                // behaviour (disabling OpenH264) is correct.
+            }
 
             if (options.DisableOpenH264)
             {

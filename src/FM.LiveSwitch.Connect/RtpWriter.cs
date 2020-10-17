@@ -16,8 +16,9 @@ namespace FM.LiveSwitch.Connect
 
         public long SynchronizationSource { get; set; }
 
-        private UdpClient _Client;
-        private DataBuffer _Buffer;
+        private readonly UdpClient _Client;
+        private readonly DataBuffer _Buffer;
+
         private IPEndPoint _IPEndPoint;
 
         public RtpWriter(int clockRate)
@@ -35,11 +36,7 @@ namespace FM.LiveSwitch.Connect
 
         public void Destroy()
         {
-            if (_Client != null)
-            {
-                _Client.Dispose();
-                _Client = null;
-            }
+            _Client.Dispose();
         }
 
         public bool Write(RtpPacket packet)

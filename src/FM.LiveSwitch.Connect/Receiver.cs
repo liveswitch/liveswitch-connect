@@ -56,7 +56,7 @@ namespace FM.LiveSwitch.Connect
 
         private Task Disconnected;
 
-        public Receiver(TOptions options)
+        protected Receiver(TOptions options)
         {
             Options = options;
         }
@@ -167,7 +167,7 @@ namespace FM.LiveSwitch.Connect
                             await Task.WhenAll(
                                 StopAudioStream(),
                                 StopVideoStream(),
-                                StopDataStream());
+                                StopDataStream()).ConfigureAwait(false);
 
                             Console.Error.WriteLine($"{GetType().Name} streams stopped.");
 

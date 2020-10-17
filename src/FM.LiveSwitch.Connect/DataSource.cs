@@ -8,12 +8,12 @@ namespace FM.LiveSwitch.Connect
     {
         public Action<DataSource, string> OnMessage;
 
-        public bool IsStarted { get; private set; } = false;
+        public bool IsStarted { get; private set; }
         public bool IsStopped { get; private set; } = true;
 
         private readonly object StateLock = new object();
 
-        private CancellationTokenSource CancellationTokenSource = null;
+        private CancellationTokenSource CancellationTokenSource;
 
         public Task Start()
         {
@@ -44,7 +44,10 @@ namespace FM.LiveSwitch.Connect
                             }
                         }, CancellationTokenSource.Token).ConfigureAwait(false);
                     }
-                    catch (TaskCanceledException) { }
+                    catch (TaskCanceledException)
+                    {
+                        // Do nothing. The operation was canceled.
+                    }
                     catch (Exception ex)
                     {
                         Console.Error.WriteLine("An exception was encountered while reading from stdin. {0}", ex);

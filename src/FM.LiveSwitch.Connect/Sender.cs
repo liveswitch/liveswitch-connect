@@ -55,7 +55,7 @@ namespace FM.LiveSwitch.Connect
 
         private Task Disconnected;
 
-        public Sender(TOptions options)
+        protected Sender(TOptions options)
         {
             Options = options;
         }
@@ -160,7 +160,7 @@ namespace FM.LiveSwitch.Connect
                             await Task.WhenAll(
                                 StopAudioStream(),
                                 StopVideoStream(),
-                                StopDataStream());
+                                StopDataStream()).ConfigureAwait(false);
 
                             Console.Error.WriteLine($"{GetType().Name} streams stopped.");
 
@@ -236,11 +236,11 @@ namespace FM.LiveSwitch.Connect
 
         #region Audio
 
-        private bool InitializeAudioStream()
+        private void InitializeAudioStream()
         {
             if (Options.NoAudio)
             {
-                return false;
+                return;
             }
 
             AudioSynchronizationSource = Utility.GenerateSynchronizationSource();
@@ -262,7 +262,6 @@ namespace FM.LiveSwitch.Connect
 
             AudioStream = new AudioStream(AudioPipes, null);
             DoInitializeAudioStream();
-            return true;
         }
 
         private async Task StartAudioStream()
@@ -413,11 +412,11 @@ namespace FM.LiveSwitch.Connect
 
         #region Video
 
-        private bool InitializeVideoStream()
+        private void InitializeVideoStream()
         {
             if (Options.NoVideo)
             {
-                return false;
+                return;
             }
 
             VideoSynchronizationSource = Utility.GenerateSynchronizationSource();
@@ -449,7 +448,6 @@ namespace FM.LiveSwitch.Connect
 
             VideoStream = new VideoStream(VideoPipes, null);
             DoInitializeVideoStream();
-            return true;
         }
 
         private async Task StartVideoStream()
@@ -600,17 +598,16 @@ namespace FM.LiveSwitch.Connect
 
         #region Data
 
-        private bool InitializeDataStream()
+        private void InitializeDataStream()
         {
             if (Options.DataChannelLabel == null)
             {
-                return false;
+                return;
             }
 
             DataChannel = new DataChannel(Options.DataChannelLabel);
             DataStream = new DataStream(DataChannel);
             DoInitializeDataStream();
-            return true;
         }
 
         private async Task StartDataStream()

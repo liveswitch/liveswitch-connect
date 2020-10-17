@@ -30,8 +30,8 @@ namespace FM.LiveSwitch.Connect
 
         public PipeStream Stream { get; private set; }
 
-        private NamedPipeClientStream _ClientStream;
-        private NamedPipeServerStream _ServerStream;
+        private readonly NamedPipeClientStream _ClientStream;
+        private readonly NamedPipeServerStream _ServerStream;
 
         public event Action OnConnected;
 
@@ -142,7 +142,6 @@ namespace FM.LiveSwitch.Connect
             return dataBuffer;
         }
 
-        private Thread _Thread;
         private volatile bool _ThreadActive;
         private TaskCompletionSource<bool> _ThreadExited;
 
@@ -158,7 +157,7 @@ namespace FM.LiveSwitch.Connect
             _ThreadExited = new TaskCompletionSource<bool>();
             _ThreadActive = true;
 
-            _Thread = new Thread(() =>
+            var thread = new Thread(() =>
             {
                 while (_ThreadActive)
                 {
@@ -190,7 +189,7 @@ namespace FM.LiveSwitch.Connect
             {
                 IsBackground = true
             };
-            _Thread.Start();
+            thread.Start();
         }
 
         public Task StopReading()

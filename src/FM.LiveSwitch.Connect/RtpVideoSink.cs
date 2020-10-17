@@ -29,7 +29,7 @@ namespace FM.LiveSwitch.Connect
 
         public bool WaitForKeyFrame { get; set; }
 
-        private RtpWriter _Writer = null;
+        private readonly RtpWriter _Writer;
         private int _KeyFrameIntervalCounter;
         private long _LastTimestamp;
         private long _SequenceNumber;
