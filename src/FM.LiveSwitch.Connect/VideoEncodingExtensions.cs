@@ -36,13 +36,13 @@ namespace FM.LiveSwitch.Connect
                     {
                         return new OpenH264.Encoder();
                     }
-                    throw new Exception("No H.264 encoders available.");
+                    throw new NotSupportedException("No H.264 encoders available.");
                 case VideoEncoding.H265:
                     if (options.NvidiaSupported)
                     {
                         return new Nvidia.H265.Encoder();
                     }
-                    throw new Exception("No H.265 encoders available.");
+                    throw new NotSupportedException("No H.265 encoders available.");
                 default:
                     throw new InvalidOperationException($"Unexpected video encoding '{encoding}'.");
             }
@@ -65,13 +65,13 @@ namespace FM.LiveSwitch.Connect
                     {
                         return new OpenH264.Decoder();
                     }
-                    throw new Exception("No H.264 decoders available.");
+                    throw new NotSupportedException("No H.264 decoders available.");
                 case VideoEncoding.H265:
                     if (options.NvidiaSupported)
                     {
                         return new Nvidia.H265.Decoder();
                     }
-                    throw new Exception("No H.265 decoders available.");
+                    throw new NotSupportedException("No H.265 decoders available.");
                 default:
                     throw new InvalidOperationException($"Unexpected video encoding '{encoding}'.");
             }
@@ -127,7 +127,7 @@ namespace FM.LiveSwitch.Connect
                 case VideoEncoding.H264:
                     return new H264.Format(H264.ProfileLevelId.Default, H264.PacketizationMode.Default) { IsPacketized = isPacketized };
                 case VideoEncoding.H265:
-                    return new H265.Format() { IsPacketized = isPacketized };
+                    return new H265.Format { IsPacketized = isPacketized };
                 default:
                     throw new InvalidOperationException($"Unexpected video encoding '{encoding}'.");
             }
