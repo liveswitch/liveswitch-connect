@@ -11,17 +11,20 @@ Requires .NET Core 3.1 or newer.
 Use `dotnet publish` to create a single, self-contained file for a specific platform/architecture:
 
 ### Windows
+
 ```shell
 dotnet publish -r win-x64 -c Release /p:PublishSingleFile=true /p:PublishTrimmed=true -o win
 ```
 
 ### macOS
-```
+
+```shell
 dotnet publish -r osx-x64 -c Release /p:PublishSingleFile=true /p:PublishTrimmed=true -o osx
 ```
 
 ### Linux
-```
+
+```shell
 dotnet publish -r linux-x64 -c Release /p:PublishSingleFile=true /p:PublishTrimmed=true -o linux
 ```
 
@@ -697,7 +700,7 @@ Open the [LiveSwitch Demo](https://v1.liveswitch.fm/) in a web browser and join 
 
 Open a terminal and run `lsconnect render` with the following arguments:
 
--   `--gateway-url` https://v1.liveswitch.fm:8443/sync
+-   `--gateway-url` <https://v1.liveswitch.fm:8443/sync>
 -   `--application-id` my-app-id
 -   `--shared-secret` --replaceThisWithYourOwnSharedSecret--
 -   `--audio-pipe` my-audio-pipe
@@ -724,7 +727,7 @@ Either of these will result in a graceful disconnection from LiveSwitch.
 
 Open a new terminal and run `lsconnect capture` in a new console tab with the following arguments:
 
--   `--gateway-url` https://v1.liveswitch.fm:8443/sync
+-   `--gateway-url` <https://v1.liveswitch.fm:8443/sync>
 -   `--application-id` my-app-id
 -   `--shared-secret` --replaceThisWithYourOwnSharedSecret--
 -   `--audio-pipe` my-audio-pipe
@@ -867,7 +870,7 @@ lsconnect ffcapture ... --input-args="-f avfoundation -i \"2\" -r 30 -vf scale=1
 
 ## Stream an MP4 file
 
-Sample file taken from here: https://file-examples.com/index.php/sample-video-files/
+Sample file taken from here: <https://file-examples.com/index.php/sample-video-files/>
 Note that `-stream_loop -1` plays the file on a loop, `-r 30` indicates 30fps and `-vf scale=640:480` scales to 640x480. You may need to tweak these depending on your file and output requirements.
 
 ```shell
