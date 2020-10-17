@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace FM.LiveSwitch.Connect
 {
@@ -224,14 +225,14 @@ namespace FM.LiveSwitch.Connect
 
         private string ReadParameter(out int c)
         {
-            var s = string.Empty;
+            var s = new StringBuilder();
             c = Read8();
             while (c != '\n' && c != ' ')
             {
-                s += Utf8.Decode(new[] { (byte)c });
+                s.Append(Utf8.Decode(new[] { (byte)c }));
                 c = Read8();
             }
-            return s;
+            return s.ToString();
         }
     }
 }

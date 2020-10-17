@@ -149,7 +149,7 @@ namespace FM.LiveSwitch.Connect.Shell
                             break;
                         }
                     }
-                });
+                }).ConfigureAwait(false);
 
                 _Channel.OnRemoteClientJoin -= onRemoteClientJoin;
                 _Channel.OnRemoteClientLeave -= onRemoteClientLeave;

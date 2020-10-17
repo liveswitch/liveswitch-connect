@@ -66,7 +66,7 @@ namespace FM.LiveSwitch.Connect
 
                     Task.Run(async () =>
                     {
-                        await ready;
+                        await ready.ConfigureAwait(false);
 
                         ReadStreamHeader();
 

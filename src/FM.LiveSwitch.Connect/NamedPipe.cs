@@ -214,7 +214,7 @@ namespace FM.LiveSwitch.Connect
 
             try
             {
-                await WaitForConnectionAsync();
+                await WaitForConnectionAsync().ConfigureAwait(false);
                 return true;
             }
             catch (Exception ex) when (ex is ObjectDisposedException || ex is IOException)

@@ -122,15 +122,15 @@ namespace FM.LiveSwitch.Connect
                             await Task.WhenAll(
                                 StartAudioStream(),
                                 StartVideoStream(),
-                                StartDataStream());
+                                StartDataStream()).ConfigureAwait(false);
 
                             Console.Error.WriteLine($"{GetType().Name} streams started.");
 
-                            await Ready();
+                            await Ready().ConfigureAwait(false);
 
                             Console.Error.WriteLine($"{GetType().Name} is ready and waiting for exit signal or disconnect...");
 
-                            await Task.WhenAny(ExitSignal(), Disconnected);
+                            await Task.WhenAny(ExitSignal(), Disconnected).ConfigureAwait(false);
 
                             if (Connection.State == ConnectionState.Failed)
                             {
@@ -153,7 +153,7 @@ namespace FM.LiveSwitch.Connect
                                 exit = true;
                             }
 
-                            await Unready();
+                            await Unready().ConfigureAwait(false);
 
                             Console.Error.WriteLine($"{GetType().Name} is not ready.");
 

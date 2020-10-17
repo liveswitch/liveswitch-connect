@@ -95,7 +95,7 @@ namespace FM.LiveSwitch.Connect
                     {
                         _LoopActive = false;
                         _Server.Close();
-                        await _LoopTask;
+                        await _LoopTask.ConfigureAwait(false);
                         promise.Resolve(null);
                     }
                     catch (Exception ex)

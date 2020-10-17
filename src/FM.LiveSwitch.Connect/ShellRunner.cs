@@ -48,7 +48,7 @@ namespace FM.LiveSwitch.Connect
                         {
                             Console.Error.WriteLine("Exception: {0}", ex);
                         }
-                    });
+                    }).ConfigureAwait(false);
                 }
                 return 0;
             }

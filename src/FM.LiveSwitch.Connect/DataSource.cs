@@ -42,7 +42,7 @@ namespace FM.LiveSwitch.Connect
                             {
                                 OnMessage?.Invoke(this, message);
                             }
-                        }, CancellationTokenSource.Token);
+                        }, CancellationTokenSource.Token).ConfigureAwait(false);
                     }
                     catch (TaskCanceledException) { }
                     catch (Exception ex)
