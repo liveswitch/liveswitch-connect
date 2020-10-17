@@ -11,6 +11,9 @@ namespace FM.LiveSwitch.Connect
         [Option("data-channel-label", Required = false, HelpText = "The data channel label.")]
         public string DataChannelLabel { get; set; }
 
+        [Option("region", Required = false, HelpText = "The local region.")]
+        public string Region { get; set; }
+
         [Option("user-id", Required = false, HelpText = "The local user ID.")]
         public string UserId { get; set; }
 

@@ -47,7 +47,9 @@ namespace FM.LiveSwitch.Connect
             File.WriteAllText(jsonPath, RemoteConnectionInfo.ToJson());
             Console.WriteLine(jsonPath);
 
-            return new Matroska.AudioSink(filePath);
+            var format = AudioFormat.Clone();
+            format.IsPacketized = false;
+            return new Matroska.AudioSink(filePath, format);
         }
 
         protected override Matroska.VideoSink CreateVideoSink()
@@ -66,7 +68,9 @@ namespace FM.LiveSwitch.Connect
             File.WriteAllText(jsonPath, RemoteConnectionInfo.ToJson());
             Console.WriteLine(jsonPath);
 
-            return new Matroska.VideoSink(filePath);
+            var format = VideoFormat.Clone();
+            format.IsPacketized = false;
+            return new Matroska.VideoSink(filePath, format);
         }
     }
 }

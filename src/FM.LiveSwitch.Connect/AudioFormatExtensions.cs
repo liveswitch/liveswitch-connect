@@ -22,7 +22,7 @@ namespace FM.LiveSwitch.Connect
             {
                 return AudioEncoding.PCMA;
             }
-            throw new Exception("Unknown audio format.");
+            throw new InvalidOperationException($"Unexpected audio format '{format.Name}'.");
         }
     }
 }

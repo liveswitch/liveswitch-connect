@@ -22,7 +22,7 @@ namespace FM.LiveSwitch.Connect
             {
                 return VideoEncoding.H265;
             }
-            throw new Exception("Unknown video format.");
+            throw new InvalidOperationException($"Unexpected video format '{format.Name}'.");
         }
     }
 }

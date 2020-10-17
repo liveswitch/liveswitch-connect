@@ -17,7 +17,7 @@ namespace FM.LiveSwitch.Connect
                 case AudioEncoding.PCMA:
                     return AudioCodec.PCMA;
                 default:
-                    throw new Exception("Unknown audio encoding.");
+                    throw new InvalidOperationException($"Unexpected audio encoding '{encoding}'.");
             }
         }
 
@@ -34,7 +34,7 @@ namespace FM.LiveSwitch.Connect
                 case AudioEncoding.PCMA:
                     return new Pcma.Encoder();
                 default:
-                    throw new Exception("Unknown audio encoding.");
+                    throw new InvalidOperationException($"Unexpected audio encoding '{encoding}'.");
             }
         }
 
@@ -51,7 +51,7 @@ namespace FM.LiveSwitch.Connect
                 case AudioEncoding.PCMA:
                     return new Pcma.Decoder();
                 default:
-                    throw new Exception("Unknown audio encoding.");
+                    throw new InvalidOperationException($"Unexpected audio encoding '{encoding}'.");
             }
         }
 
@@ -68,7 +68,7 @@ namespace FM.LiveSwitch.Connect
                 case AudioEncoding.PCMA:
                     return new Pcma.Packetizer();
                 default:
-                    throw new Exception("Unknown audio encoding.");
+                    throw new InvalidOperationException($"Unexpected audio encoding '{encoding}'.");
             }
         }
 
@@ -85,7 +85,7 @@ namespace FM.LiveSwitch.Connect
                 case AudioEncoding.PCMA:
                     return new Pcma.Depacketizer();
                 default:
-                    throw new Exception("Unknown audio encoding.");
+                    throw new InvalidOperationException($"Unexpected audio encoding '{encoding}'.");
             }
         }
 
@@ -99,15 +99,15 @@ namespace FM.LiveSwitch.Connect
             switch (encoding)
             {
                 case AudioEncoding.Opus:
-                    return new Opus.Format() { IsPacketized = isPacketized };
+                    return new Opus.Format { IsPacketized = isPacketized };
                 case AudioEncoding.G722:
-                    return new G722.Format() { IsPacketized = isPacketized, ClockRate = isPacketized ? 8000 : 16000 };
+                    return new G722.Format { IsPacketized = isPacketized, ClockRate = isPacketized ? 8000 : 16000 };
                 case AudioEncoding.PCMU:
-                    return new Pcmu.Format() { IsPacketized = isPacketized };
+                    return new Pcmu.Format { IsPacketized = isPacketized };
                 case AudioEncoding.PCMA:
-                    return new Pcma.Format() { IsPacketized = isPacketized };
+                    return new Pcma.Format { IsPacketized = isPacketized };
                 default:
-                    throw new Exception("Unknown audio encoding.");
+                    throw new InvalidOperationException($"Unexpected audio encoding '{encoding}'.");
             }
         }
     }

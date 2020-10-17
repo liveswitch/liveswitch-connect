@@ -13,7 +13,7 @@ namespace FM.LiveSwitch.Connect
 
         public event Action<RtpPacket> OnPacket;
 
-        private UdpClient _Server;
+        private readonly UdpClient _Server;
 
         public RtpReader(int clockRate)
         {
@@ -50,19 +50,17 @@ namespace FM.LiveSwitch.Connect
 
         private UdpClient CreateServer(int port)
         {
-            var listener = new UdpClient(AddressFamily.InterNetwork);
-            listener.ExclusiveAddressUse = true;
+            var listener = new UdpClient(AddressFamily.InterNetwork)
+            {
+                ExclusiveAddressUse = true
+            };
             listener.Client.Bind(new IPEndPoint(IPAddress.Any, port));
             return listener;
         }
 
         public void Destroy()
         {
-            if (_Server != null)
-            {
-                _Server.Dispose();
-                _Server = null;
-            }
+            _Server.Dispose();
         }
 
         private volatile bool _LoopActive;
@@ -95,7 +93,7 @@ namespace FM.LiveSwitch.Connect
                     {
                         _LoopActive = false;
                         _Server.Close();
-                        await _LoopTask;
+                        await _LoopTask.ConfigureAwait(false);
                         promise.Resolve(null);
                     }
                     catch (Exception ex)

@@ -11,7 +11,6 @@ namespace FM.LiveSwitch.Connect
         public ShellOptions Options { get; private set; }
 
         public ShellRunner(ShellOptions options)
-            : base()
         {
             Options = options;
         }
@@ -48,7 +47,7 @@ namespace FM.LiveSwitch.Connect
                         {
                             Console.Error.WriteLine("Exception: {0}", ex);
                         }
-                    });
+                    }).ConfigureAwait(false);
                 }
                 return 0;
             }

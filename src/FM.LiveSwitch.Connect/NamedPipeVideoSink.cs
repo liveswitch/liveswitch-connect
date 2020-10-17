@@ -17,14 +17,13 @@
 
         protected NamedPipe Pipe { get; private set; }
 
-        private volatile bool _StreamHeaderSent = false;
+        private volatile bool _StreamHeaderSent;
 
         public NamedPipeVideoSink(string pipeName)
             : this(pipeName, false)
         { }
 
         public NamedPipeVideoSink(string pipeName, bool client)
-            : base()
         {
             Initialize(pipeName, client);
         }
@@ -65,7 +64,8 @@
             {
                 if (!_StreamHeaderSent)
                 {
-                    if (!(_StreamHeaderSent = WriteStreamHeader(frame, inputBuffer)))
+                    _StreamHeaderSent = WriteStreamHeader(frame, inputBuffer);
+                    if (!_StreamHeaderSent)
                     {
                         if (!Deactivated)
                         {

@@ -15,7 +15,7 @@ namespace FM.LiveSwitch.Connect
                 case VideoEncoding.H264:
                     return VideoCodec.H264;
                 default:
-                    throw new Exception("Unknown video encoding.");
+                    throw new InvalidOperationException($"Unexpected video encoding '{encoding}'.");
             }
         }
 
@@ -44,7 +44,7 @@ namespace FM.LiveSwitch.Connect
                     }
                     throw new Exception("No H.265 encoders available.");
                 default:
-                    throw new Exception("Unknown video encoding.");
+                    throw new InvalidOperationException($"Unexpected video encoding '{encoding}'.");
             }
         }
 
@@ -73,7 +73,7 @@ namespace FM.LiveSwitch.Connect
                     }
                     throw new Exception("No H.265 decoders available.");
                 default:
-                    throw new Exception("Unknown video encoding.");
+                    throw new InvalidOperationException($"Unexpected video encoding '{encoding}'.");
             }
         }
 
@@ -90,7 +90,7 @@ namespace FM.LiveSwitch.Connect
                 case VideoEncoding.H265:
                     return new H265.Packetizer();
                 default:
-                    throw new Exception("Unknown video encoding.");
+                    throw new InvalidOperationException($"Unexpected video encoding '{encoding}'.");
             }
         }
 
@@ -107,7 +107,7 @@ namespace FM.LiveSwitch.Connect
                 case VideoEncoding.H265:
                     return new H265.Depacketizer();
                 default:
-                    throw new Exception("Unknown video encoding.");
+                    throw new InvalidOperationException($"Unexpected video encoding '{encoding}'.");
             }
         }
 
@@ -121,15 +121,15 @@ namespace FM.LiveSwitch.Connect
             switch (encoding)
             {
                 case VideoEncoding.VP8:
-                    return new Vp8.Format() { IsPacketized = isPacketized };
+                    return new Vp8.Format { IsPacketized = isPacketized };
                 case VideoEncoding.VP9:
-                    return new Vp9.Format() { IsPacketized = isPacketized };
+                    return new Vp9.Format { IsPacketized = isPacketized };
                 case VideoEncoding.H264:
                     return new H264.Format(H264.ProfileLevelId.Default, H264.PacketizationMode.Default) { IsPacketized = isPacketized };
                 case VideoEncoding.H265:
                     return new H265.Format() { IsPacketized = isPacketized };
                 default:
-                    throw new Exception("Unknown video encoding.");
+                    throw new InvalidOperationException($"Unexpected video encoding '{encoding}'.");
             }
         }
     }

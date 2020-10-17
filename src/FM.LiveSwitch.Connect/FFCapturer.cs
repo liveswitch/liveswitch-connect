@@ -107,7 +107,6 @@ namespace FM.LiveSwitch.Connect
         }
 
         private Process FFmpeg;
-        private Thread _Monitor;
         private volatile bool _Done;
         private string H264SdpFileName;
 
@@ -197,7 +196,7 @@ namespace FM.LiveSwitch.Connect
                         }
                         else
                         {
-                            throw new Exception("Unknown audio encoding.");
+                            throw new InvalidOperationException($"Unexpected audio format '{RtpAudioFormat.Name}'.");
                         }
                     }
 
@@ -219,12 +218,12 @@ namespace FM.LiveSwitch.Connect
                     }
                     else
                     {
-                        throw new Exception("Unknown audio encoding.");
+                        throw new InvalidOperationException($"Unexpected audio format '{RtpAudioFormat.Name}'.");
                     }
                 }
             }
 
-            var readH264ParameterSets = false;
+            var processParameterSets = false;
             if (VideoSource != null)
             {
                 args.Add($"-map 0:v:0");
@@ -251,7 +250,7 @@ namespace FM.LiveSwitch.Connect
 
                         if (RtpVideoFormat.IsH264)
                         {
-                            readH264ParameterSets = true;
+                            processParameterSets = true;
                             source.NeedsParameterSets = true;
                             H264SdpFileName = $"h264_{Utility.GenerateId()}.sdp";
                             args.AddRange(new[]
@@ -321,7 +320,7 @@ namespace FM.LiveSwitch.Connect
                         }
                         else
                         {
-                            throw new Exception("Unknown video format.");
+                            throw new InvalidOperationException($"Unexpected video format '{RtpVideoFormat.Name}'.");
                         }
                     }
 
@@ -343,14 +342,14 @@ namespace FM.LiveSwitch.Connect
                     }
                     else
                     {
-                        throw new Exception("Unknown video format.");
+                        throw new InvalidOperationException($"Unexpected video format '{RtpVideoFormat.Name}'.");
                     }
                 }
             }
 
             FFmpeg = FFUtility.FFmpeg(string.Join(" ", args));
 
-            _Monitor = new Thread(() =>
+            var monitor = new Thread(() =>
             {
                 while (!_Done)
                 {
@@ -365,9 +364,9 @@ namespace FM.LiveSwitch.Connect
             {
                 IsBackground = true
             };
-            _Monitor.Start();
+            monitor.Start();
 
-            if (readH264ParameterSets)
+            if (processParameterSets)
             {
                 ProcessParameterSets();
             }
@@ -408,7 +407,7 @@ namespace FM.LiveSwitch.Connect
             }
             if (timeout.IsCompletedSuccessfully)
             {
-                throw new Exception("H.264 SDP output file was not found.");
+                throw new ParameterSetException("H.264 SDP output file was not found.");
             }
             cancelTimeout.Cancel();
 
@@ -430,7 +429,7 @@ namespace FM.LiveSwitch.Connect
             }
             if (timeout.IsCompletedSuccessfully)
             {
-                throw new Exception("H.264 SDP output file could not be read.", readException);
+                throw new ParameterSetException("H.264 SDP output file could not be read.", readException);
             }
             cancelTimeout.Cancel();
 
@@ -448,19 +447,19 @@ namespace FM.LiveSwitch.Connect
             var sdpMessage = Sdp.Message.Parse(sdp);
             if (sdpMessage == null)
             {
-                throw new Exception("H.264 SDP output file could not be parsed.");
+                throw new ParameterSetException("H.264 SDP output file could not be parsed.");
             }
 
             var sdpMediaDescription = sdpMessage.MediaDescriptions.FirstOrDefault();
             if (sdpMediaDescription?.Media?.MediaType != Sdp.MediaType.Video)
             {
-                throw new Exception("H.264 SDP output file is missing video description.");
+                throw new ParameterSetException("H.264 SDP output file is missing video description.");
             }
 
             var rtpMapAttribute = sdpMediaDescription.GetRtpMapAttributes()?.FirstOrDefault();
             if (rtpMapAttribute?.FormatName != VideoFormat.H264Name)
             {
-                throw new Exception("H.264 SDP output file is missing H.264 RTP map attribute.");
+                throw new ParameterSetException("H.264 SDP output file is missing H.264 RTP map attribute.");
             }
 
             var formatSpecificParametersString = rtpMapAttribute.RelatedFormatParametersAttribute?.FormatSpecificParameters;

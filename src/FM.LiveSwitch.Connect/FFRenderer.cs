@@ -113,7 +113,6 @@ namespace FM.LiveSwitch.Connect
         }
 
         private Process FFmpeg;
-        private Thread _Monitor;
         private volatile bool _Done;
         private string AudioSdpFileName;
         private string VideoSdpFileName;
@@ -148,8 +147,6 @@ namespace FM.LiveSwitch.Connect
                 {
                     var sink = AudioSink as RtpAudioSink;
 
-                    args.Add("-protocol_whitelist file,crypto,udp,rtp");
-
                     sink.IPAddress = "127.0.0.1";
                     sink.Port = LockedRandomizer.Next(49162, 65536);
                     sink.PayloadType = 96;
@@ -176,10 +173,15 @@ namespace FM.LiveSwitch.Connect
                     }
                     else
                     {
-                        throw new Exception("Unknown audio encoding.");
+                        throw new InvalidOperationException($"Unexpected audio format '{RtpAudioFormat.Name}'.");
                     }
 
-                    var sdpMessage = new Sdp.Message(new Sdp.Origin("127.0.0.1"), "lsconnect")
+                    if (Options.AudioBitrate.HasValue && !RtpAudioFormat.IsFixedBitrate)
+                    {
+                        sdpMediaDescription.AddBandwidth(new Sdp.Bandwidth(Sdp.BandwidthType.ApplicationSpecific, Options.AudioBitrate.Value));
+                    }
+
+                    var sdpMessage = new Sdp.Message(new Sdp.Origin("127.0.0.1"), "liveswitch-audio")
                     {
                         ConnectionData = new Sdp.ConnectionData("127.0.0.1")
                     };
@@ -196,7 +198,11 @@ namespace FM.LiveSwitch.Connect
 
                     Console.Error.WriteLine($"Audio SDP:{Environment.NewLine}{sdp}");
 
-                    args.Add($"-i {AudioSdpFileName}");
+                    args.AddRange(new[]
+                    {
+                        $"-protocol_whitelist file,crypto,udp,rtp",
+                        $"-i {AudioSdpFileName}"
+                    });
                 }
             }
 
@@ -216,14 +222,16 @@ namespace FM.LiveSwitch.Connect
                 {
                     var sink = VideoSink as RtpVideoSink;
 
-                    args.Add("-protocol_whitelist file,crypto,udp,rtp");
-
                     sink.IPAddress = "127.0.0.1";
                     sink.Port = LockedRandomizer.Next(49162, 65536);
                     sink.PayloadType = 97;
 
                     var sdpMediaDescription = new Sdp.MediaDescription(new Sdp.Media(Sdp.MediaType.Video, sink.Port, Sdp.Rtp.Media.RtpAvpTransportProtocol, sink.PayloadType.ToString()));
                     sdpMediaDescription.AddMediaAttribute(new Sdp.SendReceiveAttribute());
+                    if (Options.VideoFrameRate.HasValue)
+                    {
+                        sdpMediaDescription.AddMediaAttribute(new Sdp.FrameRateAttribute(Options.VideoFrameRate.ToString()));
+                    }
 
                     if (RtpVideoFormat.IsVp8)
                     {
@@ -246,10 +254,15 @@ namespace FM.LiveSwitch.Connect
                     }
                     else
                     {
-                        throw new Exception("Unknown video format.");
+                        throw new InvalidOperationException($"Unexpected video format '{RtpVideoFormat.Name}'.");
                     }
 
-                    var sdpMessage = new Sdp.Message(new Sdp.Origin("127.0.0.1"), "lsconnect")
+                    if (Options.VideoBitrate.HasValue && !RtpVideoFormat.IsFixedBitrate)
+                    {
+                        sdpMediaDescription.AddBandwidth(new Sdp.Bandwidth(Sdp.BandwidthType.ApplicationSpecific, Options.VideoBitrate.Value));
+                    }
+
+                    var sdpMessage = new Sdp.Message(new Sdp.Origin("127.0.0.1"), "liveswitch-video")
                     {
                         ConnectionData = new Sdp.ConnectionData("127.0.0.1")
                     };
@@ -266,39 +279,69 @@ namespace FM.LiveSwitch.Connect
 
                     Console.Error.WriteLine($"Video SDP:{Environment.NewLine}{sdp}");
 
-                    args.Add($"-i {VideoSdpFileName}");
+                    if (Options.VideoFrameRate.HasValue)
+                    {
+                        args.Add($"-r {Options.VideoFrameRate}");
+                    }
+
+                    args.AddRange(new[]
+                    {
+                        $"-protocol_whitelist file,crypto,udp,rtp",
+                        $"-i {VideoSdpFileName}",
+                    });
                 }
             }
 
             args.Add(Options.OutputArgs);
 
-            FFmpeg = FFUtility.FFmpeg(string.Join(" ", args));
+            FFmpeg = FFUtility.FFmpeg(string.Join(" ", args), ProcessFFmpegOutput);
+            Activate();
 
-            _Monitor = new Thread(() =>
+            var monitor = new Thread(() =>
             {
                 while (!_Done)
                 {
                     FFmpeg.WaitForExit();
+                    Deactivate();
                     if (!_Done)
                     {
                         Console.Error.WriteLine("FFmpeg exited unexpectedly.");
-                        FFmpeg = FFUtility.FFmpeg(string.Join(" ", args));
+                        FFmpeg = FFUtility.FFmpeg(string.Join(" ", args), ProcessFFmpegOutput);
+                        Activate();
                     }
                 }
             })
             {
                 IsBackground = true
             };
-            _Monitor.Start();
+            monitor.Start();
+        }
 
-            if (AudioSink != null)
+        private void ProcessFFmpegOutput(string line)
+        {
+            var restartFFmpeg = false;
+            if (AudioSink != null && Options.AudioMode == FFRenderMode.NoDecode)
             {
-                AudioSink.Deactivated = false;
+                if (line.Contains(".sdp: Unknown error") || // input media has triggered an unknown error
+                    line.Contains(".sdp: Invalid data"))    // input media is not appreciated
+                {
+                    restartFFmpeg = true;
+                }
             }
 
-            if (VideoSink != null)
+            if (VideoSink != null && Options.VideoMode == FFRenderMode.NoDecode)
             {
-                VideoSink.Deactivated = false;
+                if (line.Contains(".sdp: Unknown error") || // input media has triggered an unknown error
+                    line.Contains(".sdp: Invalid data"))    // input media is not appreciated
+                {
+                    restartFFmpeg = true;
+                }
+            }
+
+            // signal exit so we can start again
+            if (restartFFmpeg)
+            {
+                FFmpeg.StandardInput.Write('q');
             }
         }
 
@@ -306,15 +349,7 @@ namespace FM.LiveSwitch.Connect
         {
             _Done = true;
 
-            if (AudioSink != null)
-            {
-                AudioSink.Deactivated = true;
-            }
-
-            if (VideoSink != null)
-            {
-                VideoSink.Deactivated = true;
-            }
+            Deactivate();
 
             if (FFmpeg != null)
             {
@@ -347,6 +382,32 @@ namespace FM.LiveSwitch.Connect
             }
 
             return base.Unready();
+        }
+
+        private void Deactivate()
+        {
+            if (AudioSink != null)
+            {
+                AudioSink.Deactivated = true;
+            }
+
+            if (VideoSink != null)
+            {
+                VideoSink.Deactivated = true;
+            }
+        }
+
+        private void Activate()
+        {
+            if (AudioSink != null)
+            {
+                AudioSink.Deactivated = false;
+            }
+
+            if (VideoSink != null)
+            {
+                VideoSink.Deactivated = false;
+            }
         }
     }
 }

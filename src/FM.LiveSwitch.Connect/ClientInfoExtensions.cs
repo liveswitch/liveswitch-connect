@@ -7,6 +7,10 @@ namespace FM.LiveSwitch.Connect
         public static Descriptor[] GetDescriptors(this ClientInfo clientInfo)
         {
             var descriptors = new List<Descriptor>();
+            if (clientInfo.Region != null)
+            {
+                descriptors.Add(new Descriptor("Region", clientInfo.Region));
+            }
             if (clientInfo.UserId != null)
             {
                 descriptors.Add(new Descriptor("User ID", clientInfo.UserId));

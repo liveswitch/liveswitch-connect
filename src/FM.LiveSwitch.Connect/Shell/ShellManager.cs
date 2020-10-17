@@ -58,8 +58,6 @@ namespace FM.LiveSwitch.Connect.Shell
 
         public async Task<int> Unregister(UnregisterOptions options)
         {
-            var clientId = _Client.Id;
-
             await _Client.Unregister();
 
             _Client = null;
@@ -151,7 +149,7 @@ namespace FM.LiveSwitch.Connect.Shell
                             break;
                         }
                     }
-                });
+                }).ConfigureAwait(false);
 
                 _Channel.OnRemoteClientJoin -= onRemoteClientJoin;
                 _Channel.OnRemoteClientLeave -= onRemoteClientLeave;
@@ -215,7 +213,7 @@ namespace FM.LiveSwitch.Connect.Shell
                             break;
                         }
                     }
-                });
+                }).ConfigureAwait(false);
 
                 _Channel.OnRemoteUpstreamConnectionOpen -= onRemoteUpstreamConnectionOpen;
                 _Channel.OnRemoteUpstreamConnectionClose -= onRemoteUpstreamConnectionClose;

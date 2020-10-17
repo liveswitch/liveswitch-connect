@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace FM.LiveSwitch.Connect
 {
@@ -39,13 +40,13 @@ namespace FM.LiveSwitch.Connect
                 Read8() != 'G' ||
                 Read8() != '2')
             {
-                throw new Exception("Invalid stream signature.");
+                throw new CorruptStreamException("Invalid stream signature.");
             }
 
             var c = Read8();
             if (c != '\n' && c != ' ')
             {
-                throw new Exception("Malformed stream header.");
+                throw new CorruptStreamException("Malformed stream header.");
             }
 
             while (c != '\n')
@@ -57,7 +58,7 @@ namespace FM.LiveSwitch.Connect
 
                     if (!ParseAssistant.TryParseIntegerValue(s, out _HeaderWidth))
                     {
-                        throw new Exception("Invalid stream header width.");
+                        throw new CorruptStreamException("Invalid stream header width.");
                     }
                 }
                 else if (c == 'H')
@@ -66,7 +67,7 @@ namespace FM.LiveSwitch.Connect
 
                     if (!ParseAssistant.TryParseIntegerValue(s, out _HeaderHeight))
                     {
-                        throw new Exception("Invalid stream header height.");
+                        throw new CorruptStreamException("Invalid stream header height.");
                     }
                 }
                 else if (c == 'F')
@@ -75,13 +76,13 @@ namespace FM.LiveSwitch.Connect
                     var split = s.Split(':');
                     if (split.Length != 2)
                     {
-                        throw new Exception("Invalid stream header frame rate.");
+                        throw new CorruptStreamException("Invalid stream header frame rate.");
                     }
 
                     if (!ParseAssistant.TryParseIntegerValue(split[0], out var num) ||
                         !ParseAssistant.TryParseIntegerValue(split[1], out var den))
                     {
-                        throw new Exception("Invalid stream header frame rate.");
+                        throw new CorruptStreamException("Invalid stream header frame rate.");
                     }
 
                     _HeaderFrameRate = (double)num / den;
@@ -96,13 +97,13 @@ namespace FM.LiveSwitch.Connect
                     var split = s.Split(':');
                     if (split.Length != 2)
                     {
-                        throw new Exception("Invalid stream header pixel aspect ratio.");
+                        throw new CorruptStreamException("Invalid stream header pixel aspect ratio.");
                     }
 
                     if (!ParseAssistant.TryParseIntegerValue(split[0], out var num) ||
                         !ParseAssistant.TryParseIntegerValue(split[1], out var den))
                     {
-                        throw new Exception("Invalid stream header pixel aspect ratio.");
+                        throw new CorruptStreamException("Invalid stream header pixel aspect ratio.");
                     }
 
                     _HeaderPixelAspectRatio = (double)num / den;
@@ -125,15 +126,15 @@ namespace FM.LiveSwitch.Connect
 
             // log details
             var headerParams = new List<string>();
-            if (_HeaderWidth != 0)
+            if (_HeaderWidth > 0)
             {
                 headerParams.Add($"Width={_HeaderWidth}");
             }
-            if (_HeaderHeight != 0)
+            if (_HeaderHeight > 0)
             {
                 headerParams.Add($"Height={_HeaderHeight}");
             }
-            if (_HeaderFrameRate != 0)
+            if (_HeaderFrameRate > 0)
             {
                 headerParams.Add($"FrameRate={_HeaderFrameRate}");
             }
@@ -141,7 +142,7 @@ namespace FM.LiveSwitch.Connect
             {
                 headerParams.Add($"Interlacing={_HeaderInterlacing}");
             }
-            if (_HeaderPixelAspectRatio != 0)
+            if (_HeaderPixelAspectRatio > 0)
             {
                 headerParams.Add($"PixelAspectRatio={_HeaderPixelAspectRatio}");
             }
@@ -164,13 +165,13 @@ namespace FM.LiveSwitch.Connect
                 Read8() != 'M' ||
                 Read8() != 'E')
             {
-                throw new Exception("Invalid frame signature.");
+                throw new CorruptStreamException("Invalid frame signature.");
             }
 
             var c = Read8();
             if (c != '\n' && c != ' ')
             {
-                throw new Exception("Malformed frame header.");
+                throw new CorruptStreamException("Malformed frame header.");
             }
 
             Width = _HeaderWidth;
@@ -188,7 +189,7 @@ namespace FM.LiveSwitch.Connect
                     }
                     else
                     {
-                        throw new Exception("Invalid frame header width.");
+                        throw new CorruptStreamException("Invalid frame header width.");
                     }
                 }
                 else if (c == 'H')
@@ -201,7 +202,7 @@ namespace FM.LiveSwitch.Connect
                     }
                     else
                     {
-                        throw new Exception("Invalid frame header height.");
+                        throw new CorruptStreamException("Invalid frame header height.");
                     }
                 }
                 else
@@ -224,14 +225,14 @@ namespace FM.LiveSwitch.Connect
 
         private string ReadParameter(out int c)
         {
-            var s = string.Empty;
+            var s = new StringBuilder();
             c = Read8();
             while (c != '\n' && c != ' ')
             {
-                s += Utf8.Decode(new[] { (byte)c });
+                s.Append(Utf8.Decode(new[] { (byte)c }));
                 c = Read8();
             }
-            return s;
+            return s.ToString();
         }
     }
 }

@@ -23,7 +23,7 @@
 
         public long SynchronizationSource { get; set; }
 
-        private RtpWriter _Writer = null;
+        private readonly RtpWriter _Writer;
         private long _SequenceNumber;
 
         public RtpAudioSink(AudioFormat format)

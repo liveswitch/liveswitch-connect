@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace FM.LiveSwitch.Connect
 {
-    partial class Program
+    internal static class Program
     {
         static void Main(string[] args)
         {
@@ -123,13 +123,36 @@ namespace FM.LiveSwitch.Connect
 
         private static void Initialize(Options options)
         {
-            Log.AddProvider(new ErrorLogProvider(options.LogLevel));
+            TestOpenH264Support(options);
 
-            Console.Error.WriteLine("Checking for OpenH264...");
-            OpenH264.Utility.DownloadOpenH264(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)).GetAwaiter().GetResult();
+            TestNvidiaSupport(options);
+
+            Log.AddProvider(new ErrorLogProvider(options.LogLevel));
+        }
+
+        private static void TestOpenH264Support(Options options)
+        {
+            if (!OpenH264.Utility.IsSupported())
+            {
+                return;
+            }
+
+            try
+            {
+                Console.Error.WriteLine("Downloading OpenH264...");
+                OpenH264.Utility.DownloadOpenH264(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)).GetAwaiter().GetResult();
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Could not download OpenH264. {ex.Message}");
+                return;
+            }
+
+            Console.Error.WriteLine("Testing OpenH264 support...");
             try
             {
                 options.OpenH264Supported = OpenH264.Utility.Initialize();
+
                 if (options.OpenH264Supported)
                 {
                     Console.Error.WriteLine("OpenH264 is supported.");
@@ -141,25 +164,29 @@ namespace FM.LiveSwitch.Connect
             }
             catch (Exception ex)
             {
-                Console.Error.WriteLine($"OpenH264 is not supported. {ex}");
+                Console.Error.WriteLine($"OpenH264 is not supported. {ex.Message}");
             }
+        }
 
-            Console.Error.WriteLine("Checking for Nvidia...");
+        private static void TestNvidiaSupport(Options options)
+        {
+            Console.Error.WriteLine("Testing NVIDIA support...");
             try
             {
                 options.NvidiaSupported = Nvidia.Utility.NvencSupported;
+
                 if (options.NvidiaSupported)
                 {
-                    Console.Error.WriteLine("Nvidia is supported.");
+                    Console.Error.WriteLine("NVIDIA is supported.");
                 }
                 else
                 {
-                    Console.Error.WriteLine("Nvidia is not supported.");
+                    Console.Error.WriteLine("NVIDIA is not supported.");
                 }
             }
             catch (Exception ex)
             {
-                Console.Error.WriteLine($"Nvidia is not supported. {ex}");
+                Console.Error.WriteLine($"NVIDIA is not supported. {ex.Message}");
             }
         }
     }

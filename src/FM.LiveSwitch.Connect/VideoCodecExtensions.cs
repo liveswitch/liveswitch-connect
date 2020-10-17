@@ -17,9 +17,9 @@ namespace FM.LiveSwitch.Connect
                 case VideoCodec.H265:
                     return VideoEncoding.H265;
                 case VideoCodec.Any:
-                    throw new Exception("Cannot convert 'any' codec to encoding.");
+                    throw new InvalidOperationException($"Cannot convert video codec '{codec}' to encoding.");
                 default:
-                    throw new Exception("Unknown video encoding.");
+                    throw new InvalidOperationException($"Unexpected video codec '{codec}'.");
             }
         }
     }

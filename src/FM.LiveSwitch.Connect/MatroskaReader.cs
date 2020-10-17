@@ -16,33 +16,31 @@ namespace FM.LiveSwitch.Connect
         private static byte[] EbmlBlockGroupReferenceBlockId = new byte[] { 0xFB };
         private static byte[] EbmlBlockGroupBlockDurationId = new byte[] { 0x9B };
 
-        private Ebml _Ebml = null;
-
-        private volatile bool _HasEbml = false;
-        private volatile bool _InSegment = false;
-        private volatile bool _InCluster = false;
-        private volatile bool _InBlockGroup = false;
+        private volatile bool _HasEbml;
+        private volatile bool _InSegment;
+        private volatile bool _InCluster;
+        private volatile bool _InBlockGroup;
 
         private long _SegmentEndPosition = -1;
         private long _ClusterEndPosition = -1;
         private long _BlockGroupEndPosition = -1;
 
-        private SegmentInfo _SegmentInfo = null;
-        private List<SeekHead> _SeekHeads = new List<SeekHead>();
-        private List<Track> _Tracks = new List<Track>();
+        private SegmentInfo _SegmentInfo;
+        private readonly List<SeekHead> _SeekHeads = new List<SeekHead>();
+        private readonly List<Track> _Tracks = new List<Track>();
 
         private long _ClusterTimecode = -1;
         private long _ClusterPosition = -1;
         private long _ClusterPrevSize = -1;
 
-        private List<long> _ClusterBlockGroupReferenceBlocks = new List<long>();
+        private readonly List<long> _ClusterBlockGroupReferenceBlocks = new List<long>();
         private long _ClusterBlockGroupBlockDuration = -1;
 
         private long _ClusterBlockTrackNumber = -1;
         private int _ClusterBlockTimecode = -1;
-        private byte _ClusterBlockFlags = 0;
+        private byte _ClusterBlockFlags;
 
-        private long _StreamPosition = 0;
+        private long _StreamPosition;
         private int _NextFrameLength = -1;
 
         private long _FirstFrameTimestamp = -1;
@@ -124,7 +122,7 @@ namespace FM.LiveSwitch.Connect
                     if (Element.Compare(id, Ebml.EbmlId))
                     {
                         // read this in one block
-                        _Ebml = new Ebml(ReadValue(id));
+                        _ = ReadValue(id);
 
                         _HasEbml = true;
                     }
@@ -140,7 +138,7 @@ namespace FM.LiveSwitch.Connect
                     }
                     else
                     {
-                        throw new Exception($"Unexpected ID '{BitAssistant.GetHexString(id)}' at stream offset '{_StreamPosition}'.");
+                        throw new NotImplementedException($"Unexpected ID '{BitAssistant.GetHexString(id)}' at stream offset '{_StreamPosition}'.");
                     }
                 }
                 else if (!_InSegment)
@@ -168,7 +166,7 @@ namespace FM.LiveSwitch.Connect
                     }
                     else
                     {
-                        throw new Exception($"Unexpected ID '{BitAssistant.GetHexString(id)}' at stream offset '{_StreamPosition}'.");
+                        throw new NotImplementedException($"Unexpected ID '{BitAssistant.GetHexString(id)}' at stream offset '{_StreamPosition}'.");
                     }
                 }
                 else if (!_InCluster)
@@ -222,7 +220,7 @@ namespace FM.LiveSwitch.Connect
                     }
                     else
                     {
-                        throw new Exception($"Unexpected ID '{BitAssistant.GetHexString(id)}' at stream offset '{_StreamPosition}'.");
+                        throw new NotImplementedException($"Unexpected ID '{BitAssistant.GetHexString(id)}' at stream offset '{_StreamPosition}'.");
                     }
                 }
                 else if (!_InBlockGroup)
@@ -274,7 +272,7 @@ namespace FM.LiveSwitch.Connect
                     }
                     else
                     {
-                        throw new Exception($"Unexpected ID '{BitAssistant.GetHexString(id)}' at stream offset '{_StreamPosition}'.");
+                        throw new NotImplementedException($"Unexpected ID '{BitAssistant.GetHexString(id)}' at stream offset '{_StreamPosition}'.");
                     }
                 }
                 else
@@ -313,7 +311,7 @@ namespace FM.LiveSwitch.Connect
                     }
                     else
                     {
-                        throw new Exception($"Unexpected ID '{BitAssistant.GetHexString(id)}' at stream offset '{_StreamPosition}'.");
+                        throw new NotImplementedException($"Unexpected ID '{BitAssistant.GetHexString(id)}' at stream offset '{_StreamPosition}'.");
                     }
                 }
             }
@@ -321,14 +319,13 @@ namespace FM.LiveSwitch.Connect
 
         private void Skip(int length)
         {
-            //_Stream.Seek(length, System.IO.SeekOrigin.Current);
             Read(length);
         }
 
         private byte[] Read(int length)
         {
             var output = new byte[length];
-            _Stream.Read(output);
+            _ = _Stream.Read(output);
             return output;
         }
 
@@ -371,31 +368,31 @@ namespace FM.LiveSwitch.Connect
             if ((b1 & 0x80) == 0x80) // 1xxx xxxx
             {
                 // Class A ID (1 byte)
-                return new byte[] { b1 };
+                return new[] { b1 };
             }
 
             var b2 = (byte)stream.ReadByte();
             if ((b1 & 0xC0) == 0x40) // 01xx xxxx xxxx xxxx
             {
                 // Class B ID (2 bytes)
-                return new byte[] { b1, b2 };
+                return new[] { b1, b2 };
             }
 
             var b3 = (byte)stream.ReadByte();
             if ((b1 & 0xE0) == 0x20) // 001x xxxx xxxx xxxx xxxx xxxx
             {
                 // Class C ID (3 bytes)
-                return new byte[] { b1, b2, b3 };
+                return new[] { b1, b2, b3 };
             }
 
             var b4 = (byte)stream.ReadByte();
             if ((b1 & 0xF0) == 0x10) // 0001 xxxx xxxx xxxx xxxx xxxx xxxx xxxx
             {
                 // Class D ID (4 bytes)
-                return new byte[] { b1, b2, b3, b4 };
+                return new[] { b1, b2, b3, b4 };
             }
 
-            throw new Exception("Cannot read ID. Stream is corrupt.");
+            throw new CorruptStreamException("Cannot read ID. Stream is corrupt.");
         }
 
         private static long ReadValueLength(System.IO.Stream stream, out int bytesRead)
@@ -497,7 +494,7 @@ namespace FM.LiveSwitch.Connect
                 return length;
             }
 
-            throw new Exception("Cannot read value length. Stream is corrupt.");
+            throw new CorruptStreamException("Cannot read value length. Stream is corrupt.");
         }
 
         private static long ReadVariableInteger(System.IO.Stream stream, out int bytesRead)
@@ -533,7 +530,7 @@ namespace FM.LiveSwitch.Connect
                 return Binary.FromBytes32(value, 0, false);
             }
 
-            throw new Exception("Cannot read variable integer. Stream is corrupt.");
+            throw new CorruptStreamException("Cannot read variable integer. Stream is corrupt.");
         }
     }
 }

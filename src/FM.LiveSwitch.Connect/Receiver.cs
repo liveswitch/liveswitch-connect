@@ -56,7 +56,7 @@ namespace FM.LiveSwitch.Connect
 
         private Task Disconnected;
 
-        public Receiver(TOptions options)
+        protected Receiver(TOptions options)
         {
             Options = options;
         }
@@ -92,40 +92,56 @@ namespace FM.LiveSwitch.Connect
                         {
                             Console.Error.WriteLine($"{GetType().Name} is waiting for remote connection '{Options.ConnectionId}'.");
 
-                            RemoteConnectionInfo = await GetRemoteConnectionInfo();
+                            RemoteConnectionInfo = await GetRemoteConnectionInfo().ConfigureAwait(false);
 
                             Console.Error.WriteLine($"{GetType().Name} has remote connection:{Environment.NewLine}{Descriptor.Format(RemoteConnectionInfo.GetDescriptors())}");
 
-                            InitializeAudioStream();
-                            InitializeVideoStream();
-                            InitializeDataStream();
+                            var connected = false;
+                            while (!connected)
+                            {
+                                InitializeAudioStream();
+                                InitializeVideoStream();
+                                InitializeDataStream();
 
-                            Console.Error.WriteLine($"{GetType().Name} streams initialized.");
+                                Console.Error.WriteLine($"{GetType().Name} streams initialized.");
 
-                            Connection = Options.CreateConnection(Channel, RemoteConnectionInfo, AudioStream, VideoStream, DataStream);
+                                Connection = Options.CreateConnection(Channel, RemoteConnectionInfo, AudioStream, VideoStream, DataStream);
 
-                            Console.Error.WriteLine($"{GetType().Name} connection created:{Environment.NewLine}{Descriptor.Format(Connection.GetDescriptors())}");
+                                Console.Error.WriteLine($"{GetType().Name} connection created:{Environment.NewLine}{Descriptor.Format(Connection.GetDescriptors())}");
 
-                            Disconnected = await Connection.Connect();
+                                try
+                                {
+                                    Disconnected = await Connection.Connect();
+                                    connected = true;
+                                }
+                                catch (Exception ex)
+                                {
+                                    Console.Error.WriteLine($"{GetType().Name} connection failed. {ex}");
+
+                                    DestroyAudioStream();
+                                    DestroyVideoStream();
+                                    DestroyDataStream();
+                                }
+                            }
 
                             Console.Error.WriteLine($"{GetType().Name} connection connected.");
 
                             await Task.WhenAll(
                                 StartAudioStream(),
                                 StartVideoStream(),
-                                StartDataStream());
+                                StartDataStream()).ConfigureAwait(false);
 
                             Console.Error.WriteLine($"{GetType().Name} streams started.");
 
-                            await Ready();
+                            await Ready().ConfigureAwait(false);
 
                             Console.Error.WriteLine($"{GetType().Name} is ready and waiting for exit signal or disconnect...");
 
-                            await Task.WhenAny(ExitSignal(), Disconnected);
+                            await Task.WhenAny(ExitSignal(), Disconnected).ConfigureAwait(false);
 
                             if (Connection.State == ConnectionState.Failed)
                             {
-                                Console.Error.WriteLine($"{GetType().Name} connection failed. {Client.UnregisterException}");
+                                Console.Error.WriteLine($"{GetType().Name} connection failed. {Connection.Error?.Exception}");
                             }
                             else if (Client.UnregisterException != null)
                             {
@@ -144,14 +160,14 @@ namespace FM.LiveSwitch.Connect
                                 exit = true;
                             }
 
-                            await Unready();
+                            await Unready().ConfigureAwait(false);
 
                             Console.Error.WriteLine($"{GetType().Name} is not ready.");
 
                             await Task.WhenAll(
                                 StopAudioStream(),
                                 StopVideoStream(),
-                                StopDataStream());
+                                StopDataStream()).ConfigureAwait(false);
 
                             Console.Error.WriteLine($"{GetType().Name} streams stopped.");
 
@@ -274,11 +290,11 @@ namespace FM.LiveSwitch.Connect
             return -1;
         }
 
-        private bool InitializeAudioStream()
+        private void InitializeAudioStream()
         {
             if (Options.NoAudio || !RemoteConnectionInfo.HasAudio)
             {
-                return false;
+                return;
             }
 
             AudioPipes = Options.GetAudioEncodings().Select(audioEncoding =>
@@ -294,7 +310,6 @@ namespace FM.LiveSwitch.Connect
             }
             
             DoInitializeAudioStream();
-            return true;
         }
 
         private Task StartAudioStream()
@@ -304,7 +319,7 @@ namespace FM.LiveSwitch.Connect
                 var outputFormat = AudioStream.OutputFormat;
                 if (outputFormat == null)
                 {
-                    throw new Exception("Could not negotiate an audio codec with the server.");
+                    throw new NegotiateException("Could not negotiate an audio codec with the server.");
                 }
                 AudioFormat = outputFormat.Clone();
 
@@ -447,11 +462,11 @@ namespace FM.LiveSwitch.Connect
 
         #region Video
 
-        private bool InitializeVideoStream()
+        private void InitializeVideoStream()
         {
             if (Options.NoVideo || !RemoteConnectionInfo.HasVideo)
             {
-                return false;
+                return;
             }
 
             VideoPipes = Options.GetVideoEncodings().Select(videoEncoding =>
@@ -467,7 +482,6 @@ namespace FM.LiveSwitch.Connect
             }
 
             DoInitializeVideoStream();
-            return true;
         }
 
         private Task StartVideoStream()
@@ -477,7 +491,7 @@ namespace FM.LiveSwitch.Connect
                 var outputFormat = VideoStream.OutputFormat;
                 if (outputFormat == null)
                 {
-                    throw new Exception("Could not negotiate an video codec with the server.");
+                    throw new NegotiateException("Could not negotiate an video codec with the server.");
                 }
                 VideoFormat = outputFormat.Clone();
 
@@ -612,17 +626,16 @@ namespace FM.LiveSwitch.Connect
 
         #region Data
 
-        private bool InitializeDataStream()
+        private void InitializeDataStream()
         {
             if (Options.DataChannelLabel == null || !RemoteConnectionInfo.HasData)
             {
-                return false;
+                return;
             }
 
             DataChannel = new DataChannel(Options.DataChannelLabel);
             DataStream = new DataStream(DataChannel);
             DoInitializeDataStream();
-            return true;
         }
 
         private Task StartDataStream()

@@ -9,7 +9,7 @@
 
         public int Port { get { return _Reader.Port; } }
 
-        private RtpReader _Reader;
+        private readonly RtpReader _Reader;
         private RolloverContext _SequenceNumberRolloverContext;
         private RolloverContext _TimestampRolloverContext;
 
