@@ -58,8 +58,6 @@ namespace FM.LiveSwitch.Connect.Shell
 
         public async Task<int> Unregister(UnregisterOptions options)
         {
-            var clientId = _Client.Id;
-
             await _Client.Unregister();
 
             _Client = null;

@@ -321,7 +321,6 @@ namespace FM.LiveSwitch.Connect
 
         private void Skip(int length)
         {
-            //_Stream.Seek(length, System.IO.SeekOrigin.Current);
             Read(length);
         }
 

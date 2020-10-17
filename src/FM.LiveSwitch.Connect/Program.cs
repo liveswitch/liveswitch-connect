@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace FM.LiveSwitch.Connect
 {
-    partial class Program
+    internal static class Program
     {
         static void Main(string[] args)
         {

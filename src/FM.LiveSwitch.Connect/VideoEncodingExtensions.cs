@@ -89,9 +89,9 @@ namespace FM.LiveSwitch.Connect
             switch (encoding)
             {
                 case VideoEncoding.VP8:
-                    return new Vp8.Format() { IsPacketized = isPacketized };
+                    return new Vp8.Format { IsPacketized = isPacketized };
                 case VideoEncoding.VP9:
-                    return new Vp9.Format() { IsPacketized = isPacketized };
+                    return new Vp9.Format { IsPacketized = isPacketized };
                 case VideoEncoding.H264:
                     return new H264.Format(H264.ProfileLevelId.Default, H264.PacketizationMode.Default) { IsPacketized = isPacketized };
                 default:

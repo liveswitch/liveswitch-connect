@@ -99,13 +99,13 @@ namespace FM.LiveSwitch.Connect
             switch (encoding)
             {
                 case AudioEncoding.Opus:
-                    return new Opus.Format() { IsPacketized = isPacketized };
+                    return new Opus.Format { IsPacketized = isPacketized };
                 case AudioEncoding.G722:
-                    return new G722.Format() { IsPacketized = isPacketized, ClockRate = isPacketized ? 8000 : 16000 };
+                    return new G722.Format { IsPacketized = isPacketized, ClockRate = isPacketized ? 8000 : 16000 };
                 case AudioEncoding.PCMU:
-                    return new Pcmu.Format() { IsPacketized = isPacketized };
+                    return new Pcmu.Format { IsPacketized = isPacketized };
                 case AudioEncoding.PCMA:
-                    return new Pcma.Format() { IsPacketized = isPacketized };
+                    return new Pcma.Format { IsPacketized = isPacketized };
                 default:
                     throw new Exception("Unknown audio encoding.");
             }
