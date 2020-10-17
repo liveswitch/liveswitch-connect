@@ -1,6 +1,6 @@
 # LiveSwitch Connect CLI
 
-![build](https://github.com/liveswitch/liveswitch-connect/workflows/build/badge.svg) ![license](https://img.shields.io/badge/License-MIT-yellow.svg) ![release](https://img.shields.io/github/v/release/liveswitch/liveswitch-connect.svg)
+![build](https://github.com/liveswitch/liveswitch-connect/workflows/build/badge.svg) ![code quality](https://app.codacy.com/project/badge/Grade/bc368b4880724ca2abf34b09ffd87092) ![license](https://img.shields.io/badge/License-MIT-yellow.svg) ![release](https://img.shields.io/github/v/release/liveswitch/liveswitch-connect.svg)
 
 The LiveSwitch Connect CLI lets you send and receive media to and from LiveSwitch.
 
