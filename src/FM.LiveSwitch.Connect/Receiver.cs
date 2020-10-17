@@ -290,11 +290,11 @@ namespace FM.LiveSwitch.Connect
             return -1;
         }
 
-        private bool InitializeAudioStream()
+        private void InitializeAudioStream()
         {
             if (Options.NoAudio || !RemoteConnectionInfo.HasAudio)
             {
-                return false;
+                return;
             }
 
             AudioPipes = Options.GetAudioEncodings().Select(audioEncoding =>
@@ -310,7 +310,6 @@ namespace FM.LiveSwitch.Connect
             }
             
             DoInitializeAudioStream();
-            return true;
         }
 
         private Task StartAudioStream()
@@ -320,7 +319,7 @@ namespace FM.LiveSwitch.Connect
                 var outputFormat = AudioStream.OutputFormat;
                 if (outputFormat == null)
                 {
-                    throw new Exception("Could not negotiate an audio codec with the server.");
+                    throw new NegotiateException("Could not negotiate an audio codec with the server.");
                 }
                 AudioFormat = outputFormat.Clone();
 
@@ -463,11 +462,11 @@ namespace FM.LiveSwitch.Connect
 
         #region Video
 
-        private bool InitializeVideoStream()
+        private void InitializeVideoStream()
         {
             if (Options.NoVideo || !RemoteConnectionInfo.HasVideo)
             {
-                return false;
+                return;
             }
 
             VideoPipes = Options.GetVideoEncodings().Select(videoEncoding =>
@@ -483,7 +482,6 @@ namespace FM.LiveSwitch.Connect
             }
 
             DoInitializeVideoStream();
-            return true;
         }
 
         private Task StartVideoStream()
@@ -493,7 +491,7 @@ namespace FM.LiveSwitch.Connect
                 var outputFormat = VideoStream.OutputFormat;
                 if (outputFormat == null)
                 {
-                    throw new Exception("Could not negotiate an video codec with the server.");
+                    throw new NegotiateException("Could not negotiate an video codec with the server.");
                 }
                 VideoFormat = outputFormat.Clone();
 
@@ -628,17 +626,16 @@ namespace FM.LiveSwitch.Connect
 
         #region Data
 
-        private bool InitializeDataStream()
+        private void InitializeDataStream()
         {
             if (Options.DataChannelLabel == null || !RemoteConnectionInfo.HasData)
             {
-                return false;
+                return;
             }
 
             DataChannel = new DataChannel(Options.DataChannelLabel);
             DataStream = new DataStream(DataChannel);
             DoInitializeDataStream();
-            return true;
         }
 
         private Task StartDataStream()

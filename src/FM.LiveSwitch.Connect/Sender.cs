@@ -271,7 +271,7 @@ namespace FM.LiveSwitch.Connect
                 var inputFormat = AudioStream.InputFormat;
                 if (inputFormat == null)
                 {
-                    throw new Exception("Could not negotiate an audio codec with the server.");
+                    throw new NegotiateException("Could not negotiate an audio codec with the server.");
                 }
                 AudioFormat = inputFormat.Clone();
 
@@ -457,7 +457,7 @@ namespace FM.LiveSwitch.Connect
                 var inputFormat = VideoStream.InputFormat;
                 if (inputFormat == null)
                 {
-                    throw new Exception("Could not negotiate a video codec with the server.");
+                    throw new NegotiateException("Could not negotiate a video codec with the server.");
                 }
                 VideoFormat = inputFormat.Clone();
 
@@ -630,6 +630,7 @@ namespace FM.LiveSwitch.Connect
             {
                 DoStopDataStream();
                 await DataSource.Stop();
+                DataSource.Dispose();
                 DataSource = null;
             }
         }

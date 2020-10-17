@@ -15,7 +15,7 @@ namespace FM.LiveSwitch.Connect
                 case VideoEncoding.H264:
                     return VideoCodec.H264;
                 default:
-                    throw new Exception("Unknown video encoding.");
+                    throw new InvalidOperationException($"Unexpected video encoding '{encoding}'.");
             }
         }
 
@@ -30,7 +30,7 @@ namespace FM.LiveSwitch.Connect
                 case VideoEncoding.H264:
                     return new OpenH264.Encoder();
                 default:
-                    throw new Exception("Unknown video encoding.");
+                    throw new InvalidOperationException($"Unexpected video encoding '{encoding}'.");
             }
         }
 
@@ -45,7 +45,7 @@ namespace FM.LiveSwitch.Connect
                 case VideoEncoding.H264:
                     return new OpenH264.Decoder();
                 default:
-                    throw new Exception("Unknown video encoding.");
+                    throw new InvalidOperationException($"Unexpected video encoding '{encoding}'.");
             }
         }
 
@@ -60,7 +60,7 @@ namespace FM.LiveSwitch.Connect
                 case VideoEncoding.H264:
                     return new H264.Packetizer(H264.PacketizationMode.Default);
                 default:
-                    throw new Exception("Unknown video encoding.");
+                    throw new InvalidOperationException($"Unexpected video encoding '{encoding}'.");
             }
         }
 
@@ -75,7 +75,7 @@ namespace FM.LiveSwitch.Connect
                 case VideoEncoding.H264:
                     return new H264.Depacketizer(H264.PacketizationMode.Default);
                 default:
-                    throw new Exception("Unknown video encoding.");
+                    throw new InvalidOperationException($"Unexpected video encoding '{encoding}'.");
             }
         }
 
@@ -95,7 +95,7 @@ namespace FM.LiveSwitch.Connect
                 case VideoEncoding.H264:
                     return new H264.Format(H264.ProfileLevelId.Default, H264.PacketizationMode.Default) { IsPacketized = isPacketized };
                 default:
-                    throw new Exception("Unknown video encoding.");
+                    throw new InvalidOperationException($"Unexpected video encoding '{encoding}'.");
             }
         }
     }

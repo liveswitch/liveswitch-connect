@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace FM.LiveSwitch.Connect
 {
-    class DataSource
+    class DataSource : IDisposable
     {
         public Action<DataSource, string> OnMessage;
 
@@ -73,6 +73,11 @@ namespace FM.LiveSwitch.Connect
             }
 
             return Task.CompletedTask;
+        }
+
+        public void Dispose()
+        {
+            CancellationTokenSource.Dispose();
         }
     }
 }

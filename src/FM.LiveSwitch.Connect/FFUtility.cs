@@ -71,7 +71,7 @@ namespace FM.LiveSwitch.Connect
             }
             catch (Win32Exception wex)
             {
-                throw new Exception($"Could not start {command}. Is ffmpeg installed and available on your PATH?", wex);
+                throw new ExecuteException($"Could not start {command}. Is ffmpeg installed and available on your PATH?", wex);
             }
         }
     }

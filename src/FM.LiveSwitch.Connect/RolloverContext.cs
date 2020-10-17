@@ -27,7 +27,7 @@ namespace FM.LiveSwitch.Connect
         {
             if (bits < 2)
             {
-                throw new Exception("Minimum bits is 2.");
+                throw new ArgumentOutOfRangeException("Minimum bits is 2.");
             }
 
             Bits = bits;

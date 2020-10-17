@@ -29,7 +29,7 @@ namespace FM.LiveSwitch.Connect
                 case ImageFormat.Nv21:
                     return VideoFormat.Nv21;
                 default:
-                    throw new Exception("Unknown video format.");
+                    throw new InvalidOperationException($"Unexpected image format '{format}'.");
             }
         }
     }

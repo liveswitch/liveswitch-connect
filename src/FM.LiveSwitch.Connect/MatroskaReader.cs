@@ -138,7 +138,7 @@ namespace FM.LiveSwitch.Connect
                     }
                     else
                     {
-                        throw new Exception($"Unexpected ID '{BitAssistant.GetHexString(id)}' at stream offset '{_StreamPosition}'.");
+                        throw new NotImplementedException($"Unexpected ID '{BitAssistant.GetHexString(id)}' at stream offset '{_StreamPosition}'.");
                     }
                 }
                 else if (!_InSegment)
@@ -166,7 +166,7 @@ namespace FM.LiveSwitch.Connect
                     }
                     else
                     {
-                        throw new Exception($"Unexpected ID '{BitAssistant.GetHexString(id)}' at stream offset '{_StreamPosition}'.");
+                        throw new NotImplementedException($"Unexpected ID '{BitAssistant.GetHexString(id)}' at stream offset '{_StreamPosition}'.");
                     }
                 }
                 else if (!_InCluster)
@@ -220,7 +220,7 @@ namespace FM.LiveSwitch.Connect
                     }
                     else
                     {
-                        throw new Exception($"Unexpected ID '{BitAssistant.GetHexString(id)}' at stream offset '{_StreamPosition}'.");
+                        throw new NotImplementedException($"Unexpected ID '{BitAssistant.GetHexString(id)}' at stream offset '{_StreamPosition}'.");
                     }
                 }
                 else if (!_InBlockGroup)
@@ -272,7 +272,7 @@ namespace FM.LiveSwitch.Connect
                     }
                     else
                     {
-                        throw new Exception($"Unexpected ID '{BitAssistant.GetHexString(id)}' at stream offset '{_StreamPosition}'.");
+                        throw new NotImplementedException($"Unexpected ID '{BitAssistant.GetHexString(id)}' at stream offset '{_StreamPosition}'.");
                     }
                 }
                 else
@@ -311,7 +311,7 @@ namespace FM.LiveSwitch.Connect
                     }
                     else
                     {
-                        throw new Exception($"Unexpected ID '{BitAssistant.GetHexString(id)}' at stream offset '{_StreamPosition}'.");
+                        throw new NotImplementedException($"Unexpected ID '{BitAssistant.GetHexString(id)}' at stream offset '{_StreamPosition}'.");
                     }
                 }
             }
@@ -392,7 +392,7 @@ namespace FM.LiveSwitch.Connect
                 return new[] { b1, b2, b3, b4 };
             }
 
-            throw new Exception("Cannot read ID. Stream is corrupt.");
+            throw new CorruptStreamException("Cannot read ID. Stream is corrupt.");
         }
 
         private static long ReadValueLength(System.IO.Stream stream, out int bytesRead)
@@ -494,7 +494,7 @@ namespace FM.LiveSwitch.Connect
                 return length;
             }
 
-            throw new Exception("Cannot read value length. Stream is corrupt.");
+            throw new CorruptStreamException("Cannot read value length. Stream is corrupt.");
         }
 
         private static long ReadVariableInteger(System.IO.Stream stream, out int bytesRead)
@@ -530,7 +530,7 @@ namespace FM.LiveSwitch.Connect
                 return Binary.FromBytes32(value, 0, false);
             }
 
-            throw new Exception("Cannot read variable integer. Stream is corrupt.");
+            throw new CorruptStreamException("Cannot read variable integer. Stream is corrupt.");
         }
     }
 }

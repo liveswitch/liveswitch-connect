@@ -173,7 +173,7 @@ namespace FM.LiveSwitch.Connect
                     }
                     else
                     {
-                        throw new Exception("Unknown audio encoding.");
+                        throw new InvalidOperationException($"Unexpected audio format '{RtpAudioFormat.Name}'.");
                     }
 
                     if (Options.AudioBitrate.HasValue && !RtpAudioFormat.IsFixedBitrate)
@@ -248,7 +248,7 @@ namespace FM.LiveSwitch.Connect
                     }
                     else
                     {
-                        throw new Exception("Unknown video format.");
+                        throw new InvalidOperationException($"Unexpected video format '{RtpVideoFormat.Name}'.");
                     }
 
                     if (Options.VideoBitrate.HasValue && !RtpVideoFormat.IsFixedBitrate)

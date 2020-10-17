@@ -17,9 +17,9 @@ namespace FM.LiveSwitch.Connect
                 case AudioCodec.PCMA:
                     return AudioEncoding.PCMA;
                 case AudioCodec.Any:
-                    throw new Exception("Cannot convert 'any' codec to encoding.");
+                    throw new InvalidOperationException($"Cannot convert audio codec '{codec}' to encoding.");
                 default:
-                    throw new Exception("Unknown audio codec.");
+                    throw new InvalidOperationException($"Unexpected audio codec '{codec}'.");
             }
         }
     }
