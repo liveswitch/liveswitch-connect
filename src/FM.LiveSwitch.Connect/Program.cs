@@ -1,4 +1,4 @@
-﻿using CommandLine;
+using CommandLine;
 using CommandLine.Text;
 using System;
 using System.IO;
@@ -25,6 +25,7 @@ namespace FM.LiveSwitch.Connect
                 PlayOptions, 
                 RenderOptions,
                 FFRenderOptions,
+                NdiRenderOptions,
                 LogOptions,
                 RecordOptions,
                 InterceptOptions
@@ -77,6 +78,14 @@ namespace FM.LiveSwitch.Connect
                     {
                         Initialize(options);
                         return await new Renderer(options).Render();
+                    }).GetAwaiter().GetResult();
+                },
+                (NdiRenderOptions options) =>
+                {
+                    return Task.Run(async () =>
+                    {
+                        Initialize(options);
+                        return await new NdiRenderer(options).Render();
                     }).GetAwaiter().GetResult();
                 },
                 (FFRenderOptions options) =>
