@@ -103,8 +103,8 @@ namespace FM.LiveSwitch.Connect
 
         protected override Task Initialize()
         {
-            string failoverName = $"{System.Net.Dns.GetHostName()}-{Options.NdiName}";
-            NdiSender = new Sender(Options.NdiName, true, false, null, failoverName);
+            string failoverName = $"{System.Net.Dns.GetHostName()}-{Options.StreamName}";
+            NdiSender = new Sender(Options.StreamName, true, false, null, failoverName);
             
             return base.Initialize();
         }

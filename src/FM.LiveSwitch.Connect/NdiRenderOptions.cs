@@ -5,8 +5,8 @@ namespace FM.LiveSwitch.Connect
     [Verb("ndirender", HelpText = "Renders remote media to an ndi stream.")]
     class NdiRenderOptions : ReceiveOptions
     {
-        [Option("ndi-name", Required = false, Default = "LiveswitchConnect", HelpText = "Name of the NDI stream")]
-        public string NdiName { get; set; }
+        [Option("stream-name", Required = false, Default = "LiveswitchConnect", HelpText = "Name of the NDI stream")]
+        public string StreamName { get; set; }
 
         [Option("audio-clock-rate", Required = false, Default = 48000, HelpText = "The audio clock rate in Hz. Must be a multiple of 8000. Minimum value is 8000. Maximum value is 48000.")]
         public int AudioClockRate { get; set; }

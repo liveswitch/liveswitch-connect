@@ -28,20 +28,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\FM.Spout\FM.Spout.csproj" />
     <ProjectReference Include="..\NDILibDotNet2\NDILibDotNet2.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Resource Include="Libraries\Spout.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="Libraries\Spout.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
 
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">

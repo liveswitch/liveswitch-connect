@@ -12,11 +12,11 @@ namespace FM.LiveSwitch.Connect
 
     class NdiAudioSink : AudioSink
     {
-        static ILog _Log = Log.GetLogger(typeof(NdiVideoSink));
+        static ILog _Log = Log.GetLogger(typeof(NdiAudioSink));
 
         public override string Label
         {
-            get { return "Ndi Video Sink"; }
+            get { return "Ndi Audio Sink"; }
         }
 
         protected NDI.Sender NdiSender { get; private set; }
