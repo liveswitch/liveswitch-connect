@@ -10,7 +10,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
-  
+
   <ItemGroup>
     <PackageReference Include="CommandLineParser" Version="2.8.0" />
     <PackageReference Include="GitVersionTask" Version="5.3.2">
@@ -30,7 +30,7 @@
   </ItemGroup>
 
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-    <Exec Command="xcopy &quot;$(ProjectDir)\..\NDI\x64\*.dll&quot;  &quot;$(TargetDir)&quot; /D /Y&#xD;&#xA;xcopy &quot;$(ProjectDir)\..\NDI\x86\*.dll&quot;  &quot;$(TargetDir)&quot; /D /Y&#xD;&#xA;EXIT 0" />
+    <Exec Command="xcopy &quot;%25NDI_RUNTIME_DIR_V4%25\*.dll&quot;  &quot;$(TargetDir)&quot; /D /Y&#xD;&#xA;EXIT 0" />
   </Target>
 
 </Project>
