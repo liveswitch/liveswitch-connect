@@ -898,6 +898,10 @@ You can stream the content in a LiveSwitch channel to an RTMP server. The follow
 lsconnect ffrender ... --output-args="-f flv rtmp://a.rtmp.youtube.com/live2/<YouTube Stream Key>"
 ```
 
+## Making use of NDI
+
+You'll need to install the NDI Runtime found here: <http://new.tk/NDIRedistV4>
+
 ## Contact
 
 To learn more, visit [frozenmountain.com](https://www.frozenmountain.com) or [liveswitch.io](https://www.liveswitch.io).
