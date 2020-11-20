@@ -517,6 +517,75 @@ The `ffrender` verb lets you render remote media from a LiveSwitch server to FFm
   --log-level             (Default: Error) The LiveSwitch log level.
 ```
 
+## ndirender
+
+The `ndirender` verb lets you render remote media from a LiveSwitch server to NDI.
+
+```shell
+  --stream-name             (Default: LiveswitchConnect) Name of the NDI stream
+
+  --audio-clock-rate        (Default: 48000) The audio clock rate in Hz. Must be
+                            a multiple of 8000. Minimum value is 8000. Maximum
+                            value is 48000.
+
+  --audio-channel-count     (Default: 2) The audio channel count. Minimum value
+                            is 1. Maximum value is 2.
+
+  --audio-frame-duration    (Default: 20) The audio frame duration in
+                            milliseconds. Minimum value is 5. Maximum value is
+                            100.
+
+  --video-format            (Default: Bgr) The video format.
+
+  --video-width             (Default: 800) The video width.
+
+  --video-height            (Default: 800) The video height.
+
+  --connection-id           Required. The remote connection ID or 'mcu'.
+
+  --audio-bitrate           The audio bitrate.
+
+  --video-bitrate           The video bitrate.
+
+  --channel-id              Required. The channel ID.
+
+  --data-channel-label      The data channel label.
+
+  --region                  The local region.
+
+  --user-id                 The local user ID.
+
+  --user-alias              The local user alias.
+
+  --device-id               The local device ID.
+
+  --device-alias            The local device alias.
+
+  --client-tag              The local client tag.
+
+  --client-roles            The local client roles.
+
+  --connection-tag          The local connection tag.
+
+  --no-audio                Do not process audio.
+
+  --no-video                Do not process video.
+
+  --audio-codec             (Default: Any) The audio codec to negotiate with
+                            LiveSwitch.
+
+  --video-codec             (Default: Any) The video codec to negotiate with
+                            LiveSwitch.
+
+  --gateway-url             Required. The gateway URL.
+
+  --application-id          Required. The application ID.
+
+  --shared-secret           Required. The shared secret for the application ID.
+
+  --log-level               (Default: Error) The LiveSwitch log level.
+```
+
 ## log
 
 The `log` verb lets you log remote media frame details from a LiveSwitch server to standard output (stdout).
@@ -898,7 +967,7 @@ You can stream the content in a LiveSwitch channel to an RTMP server. The follow
 lsconnect ffrender ... --output-args="-f flv rtmp://a.rtmp.youtube.com/live2/<YouTube Stream Key>"
 ```
 
-## Making use of NDI
+## Using NDI
 
 You'll need to install the NDI Runtime found here: <http://new.tk/NDIRedistV4>
 
