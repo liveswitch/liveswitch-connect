@@ -85,7 +85,8 @@ namespace FM.LiveSwitch.Connect
         protected override NdiAudioSink CreateAudioSink()
         {
             Console.WriteLine("Ndi Audio Sink Created");
-            var sink = new NdiAudioSink(NdiSender, Options.AudioClockRate, Options.AudioChannelCount, new Pcm.Format(Options.AudioClockRate, Options.AudioChannelCount));
+            var maxRate = Options.AudioClockRate / 1000 * Options.AudioFrameDuration; // 1000ms
+            var sink = new NdiAudioSink(NdiSender, maxRate,  Options.AudioClockRate, Options.AudioChannelCount, new Pcm.Format(Options.AudioClockRate, Options.AudioChannelCount));
             return sink;
         }
 

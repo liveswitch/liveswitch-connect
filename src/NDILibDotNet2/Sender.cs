@@ -158,6 +158,19 @@ namespace NewTek.NDI
             NDIlib.send_send_audio_v2(_sendInstancePtr, ref audioFrame);
         }
 
+        public void Send(AudioFrame16bpp audioFrame)
+        {
+            Send(ref audioFrame._ndiAudioFrame);
+        }
+
+        public void Send(ref NDIlib.audio_frame_interleaved_16s_t audioFrame)
+        {
+            if (_sendInstancePtr == IntPtr.Zero)
+                return;
+
+            NDIlib.util_send_send_audio_interleaved_16s(_sendInstancePtr, ref audioFrame);
+        }
+
         public void Dispose()
         {
             Dispose(true);

@@ -71,7 +71,8 @@ namespace FM.LiveSwitch.Connect
         {
             try
             {
-                Marshal.Copy(buffer.Data, 0, NdiVideoFrame.BufferPtr, buffer.Length);
+                int offset = Math.Max(0, (buffer.Data.Length - buffer.Length) / 8); // 8 bits per channel
+                Marshal.Copy(buffer.Data, offset, NdiVideoFrame.BufferPtr, buffer.Length);
            
                 NdiSender.Send(NdiVideoFrame);
                 return true;
