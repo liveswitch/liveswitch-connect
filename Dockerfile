@@ -14,4 +14,8 @@ FROM mcr.microsoft.com/dotnet/runtime:3.1
 WORKDIR /app
 COPY --from=build /app/lib .
 
+RUN apt-get -y update
+RUN apt-get -y upgrade
+RUN apt-get install -y ffmpeg
+
 ENTRYPOINT ["dotnet", "lsconnect.dll"]
