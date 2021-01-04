@@ -68,6 +68,11 @@ namespace FM.LiveSwitch.Connect
                     Options.VideoTranscode = true;
                 }
             }
+            if (Options.ConnectionId == null && Options.MediaId == null)
+            {
+                Console.Error.WriteLine("Either --connection-id or --media-id must be set.");
+                return Task.FromResult(1);
+            }
             return Receive();
         }
 
