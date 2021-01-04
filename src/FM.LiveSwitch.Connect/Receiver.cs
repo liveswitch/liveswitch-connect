@@ -68,6 +68,11 @@ namespace FM.LiveSwitch.Connect
                 Console.Error.WriteLine("--no-audio and --no-video cannot both be set.");
                 return 1;
             }
+            if (Options.ConnectionId == null && Options.MediaId == null)
+            {
+                Console.Error.WriteLine("Either --connection-id or --media-id must be set.");
+                return 1;
+            }
 
             try
             {
