@@ -95,11 +95,18 @@ namespace FM.LiveSwitch.Connect
 
                         try
                         {
-                            Console.Error.WriteLine($"{GetType().Name} is waiting for remote connection '{Options.ConnectionId}'.");
+                            //If a Media ID is specified, this replaces the connection info
+                            if (string.IsNullOrWhiteSpace(Options.MediaId))
+                            {
+                                Console.Error.WriteLine($"{GetType().Name} is waiting for remote connection '{Options.ConnectionId}'.");
 
-                            RemoteConnectionInfo = await GetRemoteConnectionInfo().ConfigureAwait(false);
-
-                            Console.Error.WriteLine($"{GetType().Name} has remote connection:{Environment.NewLine}{Descriptor.Format(RemoteConnectionInfo.GetDescriptors())}");
+                                RemoteConnectionInfo = await GetRemoteConnectionInfo().ConfigureAwait(false);
+                                Console.Error.WriteLine($"{GetType().Name} has remote connection:{Environment.NewLine}{Descriptor.Format(RemoteConnectionInfo.GetDescriptors())}");
+                            }
+                            else
+                            {
+                                Console.Error.WriteLine($"{GetType().Name} has remote media id: {Options.MediaId}");
+                            }
 
                             var connected = false;
                             while (!connected)
@@ -297,7 +304,7 @@ namespace FM.LiveSwitch.Connect
 
         private void InitializeAudioStream()
         {
-            if (Options.NoAudio || !RemoteConnectionInfo.HasAudio)
+            if (Options.NoAudio || (RemoteConnectionInfo != null && !RemoteConnectionInfo.HasAudio))
             {
                 return;
             }
@@ -469,7 +476,7 @@ namespace FM.LiveSwitch.Connect
 
         private void InitializeVideoStream()
         {
-            if (Options.NoVideo || !RemoteConnectionInfo.HasVideo)
+            if (Options.NoVideo || (RemoteConnectionInfo != null && !RemoteConnectionInfo.HasVideo))
             {
                 return;
             }
@@ -633,7 +640,7 @@ namespace FM.LiveSwitch.Connect
 
         private void InitializeDataStream()
         {
-            if (Options.DataChannelLabel == null || !RemoteConnectionInfo.HasData)
+            if (Options.DataChannelLabel == null || (RemoteConnectionInfo != null && !RemoteConnectionInfo.HasData))
             {
                 return;
             }
