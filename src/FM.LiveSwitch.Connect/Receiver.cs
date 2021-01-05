@@ -96,7 +96,7 @@ namespace FM.LiveSwitch.Connect
                         try
                         {
                             //If a Media ID is specified, this replaces the connection info
-                            if (string.IsNullOrWhiteSpace(Options.MediaId))
+                            if (Options.MediaId == null)
                             {
                                 Console.Error.WriteLine($"{GetType().Name} is waiting for remote connection '{Options.ConnectionId}'.");
 
@@ -118,6 +118,12 @@ namespace FM.LiveSwitch.Connect
                                 Console.Error.WriteLine($"{GetType().Name} streams initialized.");
 
                                 Connection = Options.CreateConnection(Channel, RemoteConnectionInfo, AudioStream, VideoStream, DataStream);
+
+                                //For a Media ID based connection, store the Remote Connection Info once available
+                                if (RemoteConnectionInfo == null && Options.MediaId != null)
+                                {
+                                    RemoteConnectionInfo = Connection.Info;
+                                }
 
                                 Console.Error.WriteLine($"{GetType().Name} connection created:{Environment.NewLine}{Descriptor.Format(Connection.GetDescriptors())}");
 
