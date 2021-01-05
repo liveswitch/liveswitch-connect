@@ -15,8 +15,8 @@ WORKDIR /app
 COPY --from=build /app/lib .
 
 RUN apt-get -y update && \
+    apt-get install -y --no-install-recommends ffmpeg=7:4.* && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
-RUN apt-get install -y --no-install-recommends ffmpeg=7:4.*
 
 ENTRYPOINT ["dotnet", "lsconnect.dll"]
