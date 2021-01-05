@@ -4,7 +4,7 @@
 
 The LiveSwitch Connect CLI lets you send and receive media to and from LiveSwitch.
 
-Requires .NET Core 3.1 or newer.
+Requires .NET Core 3.1 or newer. Requires LiveSwitch Server 1.10.0 or newer.
 
 ## Building
 
