@@ -432,7 +432,9 @@ The `render` verb lets you render remote media from a LiveSwitch server to a nam
 
   --video-height            The video height.
 
-  --connection-id           Required. The remote connection ID or 'mcu'.
+  --connection-id           The remote connection ID or 'mcu'.
+
+  --media-id                The remote media ID.
 
   --channel-id              Required. The channel ID.
 
@@ -478,7 +480,9 @@ The `ffrender` verb lets you render remote media from a LiveSwitch server to FFm
 ```shell
   --output-args           Required. The FFmpeg output arguments.
 
-  --connection-id         Required. The remote connection ID or 'mcu'.
+  --connection-id         The remote connection ID or 'mcu'.
+
+  --media-id              The remote media ID.
 
   --channel-id            Required. The channel ID.
 
@@ -545,7 +549,9 @@ The `log` verb lets you log remote media frame details from a LiveSwitch server 
                           clientId, clientTag, connectionId, connectionTag,
                           mediaId
 
-  --connection-id         Required. The remote connection ID or 'mcu'.
+  --connection-id         The remote connection ID or 'mcu'.
+
+  --media-id              The remote media ID.
 
   --channel-id            Required. The channel ID.
 
@@ -601,7 +607,9 @@ The `record` verb lets you record remote media from a LiveSwitch server to a loc
                           deviceAlias, clientId, clientTag, connectionId,
                           connectionTag, mediaId
 
-  --connection-id         Required. The remote connection ID or 'mcu'.
+  --connection-id         The remote connection ID or 'mcu'.
+
+  --media-id              The remote media ID.
 
   --channel-id            Required. The channel ID.
 
@@ -655,7 +663,9 @@ The `intercept` verb lets you forward audio and/or video packets to a specific d
   --video-ip-address      (Default: 127.0.0.1) The destination IP address for
                           video packets.
 
-  --connection-id         Required. The remote connection ID or 'mcu'.
+  --connection-id         The remote connection ID or 'mcu'.
+
+  --media-id              The remote media ID.
 
   --channel-id            Required. The channel ID.
 

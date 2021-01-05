@@ -4,7 +4,10 @@ namespace FM.LiveSwitch.Connect
 {
     abstract class ReceiveOptions : StreamOptions, IReceiveOptions
     {
-        [Option("connection-id", Required = true, HelpText = "The remote connection ID or 'mcu'.")]
+        [Option("media-id", Required = false, HelpText = "The remote media ID.")]
+        public string MediaId { get; set; }
+
+        [Option("connection-id", Required = false, HelpText = "The remote connection ID or 'mcu'.")]
         public string ConnectionId { get; set; }
 
         [Option("audio-bitrate", Required = false, HelpText = "The audio bitrate.")]
