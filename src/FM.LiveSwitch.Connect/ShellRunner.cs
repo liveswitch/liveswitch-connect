@@ -39,7 +39,7 @@ namespace FM.LiveSwitch.Connect
                     {
                         try
                         {
-                            Console.Write($"{shellManager.CurrentLabel}> ");
+                            Console.Error.Write($"{shellManager.CurrentLabel}> ");
                             var command = Console.ReadLine();
                             ProcessArgs(command.Split(" "), shellManager);
                         }

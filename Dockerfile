@@ -14,8 +14,9 @@ FROM mcr.microsoft.com/dotnet/runtime:3.1
 WORKDIR /app
 COPY --from=build /app/lib .
 
-RUN apt-get -y update
-RUN apt-get -y upgrade
-RUN apt-get install -y ffmpeg
+RUN apt-get -y update && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+RUN apt-get install -y --no-install-recommends ffmpeg=7:4.*
 
 ENTRYPOINT ["dotnet", "lsconnect.dll"]
