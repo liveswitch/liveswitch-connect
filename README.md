@@ -36,6 +36,14 @@ dotnet build
 
 Using this approach will generate a library instead of an executable. Use `dotnet lsconnect.dll` instead of `lsconnect` to run it.
 
+## Docker
+
+Images are also hosted on [DockerHub](https://hub.docker.com/r/frozenmountain/liveswitch-connect).
+
+```shell
+docker run --rm frozenmountain/liveswitch-connect [verb] [options]
+```
+
 ## Usage
 
 ```shell
