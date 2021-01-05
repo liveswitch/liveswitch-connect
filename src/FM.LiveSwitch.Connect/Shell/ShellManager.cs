@@ -107,7 +107,7 @@ namespace FM.LiveSwitch.Connect.Shell
                 }
                 else
                 {
-                    Console.WriteLine($"Remote client:{Environment.NewLine}{Descriptor.Format(remoteClientInfo.GetDescriptors())}");
+                    Console.Error.WriteLine($"Remote client:{Environment.NewLine}{Descriptor.Format(remoteClientInfo.GetDescriptors())}");
                 }
             }
             if (options.Listen)
@@ -120,7 +120,7 @@ namespace FM.LiveSwitch.Connect.Shell
                     }
                     else
                     {
-                        Console.WriteLine($"Remote client joined:{Environment.NewLine}{Descriptor.Format(remoteClientInfo.GetDescriptors())}");
+                        Console.Error.WriteLine($"Remote client joined:{Environment.NewLine}{Descriptor.Format(remoteClientInfo.GetDescriptors())}");
                     }
                 });
 
@@ -132,7 +132,7 @@ namespace FM.LiveSwitch.Connect.Shell
                     }
                     else
                     {
-                        Console.WriteLine($"Remote client left:{Environment.NewLine}{Descriptor.Format(remoteClientInfo.GetDescriptors())}");
+                        Console.Error.WriteLine($"Remote client left:{Environment.NewLine}{Descriptor.Format(remoteClientInfo.GetDescriptors())}");
                     }
                 });
 
@@ -171,7 +171,7 @@ namespace FM.LiveSwitch.Connect.Shell
                 }
                 else
                 {
-                    Console.WriteLine($"Remote upstream connection:{Environment.NewLine}{Descriptor.Format(remoteUpstreamConnectionInfo.GetDescriptors(true))}");
+                    Console.Error.WriteLine($"Remote upstream connection:{Environment.NewLine}{Descriptor.Format(remoteUpstreamConnectionInfo.GetDescriptors(true))}");
                 }
             }
             if (options.Listen)
@@ -184,7 +184,7 @@ namespace FM.LiveSwitch.Connect.Shell
                     }
                     else
                     {
-                        Console.WriteLine($"Remote upstream connection opened:{Environment.NewLine}{Descriptor.Format(remoteUpstreamConnectionInfo.GetDescriptors(true))}");
+                        Console.Error.WriteLine($"Remote upstream connection opened:{Environment.NewLine}{Descriptor.Format(remoteUpstreamConnectionInfo.GetDescriptors(true))}");
                     }
                 });
 
@@ -196,7 +196,7 @@ namespace FM.LiveSwitch.Connect.Shell
                     }
                     else
                     {
-                        Console.WriteLine($"Remote upstream connection closed:{Environment.NewLine}{Descriptor.Format(remoteUpstreamConnectionInfo.GetDescriptors(true))}");
+                        Console.Error.WriteLine($"Remote upstream connection closed:{Environment.NewLine}{Descriptor.Format(remoteUpstreamConnectionInfo.GetDescriptors(true))}");
                     }
                 });
 
