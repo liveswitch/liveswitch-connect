@@ -44,6 +44,16 @@ Images are also hosted on [DockerHub](https://hub.docker.com/r/frozenmountain/li
 docker run --rm frozenmountain/liveswitch-connect [verb] [options]
 ```
 
+## Environment Variables
+
+Environment variables can be used in place of command-line arguments.
+
+Environment variable names are `lsconnect_{verb}_{option}`, e.g. `lsconnect_play_gateway-url`.
+
+Environment variable names are case-insensitive, so `lsconnect_play_application-id` is equivalent to `LSCONNECT_PLAY_APPLICATION-ID`.
+
+Note that command-line arguments always take precedence over environment variables.
+
 ## Usage
 
 ```shell
