@@ -22,16 +22,20 @@ namespace FM.LiveSwitch.Connect
         protected NDI.VideoFrame NdiVideoFrame { get; private set; }
         protected bool IsCheckConnectionCount { get; private set; }
 
-        public NdiVideoSink(NDI.Sender ndiSender, int videoWidth, int videoHeight, VideoFormat format)
+        private int ndiBufferSizeBytes = 0;
+
+        public NdiVideoSink(NDI.Sender ndiSender, int videoWidth, int videoHeight, int frameRateNumerator, int frameRateDenominator, VideoFormat format)
             : base(format)
         {
-            Initialize(ndiSender, videoWidth, videoHeight);
+            Initialize(ndiSender, videoWidth, videoHeight, frameRateNumerator, frameRateDenominator);
         }
 
-        private void Initialize(NDI.Sender ndiSender, int videoWidth, int videoHeight)
+        private void Initialize(NDI.Sender ndiSender, int videoWidth, int videoHeight, int frameRateNumerator, int frameRateDenominator)
         {
+            
             NdiSender = ndiSender;
-            NdiVideoFrame = new NDI.VideoFrame(videoWidth, videoHeight, (float)videoWidth / videoHeight, 30000, 1001);
+            NdiVideoFrame = new NDI.VideoFrame(videoWidth, videoHeight, (float)videoWidth / videoHeight, frameRateNumerator, frameRateDenominator);
+            this.ndiBufferSizeBytes = NdiVideoFrame.Width * NdiVideoFrame.Height * 4;
         }
 
         protected override void DoProcessFrame(VideoFrame frame, VideoBuffer inputBuffer)
@@ -59,7 +63,7 @@ namespace FM.LiveSwitch.Connect
         {
             foreach (var dataBuffer in inputBuffer.DataBuffers)
             {
-                if (!TryWrite(dataBuffer))
+                if (!TryWrite(dataBuffer, frame.LastBuffer.Width, frame.LastBuffer.Height))
                 {
                     return false;
                 }
@@ -67,13 +71,13 @@ namespace FM.LiveSwitch.Connect
             return true;
         }
 
-        protected virtual bool TryWrite(DataBuffer buffer)
+        protected virtual bool TryWrite(DataBuffer buffer, int width, int height)
         {
             try
             {
                 int offset = Math.Max(0, (buffer.Data.Length - buffer.Length) / 8); // 8 bits per channel
-                Marshal.Copy(buffer.Data, offset, NdiVideoFrame.BufferPtr, buffer.Length);
-           
+                Marshal.Copy(buffer.Data, offset, NdiVideoFrame.BufferPtr, Math.Min(buffer.Length, ndiBufferSizeBytes));
+
                 NdiSender.Send(NdiVideoFrame);
                 return true;
             } 

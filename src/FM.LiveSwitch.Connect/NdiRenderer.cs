@@ -8,6 +8,8 @@ namespace FM.LiveSwitch.Connect
 {
     class NdiRenderer : Receiver<NdiRenderOptions, NdiAudioSink, NdiVideoSink>
     {
+        static ILog _Log = Log.GetLogger(typeof(NdiRenderer));
+
         public NdiRenderer(NdiRenderOptions options)
             : base(options)
         { }
@@ -73,7 +75,7 @@ namespace FM.LiveSwitch.Connect
                 Console.Error.WriteLine("--video-height must be a multiple of 2.");
                 return Task.FromResult(1);
             }
-            
+
             return Receive();
         }
 
@@ -84,7 +86,7 @@ namespace FM.LiveSwitch.Connect
 
         protected override NdiAudioSink CreateAudioSink()
         {
-            Console.WriteLine("Ndi Audio Sink Created");
+            _Log.Info("Ndi Audio Sink Created");
             var maxRate = Options.AudioClockRate / 1000 * Options.AudioFrameDuration; // 1000ms
             var sink = new NdiAudioSink(NdiSender, maxRate,  Options.AudioClockRate, Options.AudioChannelCount, new Pcm.Format(Options.AudioClockRate, Options.AudioChannelCount));
             return sink;
@@ -92,8 +94,8 @@ namespace FM.LiveSwitch.Connect
 
         protected override NdiVideoSink CreateVideoSink()
         {
-            Console.WriteLine("Ndi Video Sink Created");
-            var sink = new NdiVideoSink(NdiSender, Options.VideoWidth, Options.VideoHeight, VideoFormat.Bgra);
+            _Log.Info("Ndi Video Sink Created");
+            var sink = new NdiVideoSink(NdiSender, Options.VideoWidth, Options.VideoHeight, Options.FrameRateNumerator, Options.FrameRateDenominator, VideoFormat.Bgra);
             return sink;
         }
 
@@ -105,6 +107,7 @@ namespace FM.LiveSwitch.Connect
         protected override Task Initialize()
         {
             string failoverName = $"{System.Net.Dns.GetHostName()}-{Options.StreamName}";
+            _Log.Info($"Initializing NDI Stream - {Options.StreamName} (Alt: {failoverName})");
             NdiSender = new Sender(Options.StreamName, true, false, null, failoverName);
             
             return base.Initialize();

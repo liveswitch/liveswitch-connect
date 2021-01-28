@@ -541,6 +541,10 @@ The `ndirender` verb lets you render remote media from a LiveSwitch server to ND
 
   --video-height            (Default: 800) The video height.
 
+  --frame-rate-numerator    (Default: 30000) The frame rate numerator.
+
+  --frame-rate-denominator  (Default: 1000) The frame rate denominator.
+
   --connection-id           Required. The remote connection ID or 'mcu'.
 
   --audio-bitrate           The audio bitrate.

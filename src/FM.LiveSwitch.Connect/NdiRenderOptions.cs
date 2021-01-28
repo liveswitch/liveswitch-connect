@@ -25,5 +25,11 @@ namespace FM.LiveSwitch.Connect
 
         [Option("video-height", Required = false, Default = 800, HelpText = "The video height.")]
         public int VideoHeight { get; set; }
+
+        [Option("frame-rate-numerator", Required = false, Default = 30000, HelpText = "The frame rate numerator")]
+        public int FrameRateNumerator { get; set; }
+
+        [Option("frame-rate-denominator", Required = false, Default = 1000, HelpText = "The frame rate denominator")]
+        public int FrameRateDenominator { get; set; }
     }
 }
