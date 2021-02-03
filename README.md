@@ -208,6 +208,10 @@ The `capture` verb lets you capture local media from a named pipe and send it to
   --video-codec             (Default: Any) The video codec to negotiate with
                             LiveSwitch.
 
+  --h264-encoder            (Default: Auto) The H.264 encoder to use.
+
+  --h264-decoder            (Default: Auto) The H.264 decoder to use.
+
   --gateway-url             Required. The gateway URL.
 
   --application-id          Required. The application ID.
@@ -282,6 +286,10 @@ The `ffcapture` verb lets you capture local media from FFmpeg and send it to a L
   --video-codec                   (Default: Any) The video codec to negotiate
                                   with LiveSwitch.
 
+  --h264-encoder                  (Default: Auto) The H.264 encoder to use.
+
+  --h264-decoder                  (Default: Auto) The H.264 decoder to use.
+
   --gateway-url                   Required. The gateway URL.
 
   --application-id                Required. The application ID.
@@ -355,6 +363,10 @@ The `fake` verb lets you generate fake media and send it to a LiveSwitch server.
   --video-codec            (Default: Any) The video codec to negotiate with
                            LiveSwitch.
 
+  --h264-encoder           (Default: Auto) The H.264 encoder to use.
+
+  --h264-decoder           (Default: Auto) The H.264 decoder to use.
+
   --gateway-url            Required. The gateway URL.
 
   --application-id         Required. The application ID.
@@ -412,6 +424,10 @@ The `play` verb lets you capture media from a local file (or pair of files) and 
 
   --video-codec           (Default: Any) The video codec to negotiate with
                           LiveSwitch.
+
+  --h264-encoder          (Default: Auto) The H.264 encoder to use.
+
+  --h264-decoder          (Default: Auto) The H.264 decoder to use.
 
   --gateway-url           Required. The gateway URL.
 
@@ -482,6 +498,10 @@ The `render` verb lets you render remote media from a LiveSwitch server to a nam
   --video-codec             (Default: Any) The video codec to negotiate with
                             LiveSwitch.
 
+  --h264-encoder            (Default: Auto) The H.264 encoder to use.
+
+  --h264-decoder            (Default: Auto) The H.264 decoder to use.
+
   --gateway-url             Required. The gateway URL.
 
   --application-id          Required. The application ID.
@@ -529,6 +549,10 @@ The `ffrender` verb lets you render remote media from a LiveSwitch server to FFm
 
   --video-codec           (Default: Any) The video codec to negotiate with
                           LiveSwitch.
+
+  --h264-encoder          (Default: Auto) The H.264 encoder to use.
+
+  --h264-decoder          (Default: Auto) The H.264 decoder to use.
 
   --gateway-url           Required. The gateway URL.
 
@@ -599,6 +623,10 @@ The `log` verb lets you log remote media frame details from a LiveSwitch server 
   --video-codec           (Default: Any) The video codec to negotiate with
                           LiveSwitch.
 
+  --h264-encoder          (Default: Auto) The H.264 encoder to use.
+
+  --h264-decoder          (Default: Auto) The H.264 decoder to use.
+
   --gateway-url           Required. The gateway URL.
 
   --application-id        Required. The application ID.
@@ -657,6 +685,10 @@ The `record` verb lets you record remote media from a LiveSwitch server to a loc
   --video-codec           (Default: Any) The video codec to negotiate with
                           LiveSwitch.
 
+  --h264-encoder          (Default: Auto) The H.264 encoder to use.
+
+  --h264-decoder          (Default: Auto) The H.264 decoder to use.
+
   --gateway-url           Required. The gateway URL.
 
   --application-id        Required. The application ID.
@@ -712,6 +744,10 @@ The `intercept` verb lets you forward audio and/or video packets to a specific d
 
   --video-codec           (Default: Any) The video codec to negotiate with
                           LiveSwitch.
+
+  --h264-encoder          (Default: Auto) The H.264 encoder to use.
+
+  --h264-decoder          (Default: Auto) The H.264 decoder to use.
 
   --gateway-url           Required. The gateway URL.
 

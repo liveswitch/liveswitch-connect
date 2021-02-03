@@ -125,40 +125,71 @@ namespace FM.LiveSwitch.Connect
 
         private static void Initialize(Options options)
         {
-            Console.Error.WriteLine("Checking for OpenH264...");
-            options.DisableOpenH264 = true;
-            try
-            {
-                options.DisableOpenH264 = !OpenH264.Utility.Initialize();
-            }
-            catch
-            {
-                // Do nothing. An exception indicates that the default
-                // behaviour (disabling OpenH264) is correct.
-            }
+            TestOpenH264Support(options);
 
-            if (options.DisableOpenH264)
-            {
-                OpenH264.Utility.DownloadOpenH264(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)).GetAwaiter().GetResult();
-                try
-                {
-                    options.DisableOpenH264 = !OpenH264.Utility.Initialize();
-                    if (options.DisableOpenH264)
-                    {
-                        Console.Error.WriteLine("OpenH264 failed to initialize.");
-                    }
-                    else
-                    {
-                        Console.Error.WriteLine("OpenH264 initialized.");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.Error.WriteLine($"OpenH264 failed to initialize. {ex}");
-                }
-            }
+            TestNvidiaSupport(options);
 
             Log.AddProvider(new ErrorLogProvider(options.LogLevel));
+        }
+
+        private static void TestOpenH264Support(Options options)
+        {
+            if (!OpenH264.Utility.IsSupported())
+            {
+                return;
+            }
+
+            try
+            {
+                Console.Error.WriteLine("Downloading OpenH264...");
+                OpenH264.Utility.DownloadOpenH264(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)).GetAwaiter().GetResult();
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Could not download OpenH264. {ex.Message}");
+                return;
+            }
+
+            Console.Error.WriteLine("Testing OpenH264 support...");
+            try
+            {
+                options.OpenH264Supported = OpenH264.Utility.Initialize();
+
+                if (options.OpenH264Supported)
+                {
+                    Console.Error.WriteLine("OpenH264 is supported.");
+                }
+                else
+                {
+                    Console.Error.WriteLine("OpenH264 is not supported.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"OpenH264 is not supported. {ex.Message}");
+            }
+        }
+
+        private static void TestNvidiaSupport(Options options)
+        {
+            Console.Error.WriteLine("Testing NVIDIA support...");
+            try
+            {
+                options.NvidiaSupported = Nvidia.Utility.NvencSupported;
+
+                if (options.NvidiaSupported)
+                {
+                    Console.Error.WriteLine("NVIDIA is supported.");
+                }
+                else
+                {
+                    Console.Error.WriteLine("NVIDIA is not supported.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"NVIDIA is not supported. {ex.Message}");
+            }
         }
 
         private static string[] AppendEnvironmentVariables(string[] args)

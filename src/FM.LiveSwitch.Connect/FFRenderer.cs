@@ -246,6 +246,10 @@ namespace FM.LiveSwitch.Connect
                         sdpMediaDescription.AddMediaAttribute(new Sdp.Rtp.MapAttribute(sink.PayloadType, VideoFormat.H264Name, VideoFormat.DefaultClockRate));
                         sdpMediaDescription.AddMediaAttribute(new Sdp.FormatParametersAttribute(sink.PayloadType, "profile-level-id=42001f;level-asymmetry-allowed=1;packetization-mode=1"));
                     }
+                    else if (RtpVideoFormat.IsH265)
+                    {
+                        sdpMediaDescription.AddMediaAttribute(new Sdp.Rtp.MapAttribute(sink.PayloadType, VideoFormat.H265Name, VideoFormat.DefaultClockRate));
+                    }
                     else
                     {
                         throw new InvalidOperationException($"Unexpected video format '{RtpVideoFormat.Name}'.");

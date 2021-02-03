@@ -2,23 +2,32 @@
 {
     class MatroskaVideoSource : Matroska.VideoSource
     {
-        public MatroskaVideoSource(string path)
+        protected IConnectionOptions Options { get; private set; }
+
+        public MatroskaVideoSource(string path, IConnectionOptions options)
             : base(path)
-        { }
+        {
+            Options = options;
+        }
 
         protected override VideoDecoder CreateVp8Decoder()
         {
-            return new Vp8.Decoder();
+            return VideoEncoding.VP8.CreateDecoder(Options);
         }
 
         protected override VideoDecoder CreateVp9Decoder()
         {
-            return new Vp9.Decoder();
+            return VideoEncoding.VP9.CreateDecoder(Options);
         }
 
         protected override VideoDecoder CreateH264Decoder()
         {
-            return new OpenH264.Decoder();
+            return VideoEncoding.H264.CreateDecoder(Options);
+        }
+
+        protected override VideoDecoder CreateH265Decoder()
+        {
+            return VideoEncoding.H265.CreateDecoder(Options);
         }
     }
 }

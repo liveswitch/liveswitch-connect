@@ -12,12 +12,12 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="3.1.3" />
-    <PackageReference Include="FM.LiveSwitch.Opus" Version="1.10.0.34671" />
-    <PackageReference Include="FM.LiveSwitch.Yuv" Version="1.10.0.34671" />
-    <PackageReference Include="FM.LiveSwitch.Vpx" Version="1.10.0.34671" />
-    <PackageReference Include="FM.LiveSwitch.OpenH264" Version="1.10.0.34671" />
-    <PackageReference Include="FM.LiveSwitch" Version="1.10.0.34671" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="5.0.0" />
+    <PackageReference Include="FM.LiveSwitch.Opus" Version="1.11.4.41407" />
+    <PackageReference Include="FM.LiveSwitch.Yuv" Version="1.11.4.41407" />
+    <PackageReference Include="FM.LiveSwitch.Vpx" Version="1.11.4.41407" />
+    <PackageReference Include="FM.LiveSwitch.OpenH264" Version="1.11.4.41407" />
+    <PackageReference Include="FM.LiveSwitch.Nvidia" Version="1.11.4.41407" />
+    <PackageReference Include="FM.LiveSwitch" Version="1.11.4.41407" />
   </ItemGroup>
-
 </Project>

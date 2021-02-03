@@ -478,7 +478,7 @@ namespace FM.LiveSwitch.Connect
 
                     if (currentOutput.OutputFormat.IsCompressed)
                     {
-                        VideoDecoder = currentOutput.OutputFormat.ToEncoding().CreateDecoder();
+                        VideoDecoder = currentOutput.OutputFormat.ToEncoding().CreateDecoder(Options);
 
                         currentOutput.AddOutput(VideoDecoder);
                         currentOutput = VideoDecoder;
@@ -491,7 +491,7 @@ namespace FM.LiveSwitch.Connect
 
                 if (!currentOutput.OutputFormat.IsCompressed)
                 {
-                    VideoEncoder = VideoFormat.ToEncoding().CreateEncoder();
+                    VideoEncoder = VideoFormat.ToEncoding().CreateEncoder(Options);
 
                     VideoConverter = new ImageConverter(currentOutput.OutputFormat, VideoEncoder.InputFormat);
 

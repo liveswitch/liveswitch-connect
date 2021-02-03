@@ -12,14 +12,6 @@ namespace FM.LiveSwitch.Connect
 
         public Task<int> Record()
         {
-            if (!Options.NoVideo)
-            {
-                if (Options.DisableOpenH264 && Options.VideoCodec == VideoCodec.H264)
-                {
-                    Console.Error.WriteLine("--video-codec cannot be H264. OpenH264 failed to initialize.");
-                    return Task.FromResult(1);
-                }
-            }
             return Receive();
         }
 

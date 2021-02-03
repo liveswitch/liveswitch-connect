@@ -116,6 +116,7 @@ namespace FM.LiveSwitch.Connect
         private const int Vp8PacketSize = 1000 + 12;
         private const int Vp9PacketSize = 1000 + 12;
         private const int H264PacketSize = 1000 + 12;
+        private const int H265PacketSize = 1000 + 12;
 
         protected override Task Ready()
         {
@@ -257,6 +258,8 @@ namespace FM.LiveSwitch.Connect
                                 $"-sdp_file {H264SdpFileName}",
                             });
                         }
+
+                        //TODO: H.265 SPS/PPS?
                     }
                     else
                     {
@@ -301,6 +304,19 @@ namespace FM.LiveSwitch.Connect
                                 $"-g {Options.KeyFrameInterval} -keyint_min {Options.KeyFrameInterval}",
                             });
                         }
+                        else if (VideoFormat.IsH265)
+                        {
+                            args.AddRange(new[]
+                            {
+                                $"-c libx265",
+                                $"-profile:v main",
+                                $"-level:v 3.1",
+                                $"-pix_fmt yuv420p",
+                                $"-tune zerolatency",
+                                $"-b:v {Options.VideoBitrate}k",
+                                $"-g {Options.KeyFrameInterval} -keyint_min {Options.KeyFrameInterval}"
+                            });
+                        }
                         else
                         {
                             throw new InvalidOperationException($"Unexpected video format '{RtpVideoFormat.Name}'.");
@@ -318,6 +334,10 @@ namespace FM.LiveSwitch.Connect
                     else if (RtpVideoFormat.IsH264)
                     {
                         args.Add($"rtp://127.0.0.1:{source.Port}?pkt_size={H264PacketSize}");
+                    }
+                    else if (RtpVideoFormat.IsH265)
+                    {
+                        args.Add($"rtp://127.0.0.1:{source.Port}?pkt_size={H265PacketSize}");
                     }
                     else
                     {
