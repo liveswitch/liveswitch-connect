@@ -2,7 +2,7 @@
 {
     class NamedPipeAudioSink : AudioSink
     {
-        static ILog _Log = Log.GetLogger(typeof(NamedPipeAudioSink));
+        private static readonly ILog _Log = Log.GetLogger(typeof(NamedPipeAudioSink));
 
         public override string Label
         {
@@ -45,7 +45,12 @@
             Pipe.OnConnected += () =>
             {
                 Deactivated = false;
-                OnPipeConnected?.Invoke();
+
+                var handler = OnPipeConnected;
+                if (handler != null)
+                {
+                    handler();
+                }
             };
 
             if (client)

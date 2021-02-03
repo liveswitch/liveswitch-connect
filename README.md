@@ -4,7 +4,7 @@
 
 The LiveSwitch Connect CLI lets you send and receive media to and from LiveSwitch.
 
-Requires .NET Core 3.1 or newer.
+Requires .NET Core 3.1 or newer. Requires LiveSwitch Server 1.10.0 or newer.
 
 ## Building
 
@@ -35,6 +35,24 @@ dotnet build
 ```
 
 Using this approach will generate a library instead of an executable. Use `dotnet lsconnect.dll` instead of `lsconnect` to run it.
+
+## Docker
+
+Images are also hosted on [DockerHub](https://hub.docker.com/r/frozenmountain/liveswitch-connect).
+
+```shell
+docker run --rm frozenmountain/liveswitch-connect [verb] [options]
+```
+
+## Environment Variables
+
+Environment variables can be used in place of command-line arguments.
+
+Environment variable names are `lsconnect_{verb}_{option}`, e.g. `lsconnect_play_gateway-url`.
+
+Environment variable names are case-insensitive, so `lsconnect_play_application-id` is equivalent to `LSCONNECT_PLAY_APPLICATION-ID`.
+
+Note that command-line arguments always take precedence over environment variables.
 
 ## Usage
 
@@ -448,7 +466,9 @@ The `render` verb lets you render remote media from a LiveSwitch server to a nam
 
   --video-height            The video height.
 
-  --connection-id           Required. The remote connection ID or 'mcu'.
+  --connection-id           The remote connection ID or 'mcu'.
+
+  --media-id                The remote media ID.
 
   --channel-id              Required. The channel ID.
 
@@ -498,7 +518,9 @@ The `ffrender` verb lets you render remote media from a LiveSwitch server to FFm
 ```shell
   --output-args           Required. The FFmpeg output arguments.
 
-  --connection-id         Required. The remote connection ID or 'mcu'.
+  --connection-id         The remote connection ID or 'mcu'.
+
+  --media-id              The remote media ID.
 
   --channel-id            Required. The channel ID.
 
@@ -569,7 +591,9 @@ The `log` verb lets you log remote media frame details from a LiveSwitch server 
                           clientId, clientTag, connectionId, connectionTag,
                           mediaId
 
-  --connection-id         Required. The remote connection ID or 'mcu'.
+  --connection-id         The remote connection ID or 'mcu'.
+
+  --media-id              The remote media ID.
 
   --channel-id            Required. The channel ID.
 
@@ -629,7 +653,9 @@ The `record` verb lets you record remote media from a LiveSwitch server to a loc
                           deviceAlias, clientId, clientTag, connectionId,
                           connectionTag, mediaId
 
-  --connection-id         Required. The remote connection ID or 'mcu'.
+  --connection-id         The remote connection ID or 'mcu'.
+
+  --media-id              The remote media ID.
 
   --channel-id            Required. The channel ID.
 
@@ -687,7 +713,9 @@ The `intercept` verb lets you forward audio and/or video packets to a specific d
   --video-ip-address      (Default: 127.0.0.1) The destination IP address for
                           video packets.
 
-  --connection-id         Required. The remote connection ID or 'mcu'.
+  --connection-id         The remote connection ID or 'mcu'.
+
+  --media-id              The remote media ID.
 
   --channel-id            Required. The channel ID.
 

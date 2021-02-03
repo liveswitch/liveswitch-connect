@@ -47,7 +47,11 @@ namespace FM.LiveSwitch.Connect
                 Pipe = new NamedPipe(PipeName, Server);
                 Pipe.OnConnected += () =>
                 {
-                    OnPipeConnected?.Invoke();
+                    var handler = OnPipeConnected;
+                    if (handler != null)
+                    {
+                        handler();
+                    }
                 };
                 Pipe.OnReadDataBuffer += (dataBuffer) =>
                 {

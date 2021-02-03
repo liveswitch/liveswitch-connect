@@ -2,6 +2,8 @@
 {
     interface IReceiveOptions : IConnectionOptions, IChannelOptions, IClientOptions
     {
+        string MediaId { get; }
+
         string ConnectionId { get; set; }
 
         bool AudioTranscode { get; }

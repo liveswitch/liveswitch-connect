@@ -7,13 +7,21 @@ namespace FM.LiveSwitch.Connect
         public static ManagedConnection CreateConnection(this IReceiveOptions options, Channel channel, ConnectionInfo remoteConnectionInfo, AudioStream audioStream, VideoStream videoStream, DataStream dataStream, bool logState = true)
         {
             ManagedConnection connection;
-            if (remoteConnectionInfo.Id == "mcu")
+            if (remoteConnectionInfo != null)
             {
-                connection = channel.CreateMcuConnection(audioStream, videoStream, dataStream);
+                if (remoteConnectionInfo.Id == "mcu")
+                {
+                    connection = channel.CreateMcuConnection(audioStream, videoStream, dataStream);
+                }
+                else
+                {
+                    connection = channel.CreateSfuDownstreamConnection(remoteConnectionInfo, audioStream, videoStream, dataStream);
+                }
             }
             else
             {
-                connection = channel.CreateSfuDownstreamConnection(remoteConnectionInfo, audioStream, videoStream, dataStream);
+                //Connect by Media ID
+                connection = channel.CreateSfuDownstreamConnection(options.MediaId, audioStream, videoStream, dataStream);
             }
 
             connection.Tag = options.ConnectionTag;
