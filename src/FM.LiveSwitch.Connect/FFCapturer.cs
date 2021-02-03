@@ -306,12 +306,11 @@ namespace FM.LiveSwitch.Connect
                         }
                         else if (VideoFormat.IsH265)
                         {
-                            //TODO: review these settings
                             args.AddRange(new[]
                             {
                                 $"-c libx265",
-                                $"-profile:v baseline",
-                                $"-level:v 1.3",
+                                $"-profile:v main",
+                                $"-level:v 3.1",
                                 $"-pix_fmt yuv420p",
                                 $"-tune zerolatency",
                                 $"-b:v {Options.VideoBitrate}k",

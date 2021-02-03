@@ -248,9 +248,7 @@ namespace FM.LiveSwitch.Connect
                     }
                     else if (RtpVideoFormat.IsH265)
                     {
-                        //TODO: review these settings
                         sdpMediaDescription.AddMediaAttribute(new Sdp.Rtp.MapAttribute(sink.PayloadType, VideoFormat.H265Name, VideoFormat.DefaultClockRate));
-                        sdpMediaDescription.AddMediaAttribute(new Sdp.FormatParametersAttribute(sink.PayloadType, "profile-level-id=42001f;level-asymmetry-allowed=1;packetization-mode=1"));
                     }
                     else
                     {
