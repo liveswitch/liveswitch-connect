@@ -19,7 +19,7 @@ namespace NewTek.NDI
 
             // allocate some memory for a video buffer
             IntPtr videoBufferPtr = Marshal.AllocHGlobal(bufferSize);
-
+            
             _ndiVideoFrame = new NDIlib.video_frame_v2_t()
             {
                 xres = width,
@@ -31,7 +31,7 @@ namespace NewTek.NDI
                 frame_format_type = format,
                 timecode = NDIlib.send_timecode_synthesize,
                 p_data = videoBufferPtr,
-                line_stride_in_bytes = stride,
+                line_stride_in_bytes = stride,              
                 p_metadata = IntPtr.Zero,
                 timestamp = 0
             };

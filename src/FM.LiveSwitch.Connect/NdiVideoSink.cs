@@ -22,20 +22,22 @@ namespace FM.LiveSwitch.Connect
         protected NDI.VideoFrame NdiVideoFrame { get; private set; }
         protected bool IsCheckConnectionCount { get; private set; }
 
-        private int ndiBufferSizeBytes = 0;
+        private int stride = -1;
 
-        public NdiVideoSink(NDI.Sender ndiSender, int videoWidth, int videoHeight, int frameRateNumerator, int frameRateDenominator, VideoFormat format)
+        private readonly int frameRateNumerator = 30000;
+
+        private readonly int frameRateDenominator = 1000;
+
+        private IntPtr videoBufferPtr = IntPtr.Zero;
+
+        private bool videoBufferAllocated = false;
+
+        public NdiVideoSink(NDI.Sender ndiSender, int frameRateNumerator, int frameRateDenominator, VideoFormat format)
             : base(format)
         {
-            Initialize(ndiSender, videoWidth, videoHeight, frameRateNumerator, frameRateDenominator);
-        }
-
-        private void Initialize(NDI.Sender ndiSender, int videoWidth, int videoHeight, int frameRateNumerator, int frameRateDenominator)
-        {
-            
-            NdiSender = ndiSender;
-            NdiVideoFrame = new NDI.VideoFrame(videoWidth, videoHeight, (float)videoWidth / videoHeight, frameRateNumerator, frameRateDenominator);
-            this.ndiBufferSizeBytes = NdiVideoFrame.Width * NdiVideoFrame.Height * 4;
+            this.frameRateNumerator = frameRateNumerator;
+            this.frameRateDenominator = frameRateDenominator;
+            this.NdiSender = ndiSender;
         }
 
         protected override void DoProcessFrame(VideoFrame frame, VideoBuffer inputBuffer)
@@ -61,37 +63,65 @@ namespace FM.LiveSwitch.Connect
 
         protected virtual bool WriteFrame(VideoFrame frame, VideoBuffer inputBuffer)
         {
-            foreach (var dataBuffer in inputBuffer.DataBuffers)
-            {
-                if (!TryWrite(dataBuffer, frame.LastBuffer.Width, frame.LastBuffer.Height))
-                {
-                    return false;
-                }
-            }
-            return true;
-        }
 
-        protected virtual bool TryWrite(DataBuffer buffer, int width, int height)
-        {
             try
             {
-                int offset = Math.Max(0, (buffer.Data.Length - buffer.Length) / 8); // 8 bits per channel
-                Marshal.Copy(buffer.Data, offset, NdiVideoFrame.BufferPtr, Math.Min(buffer.Length, ndiBufferSizeBytes));
+                if (stride != inputBuffer.Stride || NdiVideoFrame == null)
+                {
+                    stride = inputBuffer.Stride;
 
-                NdiSender.Send(NdiVideoFrame);
+                    int width = inputBuffer.Stride; //This has to be stride! - The buffer may be returned with a stride that does not match up with the width.
+                                                    // For example - when returning video at 1918x924 the stride ends up being 1984
+                                                    // If 1918x924 is passed to ndi with a stride of 1984 it will expect a different buffer size. 
+
+                    int height = inputBuffer.Height;
+                    int bufferSize = (width * height) + 2 * ((width / 2) * (height / 2));
+
+                    if (videoBufferAllocated)
+                    {
+                        Marshal.FreeHGlobal(videoBufferPtr);
+                    }
+
+                    videoBufferPtr = Marshal.AllocHGlobal(bufferSize);
+                    videoBufferAllocated = true;
+
+                    NdiVideoFrame = new NDI.VideoFrame(
+                        videoBufferPtr, 
+                        width, 
+                        height, 
+                        stride, 
+                        NDIlib.FourCC_type_e.NDIlib_FourCC_video_type_I420, 
+                        (float)width / height, 
+                        frameRateNumerator, 
+                        frameRateDenominator,
+                        NDIlib.frame_format_type_e.frame_format_type_progressive);
+                }
+
+                foreach(var dataBuffer in inputBuffer.DataBuffers)
+                {
+                    Marshal.Copy(dataBuffer.Data, 0, NdiVideoFrame.BufferPtr, dataBuffer.Data.Length);
+                    NdiSender.Send(NdiVideoFrame);
+                }
+                
                 return true;
-            } 
+            }
             catch (Exception ex)
             {
                 _Log.Error("Could not write Video buffer to Ndi Sender", ex);
             }
             return false;
-         }
-
+        }
 
         protected override void DoDestroy()
         {
+            if (videoBufferAllocated)
+            {
+                Marshal.FreeHGlobal(videoBufferPtr);
+                videoBufferPtr = IntPtr.Zero;
+            }
             NdiVideoFrame.Dispose();
+            
+
         }
     }
 }

@@ -89,13 +89,15 @@ namespace FM.LiveSwitch.Connect
             _Log.Info("Ndi Audio Sink Created");
             var maxRate = Options.AudioClockRate / 1000 * Options.AudioFrameDuration; // 1000ms
             var sink = new NdiAudioSink(NdiSender, maxRate,  Options.AudioClockRate, Options.AudioChannelCount, new Pcm.Format(Options.AudioClockRate, Options.AudioChannelCount));
+
+            
             return sink;
         }
 
         protected override NdiVideoSink CreateVideoSink()
         {
             _Log.Info("Ndi Video Sink Created");
-            var sink = new NdiVideoSink(NdiSender, Options.VideoWidth, Options.VideoHeight, Options.FrameRateNumerator, Options.FrameRateDenominator, VideoFormat.Bgra);
+            var sink = new NdiVideoSink(NdiSender, Options.FrameRateNumerator, Options.FrameRateDenominator, VideoFormat.I420);
             return sink;
         }
 
@@ -108,13 +110,16 @@ namespace FM.LiveSwitch.Connect
         {
             string failoverName = $"{System.Net.Dns.GetHostName()}-{Options.StreamName}";
             _Log.Info($"Initializing NDI Stream - {Options.StreamName} (Alt: {failoverName})");
-            NdiSender = new Sender(Options.StreamName, true, false, null, failoverName);
+
+            // Faster to put the clock on audio as opposed to video
+            NdiSender = new Sender(Options.StreamName, false, true, null, failoverName);
             
             return base.Initialize();
         }
 
         protected override Task Ready()
         {
+
             var videoConverter = VideoConverter;
             if (videoConverter != null)
             {
