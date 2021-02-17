@@ -24,6 +24,10 @@ namespace FM.LiveSwitch.Connect
 
         private int stride = -1;
 
+        private int width = -1;
+
+        private int height = -1;
+
         private readonly int frameRateNumerator = 30000;
 
         private readonly int frameRateDenominator = 1000;
@@ -66,16 +70,13 @@ namespace FM.LiveSwitch.Connect
 
             try
             {
-                if (stride != inputBuffer.Stride || NdiVideoFrame == null)
+                if (stride != inputBuffer.Stride || width != inputBuffer.Width || height != inputBuffer.Height || NdiVideoFrame == null)
                 {
                     stride = inputBuffer.Stride;
+                    width = inputBuffer.Width; 
+                    height = inputBuffer.Height;
 
-                    int width = inputBuffer.Stride; //This has to be stride! - The buffer may be returned with a stride that does not match up with the width.
-                                                    // For example - when returning video at 1918x924 the stride ends up being 1984
-                                                    // If 1918x924 is passed to ndi with a stride of 1984 it will expect a different buffer size. 
-
-                    int height = inputBuffer.Height;
-                    int bufferSize = (width * height) + 2 * ((width / 2) * (height / 2));
+                    int bufferSize = height * stride * 3/2;
 
                     if (videoBufferAllocated)
                     {
