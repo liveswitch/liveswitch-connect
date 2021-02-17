@@ -97,7 +97,7 @@ namespace FM.LiveSwitch.Connect
         protected override NdiVideoSink CreateVideoSink()
         {
             _Log.Info("Ndi Video Sink Created");
-            var sink = new NdiVideoSink(NdiSender, Options.FrameRateNumerator, Options.FrameRateDenominator, VideoFormat.I420);
+            var sink = new NdiVideoSink(NdiSender, Options.VideoWidth, Options.VideoHeight, Options.FrameRateNumerator, Options.FrameRateDenominator, VideoFormat.I420);
             return sink;
         }
 
@@ -119,21 +119,6 @@ namespace FM.LiveSwitch.Connect
 
         protected override Task Ready()
         {
-
-            var videoConverter = VideoConverter;
-            if (videoConverter != null)
-            {
-                videoConverter.OnProcessFrame += (frame) =>
-                {
-                    var buffer = frame.LastBuffer;
-                    var scale = (double)Options.VideoWidth / frame.LastBuffer.Width;
-                    if (scale != videoConverter.TargetScale)
-                    {
-                        videoConverter.TargetScale = scale;
-                        Console.Error.WriteLine($"Video scale updated to {scale} (input frame size is {buffer.Width}x{buffer.Height}).");
-                    }
-                };
-            }
 
             return base.Ready();
         }
