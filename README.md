@@ -274,6 +274,10 @@ The `ffcapture` verb lets you capture local media from FFmpeg and send it to a L
   --log-level                     (Default: Error) The LiveSwitch log level.
 ```
 
+## ndifind
+
+The `ndifind` verb prints a list of the discoverable NDI devices on the network.
+
 ## ndicapture
 
 The `ndicapture` verb lets you capture media from an NDI device and send it to a LiveSwitch server.

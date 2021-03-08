@@ -29,7 +29,8 @@ namespace FM.LiveSwitch.Connect
                 NdiRenderOptions,
                 LogOptions,
                 RecordOptions,
-                InterceptOptions
+                InterceptOptions,
+                NdiFindOptions
             >(args);
 
             result.MapResult(
@@ -127,6 +128,13 @@ namespace FM.LiveSwitch.Connect
                     {
                         Initialize(options);
                         return await new Interceptor(options).Intercept();
+                    }).GetAwaiter().GetResult();
+                },
+                (NdiFindOptions options) =>
+                {
+                    return Task.Run(async () =>
+                    {
+                        return await new NdiFinder(options).Run();
                     }).GetAwaiter().GetResult();
                 },
                 errors =>
