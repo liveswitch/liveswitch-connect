@@ -66,12 +66,6 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="NAudio, Version=1.8.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\NAudio\NAudio.dll</HintPath>
-    </Reference>
-    <Reference Include="PresentationCore" />
-    <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xaml" />
@@ -92,8 +86,6 @@
     <Compile Include="Source.cs" />
     <Compile Include="VideoFrame.cs" />
     <Compile Include="Receiver.cs" />
-    <Compile Include="WPF.ReceiveView.cs" />
-    <Compile Include="Wpf.SendContainer.cs" />
     <Compile Include="Pinvoke\Processing.NDI.compat.Interop.cs" />
     <Compile Include="Utilities.cs" />
     <Compile Include="Pinvoke\Processing.NDI.Find.Interop.cs" />

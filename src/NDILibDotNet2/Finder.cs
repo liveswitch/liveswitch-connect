@@ -25,8 +25,6 @@ namespace NewTek.NDI
                     throw new InvalidOperationException("Unable to initialize NDI.");
             }
 
-            BindingOperations.EnableCollectionSynchronization(_sourceList, _sourceLock);
-
             IntPtr groupsNamePtr = IntPtr.Zero;
 
             // make a flat list of groups if needed
@@ -183,8 +181,7 @@ namespace NewTek.NDI
 
         private IntPtr _findInstancePtr = IntPtr.Zero;
 
-        private ObservableCollection<Source> _sourceList = new ObservableCollection<Source>();
-        private object _sourceLock = new object();        
+        private ObservableCollection<Source> _sourceList = new ObservableCollection<Source>();      
 
         // a thread to find on so that the UI isn't dragged down
         Thread _findThread = null;
