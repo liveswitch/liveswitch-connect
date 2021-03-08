@@ -41,6 +41,12 @@ namespace NewTek.NDI
             };
         }
 
+        internal AudioFrame(NDIlib.audio_frame_v2_t ndiAudioFrame)
+        {
+            _memoryOwned = false;
+            _ndiAudioFrame = ndiAudioFrame;
+        }
+
         public IntPtr AudioBuffer
         {
             get

@@ -21,6 +21,7 @@ namespace FM.LiveSwitch.Connect
                 ShellOptions,
                 CaptureOptions, 
                 FFCaptureOptions,
+                NdiCaptureOptions,
                 FakeOptions,
                 PlayOptions, 
                 RenderOptions,
@@ -46,6 +47,14 @@ namespace FM.LiveSwitch.Connect
                     {
                         Initialize(options);
                         return await new Capturer(options).Capture();
+                    }).GetAwaiter().GetResult();
+                },
+                (NdiCaptureOptions options) =>
+                {
+                    return Task.Run(async () =>
+                    {
+                        Initialize(options);
+                        return await new NdiCapturer(options).Capture();
                     }).GetAwaiter().GetResult();
                 },
                 (FFCaptureOptions options) =>

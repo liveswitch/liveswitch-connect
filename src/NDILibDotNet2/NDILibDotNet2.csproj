@@ -91,6 +91,7 @@
     <Compile Include="Router.cs" />
     <Compile Include="Source.cs" />
     <Compile Include="VideoFrame.cs" />
+    <Compile Include="Receiver.cs" />
     <Compile Include="WPF.ReceiveView.cs" />
     <Compile Include="Wpf.SendContainer.cs" />
     <Compile Include="Pinvoke\Processing.NDI.compat.Interop.cs" />
