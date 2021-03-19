@@ -274,6 +274,76 @@ The `ffcapture` verb lets you capture local media from FFmpeg and send it to a L
   --log-level                     (Default: Error) The LiveSwitch log level.
 ```
 
+## ndifind
+
+The `ndifind` verb prints a list of the discoverable NDI devices on the network.
+
+## ndicapture
+
+The `ndicapture` verb lets you capture media from an NDI device and send it to a LiveSwitch server.
+
+```shell
+  --stream-name                   Required. Name of the NDI stream to capture.
+
+  --audio-clock-rate              (Default: 48000) The audio clock rate in Hz.
+                                  Minimum value is 8000. Maximum value is 48000.
+
+  --audio-channel-count           (Default: 2) The audio channel count. Minimum value
+                                  is 1. Maximum value is 4.
+
+  --video-format                  (Default: Bgra) The video format. (rgb, bgr, rgba, bgra)
+
+  --video-width                   (Default: 1920) The video width, to send to the LiveSwitch server.
+
+  --video-height                  (Default: 1080) The video height, to send to the LiveSwitch server.
+
+  --media-id                      The local media ID.
+
+  --audio-bitrate                 The audio bitrate.
+
+  --video-bitrate                 The video bitrate.
+
+  --video-frame-rate              The video frame-rate, if known, for
+                                  signalling.
+
+  --channel-id                    Required. The channel ID.
+
+  --data-channel-label            The data channel label.
+
+  --user-id                       The local user ID.
+
+  --user-alias                    The local user alias.
+
+  --device-id                     The local device ID.
+
+  --device-alias                  The local device alias.
+
+  --client-tag                    The local client tag.
+
+  --client-roles                  The local client roles.
+
+  --connection-tag                The local connection tag.
+
+  --no-audio                      Do not process audio.
+
+  --no-video                      Do not process video.
+
+  --audio-codec                   (Default: Any) The audio codec to negotiate
+                                  with LiveSwitch.
+
+  --video-codec                   (Default: Any) The video codec to negotiate
+                                  with LiveSwitch.
+
+  --gateway-url                   Required. The gateway URL.
+
+  --application-id                Required. The application ID.
+
+  --shared-secret                 Required. The shared secret for the
+                                  application ID.
+
+  --log-level                     (Default: Error) The LiveSwitch log level.
+```
+
 ## fake
 
 The `fake` verb lets you generate fake media and send it to a LiveSwitch server. Audio is generated as a continuous tone following the argument provided. Video is generated as a sequence of solid-fill images that rotate through the colour wheel.
@@ -974,6 +1044,7 @@ lsconnect ffrender ... --output-args="-f flv rtmp://a.rtmp.youtube.com/live2/<Yo
 ## Using NDI
 
 You'll need to install the NDI Runtime found here: <http://new.tk/NDIRedistV4>
+Add the runtime directory to the Path environment variable. Default: `C:\Program Files\NDI.tv\NDI 4 Runtime\v4`
 
 ## Contact
 

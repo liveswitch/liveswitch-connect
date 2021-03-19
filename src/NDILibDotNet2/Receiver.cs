@@ -1,48 +1,29 @@
-﻿using NAudio.Wave;
-using NewTek;
+﻿using NewTek;
 using NewTek.NDI;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
 using System.Threading;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
 
-namespace NewTek.NDI.WPF
+namespace NewTek.NDI
 {
+    public class AudioFrameReceivedEventArgs : EventArgs
+    {
+        public AudioFrame16bpp Frame { get; set; }
+    }
+
+    public class VideoFrameReceivedEventArgs : EventArgs
+    {
+        public VideoFrame Frame { get; set; }
+    }
+
     // If you do not use this control, you can remove this file
     // and remove the dependency on naudio.
     // Alternatively you can also remove any naudio related entries
     // and use it for video only, but don't forget that you will still need
     // to free any audio frames received.
-    public class ReceiveView : Viewbox, IDisposable, INotifyPropertyChanged
+    public class Receiver : IDisposable, INotifyPropertyChanged
     {
-        [Category("NewTek NDI"),
-        Description("The name of this receiver channel. Required or else an invalid argument exception will be thrown.")]
-        public String ReceiverName
-        {
-            get { return (String)GetValue(ReceiverNameProperty); }
-            set { SetValue(ReceiverNameProperty, value); }
-        }
-        public static readonly DependencyProperty ReceiverNameProperty =
-            DependencyProperty.Register("ReceiverName", typeof(String), typeof(ReceiveView), new PropertyMetadata(""));
-
-        
-
-        [Category("NewTek NDI"),
-        Description("The NDI source to connect to. An empty new Source() or a Source with no Name will disconnect.")]
-        public Source ConnectedSource
-        {
-            get { return (Source)GetValue(ConnectedSourceProperty); }
-            set { SetValue(ConnectedSourceProperty, value); }
-        }
-        public static readonly DependencyProperty ConnectedSourceProperty =
-            DependencyProperty.Register("ConnectedSource", typeof(Source), typeof(ReceiveView), new PropertyMetadata(new Source(), OnConnectedSourceChanged));
-
-
         [Category("NewTek NDI"),
         Description("If true (default) received audio will be sent to the default Windows audio playback device.")]
         public bool IsAudioEnabled
@@ -67,25 +48,6 @@ namespace NewTek.NDI.WPF
                 if (value != _videoEnabled)
                 {
                     NotifyPropertyChanged("IsVideoEnabled");
-                }
-            }
-        }
-
-        [Category("NewTek NDI"),
-        Description("Set or get the current audio volume. Range is 0.0 to 1.0")]
-        public float Volume
-        {
-            get { return _volume; }
-            set
-            {
-                if (value != _volume)
-                {
-                    _volume = Math.Max(0.0f, Math.Min(1.0f, value));
-
-                    if (_wasapiOut != null)
-                        _wasapiOut.Volume = _volume;
-
-                    NotifyPropertyChanged("Volume");
                 }
             }
         }
@@ -132,10 +94,15 @@ namespace NewTek.NDI.WPF
             }
         }
 
-        public ReceiveView()
+        public Receiver(String sourceName, String receiverName)
         {
-            if (System.ComponentModel.DesignerProperties.GetIsInDesignMode(this))
-                return;
+            if (String.IsNullOrEmpty(sourceName))
+                throw new ArgumentException("Source name can not be null or empty.", sourceName);
+            _sourceName = sourceName;
+
+            if (String.IsNullOrEmpty(receiverName))
+                throw new ArgumentException("Receiver name can not be null or empty.", receiverName);
+            _receiverName = receiverName;
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -384,7 +351,7 @@ namespace NewTek.NDI.WPF
             GC.SuppressFinalize(this);
         }
 
-        ~ReceiveView()
+        ~Receiver()
         {
             Dispose(false);
         }
@@ -405,14 +372,6 @@ namespace NewTek.NDI.WPF
 
                         _receiveThread = null;
                     }
-
-                    // Stop the audio device if needed
-                    if (_wasapiOut != null)
-                    {
-                        _wasapiOut.Stop();
-                        _wasapiOut.Dispose();
-                        _wasapiOut = null;
-                    }
                 }
                 
                 // Destroy the receiver
@@ -431,41 +390,16 @@ namespace NewTek.NDI.WPF
 
         private bool _disposed = false;
 
-        // when the ConnectedSource changes, connect to it.
-        private static void OnConnectedSourceChanged(object sender, DependencyPropertyChangedEventArgs e)
-        {
-            ReceiveView s = sender as ReceiveView;
-            if (s == null)
-                return;
-
-            s.Connect(s.ConnectedSource);
-        }
-
         // connect to an NDI source in our Dictionary by name
-        private void Connect(Source source)
+        public void Connect(NDIlib.recv_color_format_e colorFormat)
         {
-            if (System.ComponentModel.DesignerProperties.GetIsInDesignMode(this))
-                return;
-
-            if(String.IsNullOrEmpty(ReceiverName))
-                throw new ArgumentException("sourceName can not be null or empty.", ReceiverName);
-
             // just in case we're already connected
             Disconnect();
-
-            // before we are connected, we need to set up our image
-            // it's bad practice to do this in the constructor
-            if(Child == null)
-                Child = VideoSurface;
-            
-            // Sanity
-            if (source == null || String.IsNullOrEmpty(source.Name))
-                return;
 
             // a source_t to describe the source to connect to.
             NDIlib.source_t source_t = new NDIlib.source_t()
             {
-                p_ndi_name = UTF.StringToUtf8(source.Name)
+                p_ndi_name = UTF.StringToUtf8(_sourceName)
             };
 
             // make a description of the receiver we want
@@ -475,7 +409,7 @@ namespace NewTek.NDI.WPF
                 source_to_connect_to = source_t,
 
                 // we want BGRA frames for this example
-                color_format = NDIlib.recv_color_format_e.recv_color_format_BGRX_BGRA,
+                color_format = colorFormat,
 
                 // we want full quality - for small previews or limited bandwidth, choose lowest
                 bandwidth = NDIlib.recv_bandwidth_e.recv_bandwidth_highest,
@@ -486,7 +420,7 @@ namespace NewTek.NDI.WPF
                 // The name of the NDI receiver to create. This is a NULL terminated UTF8 string and should be
                 // the name of receive channel that you have. This is in many ways symettric with the name of
                 // senders, so this might be "Channel 1" on your system.
-                p_ndi_recv_name = UTF.StringToUtf8(ReceiverName)
+                p_ndi_recv_name = UTF.StringToUtf8(_receiverName)
             };
             
             // create a new instance connected to this source
@@ -614,38 +548,12 @@ namespace NewTek.NDI.WPF
                         break;
                     }
 
-                    // get all our info so that we can free the frame
-                    int yres = (int)videoFrame.yres;
-                    int xres = (int)videoFrame.xres;
+                    VideoFrameReceivedEventArgs videoArgs = new VideoFrameReceivedEventArgs();
+                    videoArgs.Frame = new VideoFrame(videoFrame);
+                    VideoFrameReceived?.Invoke(this, videoArgs);
 
-                    // quick and dirty aspect ratio correction for non-square pixels - SD 4:3, 16:9, etc.
-                    double dpiX = 96.0 * (videoFrame.picture_aspect_ratio / ((double)xres / (double)yres));
-
-                    int stride = (int)videoFrame.line_stride_in_bytes;
-                    int bufferSize = yres * stride;
-
-                    // We need to be on the UI thread to write to our bitmap
-                    // Not very efficient, but this is just an example
-                    Dispatcher.BeginInvoke(new Action(delegate
-                    {
-                        // resize the writeable if needed
-                        if (VideoBitmap == null ||
-                            VideoBitmap.PixelWidth != xres ||
-                            VideoBitmap.PixelHeight != yres ||
-                            VideoBitmap.DpiX != dpiX)
-                        {
-                            VideoBitmap = new WriteableBitmap(xres, yres, dpiX, 96.0, PixelFormats.Pbgra32, null);
-                            VideoSurface.Source = VideoBitmap;
-                        }
-
-                        // update the writeable bitmap
-                        VideoBitmap.WritePixels(new Int32Rect(0, 0, xres, yres), videoFrame.p_data, bufferSize, stride);
-
-                        // free frames that were received AFTER use!
-                        // This writepixels call is dispatched, so we must do it inside this scope.
-                        NDIlib.recv_free_video_v2(_recvInstancePtr, ref videoFrame);
-                    }));
-
+                    // free frames that were received AFTER use!
+                    NDIlib.recv_free_video_v2(_recvInstancePtr, ref videoFrame);
                     break;
 
                 // audio is beyond the scope of this example
@@ -660,97 +568,46 @@ namespace NewTek.NDI.WPF
                         break;
                     }
 
-                    // if the audio format changed, we need to reconfigure the audio device
-                    bool formatChanged = false;
+                    // we're working in bytes, so take the size of a 16 bit sample into account
+                    int sizeInBytes = (int)audioFrame.no_samples * (int)audioFrame.no_channels * sizeof(short);
 
-                    // make sure our format has been created and matches the incomming audio
-                    if (_waveFormat == null ||
-                        _waveFormat.Channels != audioFrame.no_channels ||
-                        _waveFormat.SampleRate != audioFrame.sample_rate)
+                    // NDI uses planar, but we'll return interleaved which Pcm uses by default.
+                    // create an interleaved frame and convert from the one we received
+                    NDIlib.audio_frame_interleaved_16s_t interleavedFrame = new NDIlib.audio_frame_interleaved_16s_t()
                     {
-                        // Create a wavformat that matches the incomming frames
-                        _waveFormat = WaveFormat.CreateIeeeFloatWaveFormat((int)audioFrame.sample_rate, (int)audioFrame.no_channels);
+                        sample_rate = audioFrame.sample_rate,
+                        no_channels = audioFrame.no_channels,
+                        no_samples = audioFrame.no_samples,
+                        timecode = audioFrame.timecode
+                    };
 
-                        formatChanged = true;
-                    }
+                    // we need a managed byte array to add to buffered provider
+                    byte[] audBuffer = new byte[sizeInBytes];
 
-                    // set up our audio buffer if needed
-                    if (_bufferedProvider == null || formatChanged)
-                    {
-                        _bufferedProvider = new BufferedWaveProvider(_waveFormat);
-                        _bufferedProvider.DiscardOnBufferOverflow = true;
-                    }
+                    // pin the byte[] and get a GC handle to it
+                    // doing it this way saves an expensive Marshal.Alloc/Marshal.Copy/Marshal.Free later
+                    // the data will only be moved once, during the fast interleave step that is required anyway
+                    GCHandle handle = GCHandle.Alloc(audBuffer, GCHandleType.Pinned);
 
-                    // set up our multiplexer used to mix down to 2 output channels)
-                    if (_multiplexProvider == null || formatChanged)
-                    {
-                        _multiplexProvider = new MultiplexingWaveProvider(new List<IWaveProvider>() { _bufferedProvider }, 2);
-                    }
+                    // access it by an IntPtr and use it for our interleaved audio buffer
+                    interleavedFrame.p_data = handle.AddrOfPinnedObject();
 
-                    // set up our audio output device
-                    if (_haveAudioDevice && (_wasapiOut == null || formatChanged))
-                    {
-                        try
-                        {
-                            // We can't guarantee audio sync or buffer fill, that's beyond the scope of this example.
-                            // This is close enough to show that audio is received and converted correctly.
-                            _wasapiOut = new WasapiOut(NAudio.CoreAudioApi.AudioClientShareMode.Shared, 50);
-                            _wasapiOut.Init(_multiplexProvider);
-                            _wasapiOut.Volume = _volume;
-                            _wasapiOut.Play();
-                        }
-                        catch
-                        {
-                            // if this fails, assume that there is no audio device on the system
-                            // so that we don't retry/catch on every audio frame received
-                            _haveAudioDevice = false;
-                        }
-                    }
+                    // Convert from float planar to 16 bit interleaved audio
+                    NDIlib.util_audio_to_interleaved_16s_v2(ref audioFrame, ref interleavedFrame);
 
-                    // did we get a device?
-                    if (_haveAudioDevice && _wasapiOut != null)
-                    {
-                        // we're working in bytes, so take the size of a 32 bit sample (float) into account
-                        int sizeInBytes = (int)audioFrame.no_samples * (int)audioFrame.no_channels * sizeof(float);
+                    AudioFrameReceivedEventArgs audioArgs = new AudioFrameReceivedEventArgs();
+                    audioArgs.Frame = new AudioFrame16bpp(interleavedFrame);
+                    AudioFrameReceived?.Invoke(this, audioArgs);
 
-                        // NAudio is expecting interleaved audio and NDI uses planar.
-                        // create an interleaved frame and convert from the one we received
-                        NDIlib.audio_frame_interleaved_32f_t interleavedFrame = new NDIlib.audio_frame_interleaved_32f_t()
-                        {
-                            sample_rate = audioFrame.sample_rate,
-                            no_channels = audioFrame.no_channels,
-                            no_samples = audioFrame.no_samples,
-                            timecode = audioFrame.timecode
-                        };
-
-                        // we need a managed byte array to add to buffered provider
-                        byte[] audBuffer = new byte[sizeInBytes];
-
-                        // pin the byte[] and get a GC handle to it
-                        // doing it this way saves an expensive Marshal.Alloc/Marshal.Copy/Marshal.Free later
-                        // the data will only be moved once, during the fast interleave step that is required anyway
-                        GCHandle handle = GCHandle.Alloc(audBuffer, GCHandleType.Pinned);
-
-                        // access it by an IntPtr and use it for our interleaved audio buffer
-                        interleavedFrame.p_data = handle.AddrOfPinnedObject();
-
-                        // Convert from float planar to float interleaved audio
-                        // There is a matching version of this that converts to interleaved 16 bit audio frames if you need 16 bit
-                        NDIlib.util_audio_to_interleaved_32f_v2(ref audioFrame, ref interleavedFrame);
-
-                        // release the pin on the byte[]
-                        // never try to access p_data after the byte[] has been unpinned!
-                        // that IntPtr will no longer be valid.
-                        handle.Free();
-
-                        // push the byte[] buffer into the bufferedProvider for output
-                        _bufferedProvider.AddSamples(audBuffer, 0, sizeInBytes);
-                    }
+                    // release the pin on the byte[]
+                    // never try to access p_data after the byte[] has been unpinned!
+                    // that IntPtr will no longer be valid.
+                    handle.Free();
 
                     // free the frame that was received
                     NDIlib.recv_free_audio_v2(_recvInstancePtr, ref audioFrame);
-
                     break;
+
                 // Metadata
                 case NDIlib.frame_type_e.frame_type_metadata:
 
@@ -775,34 +632,20 @@ namespace NewTek.NDI.WPF
         // a way to exit the thread safely
         bool _exitThread = false;
 
-        // the image that will show our bitmap source
-        private Image VideoSurface = new Image();
+        public event EventHandler<AudioFrameReceivedEventArgs> AudioFrameReceived;
+        public event EventHandler<VideoFrameReceivedEventArgs> VideoFrameReceived;
 
-        // the bitmap source we copy received frames into
-        private WriteableBitmap VideoBitmap;
+        private readonly String _sourceName;
+        private readonly String _receiverName;
 
         // should we send audio to Windows or not?
         private bool _audioEnabled = true;
 
         // should we send video to Windows or not?
         private bool _videoEnabled = true;
-        
-        // the NAudio related
-        private WasapiOut _wasapiOut = null;
-        private bool _haveAudioDevice = true;
-        private MultiplexingWaveProvider _multiplexProvider = null;
-        private BufferedWaveProvider _bufferedProvider = null;
-
-        // The last WaveFormat we used.
-        // This may change over time, so remember how we are configured currently.
-        private WaveFormat _waveFormat = null;
-
-        // the current audio volume
-        private float _volume = 1.0f;
 
         private bool _isPtz = false;
         private bool _canRecord = false;
         private String _webControlUrl = String.Empty;
-        private String _receiverName = String.Empty;
     }
 }

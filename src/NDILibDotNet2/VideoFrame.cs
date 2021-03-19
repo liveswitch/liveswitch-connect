@@ -57,6 +57,20 @@ namespace NewTek.NDI
             };
         }
 
+        internal VideoFrame(NDIlib.video_frame_v2_t ndiVideoFrame)
+        {
+            _memoryOwned = false;
+            _ndiVideoFrame = ndiVideoFrame;
+        }
+
+        public int FourCC
+        {
+            get
+            {
+                return (int)_ndiVideoFrame.FourCC;
+            }
+        }
+
         public int Width
         {
             get
