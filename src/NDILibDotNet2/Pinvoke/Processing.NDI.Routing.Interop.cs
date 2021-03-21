@@ -80,30 +80,30 @@ namespace NewTek
 		internal static partial class UnsafeNativeMethods
 		{
 			// routing_create 
-			[DllImport("Processing.NDI.Lib.x64.dll", EntryPoint = "NDIlib_routing_create", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+			[DllImport(Dllx64Name, EntryPoint = "NDIlib_routing_create", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
 			internal static extern IntPtr routing_create_64(ref routing_create_t p_create_settings);
-			[DllImport("Processing.NDI.Lib.x86.dll", EntryPoint = "NDIlib_routing_create", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+			[DllImport(Dllx86Name, EntryPoint = "NDIlib_routing_create", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
 			internal static extern IntPtr routing_create_32(ref routing_create_t p_create_settings);
 
 			// routing_destroy 
-			[DllImport("Processing.NDI.Lib.x64.dll", EntryPoint = "NDIlib_routing_destroy", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+			[DllImport(Dllx64Name, EntryPoint = "NDIlib_routing_destroy", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
 			internal static extern void routing_destroy_64(IntPtr p_instance);
-			[DllImport("Processing.NDI.Lib.x86.dll", EntryPoint = "NDIlib_routing_destroy", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+			[DllImport(Dllx86Name, EntryPoint = "NDIlib_routing_destroy", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
 			internal static extern void routing_destroy_32(IntPtr p_instance);
 
 			// routing_change 
-			[DllImport("Processing.NDI.Lib.x64.dll", EntryPoint = "NDIlib_routing_change", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+			[DllImport(Dllx64Name, EntryPoint = "NDIlib_routing_change", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
 			[return: MarshalAsAttribute(UnmanagedType.U1)]
 			internal static extern bool routing_change_64(IntPtr p_instance, ref source_t p_source);
-			[DllImport("Processing.NDI.Lib.x86.dll", EntryPoint = "NDIlib_routing_change", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+			[DllImport(Dllx86Name, EntryPoint = "NDIlib_routing_change", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
 			[return: MarshalAsAttribute(UnmanagedType.U1)]
 			internal static extern bool routing_change_32(IntPtr p_instance, ref source_t p_source);
 
 			// routing_clear 
-			[DllImport("Processing.NDI.Lib.x64.dll", EntryPoint = "NDIlib_routing_clear", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+			[DllImport(Dllx64Name, EntryPoint = "NDIlib_routing_clear", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
 			[return: MarshalAsAttribute(UnmanagedType.U1)]
 			internal static extern bool routing_clear_64(IntPtr p_instance);
-			[DllImport("Processing.NDI.Lib.x86.dll", EntryPoint = "NDIlib_routing_clear", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+			[DllImport(Dllx86Name, EntryPoint = "NDIlib_routing_clear", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
 			[return: MarshalAsAttribute(UnmanagedType.U1)]
 			internal static extern bool routing_clear_32(IntPtr p_instance);
 

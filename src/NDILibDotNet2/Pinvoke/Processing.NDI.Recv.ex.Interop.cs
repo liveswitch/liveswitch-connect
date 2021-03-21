@@ -302,198 +302,198 @@ namespace NewTek
 		internal static partial class UnsafeNativeMethods
 		{
 			// recv_ptz_is_supported 
-			[DllImport("Processing.NDI.Lib.x64.dll", EntryPoint = "NDIlib_recv_ptz_is_supported", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+			[DllImport(Dllx64Name, EntryPoint = "NDIlib_recv_ptz_is_supported", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
 			[return: MarshalAsAttribute(UnmanagedType.U1)]
 			internal static extern bool recv_ptz_is_supported_64(IntPtr p_instance);
-			[DllImport("Processing.NDI.Lib.x86.dll", EntryPoint = "NDIlib_recv_ptz_is_supported", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+			[DllImport(Dllx86Name, EntryPoint = "NDIlib_recv_ptz_is_supported", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
 			[return: MarshalAsAttribute(UnmanagedType.U1)]
 			internal static extern bool recv_ptz_is_supported_32(IntPtr p_instance);
 
 			// recv_recording_is_supported 
-			[DllImport("Processing.NDI.Lib.x64.dll", EntryPoint = "NDIlib_recv_recording_is_supported", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+			[DllImport(Dllx64Name, EntryPoint = "NDIlib_recv_recording_is_supported", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
 			[return: MarshalAsAttribute(UnmanagedType.U1)]
 			internal static extern bool recv_recording_is_supported_64(IntPtr p_instance);
-			[DllImport("Processing.NDI.Lib.x86.dll", EntryPoint = "NDIlib_recv_recording_is_supported", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+			[DllImport(Dllx86Name, EntryPoint = "NDIlib_recv_recording_is_supported", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
 			[return: MarshalAsAttribute(UnmanagedType.U1)]
 			internal static extern bool recv_recording_is_supported_32(IntPtr p_instance);
 
 			// recv_ptz_zoom 
-			[DllImport("Processing.NDI.Lib.x64.dll", EntryPoint = "NDIlib_recv_ptz_zoom", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+			[DllImport(Dllx64Name, EntryPoint = "NDIlib_recv_ptz_zoom", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
 			[return: MarshalAsAttribute(UnmanagedType.U1)]
 			internal static extern bool recv_ptz_zoom_64(IntPtr p_instance, float zoom_value);
-			[DllImport("Processing.NDI.Lib.x86.dll", EntryPoint = "NDIlib_recv_ptz_zoom", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+			[DllImport(Dllx86Name, EntryPoint = "NDIlib_recv_ptz_zoom", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
 			[return: MarshalAsAttribute(UnmanagedType.U1)]
 			internal static extern bool recv_ptz_zoom_32(IntPtr p_instance, float zoom_value);
 
 			// recv_ptz_zoom_speed 
-			[DllImport("Processing.NDI.Lib.x64.dll", EntryPoint = "NDIlib_recv_ptz_zoom_speed", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+			[DllImport(Dllx64Name, EntryPoint = "NDIlib_recv_ptz_zoom_speed", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
 			[return: MarshalAsAttribute(UnmanagedType.U1)]
 			internal static extern bool recv_ptz_zoom_speed_64(IntPtr p_instance, float zoom_speed);
-			[DllImport("Processing.NDI.Lib.x86.dll", EntryPoint = "NDIlib_recv_ptz_zoom_speed", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+			[DllImport(Dllx86Name, EntryPoint = "NDIlib_recv_ptz_zoom_speed", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
 			[return: MarshalAsAttribute(UnmanagedType.U1)]
 			internal static extern bool recv_ptz_zoom_speed_32(IntPtr p_instance, float zoom_speed);
 
 			// recv_ptz_pan_tilt 
-			[DllImport("Processing.NDI.Lib.x64.dll", EntryPoint = "NDIlib_recv_ptz_pan_tilt", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+			[DllImport(Dllx64Name, EntryPoint = "NDIlib_recv_ptz_pan_tilt", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
 			[return: MarshalAsAttribute(UnmanagedType.U1)]
 			internal static extern bool recv_ptz_pan_tilt_64(IntPtr p_instance, float pan_value, float tilt_value);
-			[DllImport("Processing.NDI.Lib.x86.dll", EntryPoint = "NDIlib_recv_ptz_pan_tilt", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+			[DllImport(Dllx86Name, EntryPoint = "NDIlib_recv_ptz_pan_tilt", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
 			[return: MarshalAsAttribute(UnmanagedType.U1)]
 			internal static extern bool recv_ptz_pan_tilt_32(IntPtr p_instance, float pan_value, float tilt_value);
 
 			// recv_ptz_pan_tilt_speed 
-			[DllImport("Processing.NDI.Lib.x64.dll", EntryPoint = "NDIlib_recv_ptz_pan_tilt_speed", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+			[DllImport(Dllx64Name, EntryPoint = "NDIlib_recv_ptz_pan_tilt_speed", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
 			[return: MarshalAsAttribute(UnmanagedType.U1)]
 			internal static extern bool recv_ptz_pan_tilt_speed_64(IntPtr p_instance, float pan_speed, float tilt_speed);
-			[DllImport("Processing.NDI.Lib.x86.dll", EntryPoint = "NDIlib_recv_ptz_pan_tilt_speed", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+			[DllImport(Dllx86Name, EntryPoint = "NDIlib_recv_ptz_pan_tilt_speed", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
 			[return: MarshalAsAttribute(UnmanagedType.U1)]
 			internal static extern bool recv_ptz_pan_tilt_speed_32(IntPtr p_instance, float pan_speed, float tilt_speed);
 
 			// recv_ptz_store_preset 
-			[DllImport("Processing.NDI.Lib.x64.dll", EntryPoint = "NDIlib_recv_ptz_store_preset", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+			[DllImport(Dllx64Name, EntryPoint = "NDIlib_recv_ptz_store_preset", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
 			[return: MarshalAsAttribute(UnmanagedType.U1)]
 			internal static extern bool recv_ptz_store_preset_64(IntPtr p_instance, int preset_no);
-			[DllImport("Processing.NDI.Lib.x86.dll", EntryPoint = "NDIlib_recv_ptz_store_preset", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+			[DllImport(Dllx86Name, EntryPoint = "NDIlib_recv_ptz_store_preset", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
 			[return: MarshalAsAttribute(UnmanagedType.U1)]
 			internal static extern bool recv_ptz_store_preset_32(IntPtr p_instance, int preset_no);
 
 			// recv_ptz_recall_preset 
-			[DllImport("Processing.NDI.Lib.x64.dll", EntryPoint = "NDIlib_recv_ptz_recall_preset", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+			[DllImport(Dllx64Name, EntryPoint = "NDIlib_recv_ptz_recall_preset", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
 			[return: MarshalAsAttribute(UnmanagedType.U1)]
 			internal static extern bool recv_ptz_recall_preset_64(IntPtr p_instance, int preset_no, float speed);
-			[DllImport("Processing.NDI.Lib.x86.dll", EntryPoint = "NDIlib_recv_ptz_recall_preset", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+			[DllImport(Dllx86Name, EntryPoint = "NDIlib_recv_ptz_recall_preset", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
 			[return: MarshalAsAttribute(UnmanagedType.U1)]
 			internal static extern bool recv_ptz_recall_preset_32(IntPtr p_instance, int preset_no, float speed);
 
 			// recv_ptz_auto_focus 
-			[DllImport("Processing.NDI.Lib.x64.dll", EntryPoint = "NDIlib_recv_ptz_auto_focus", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+			[DllImport(Dllx64Name, EntryPoint = "NDIlib_recv_ptz_auto_focus", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
 			[return: MarshalAsAttribute(UnmanagedType.U1)]
 			internal static extern bool recv_ptz_auto_focus_64(IntPtr p_instance);
-			[DllImport("Processing.NDI.Lib.x86.dll", EntryPoint = "NDIlib_recv_ptz_auto_focus", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+			[DllImport(Dllx86Name, EntryPoint = "NDIlib_recv_ptz_auto_focus", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
 			[return: MarshalAsAttribute(UnmanagedType.U1)]
 			internal static extern bool recv_ptz_auto_focus_32(IntPtr p_instance);
 
 			// recv_ptz_focus 
-			[DllImport("Processing.NDI.Lib.x64.dll", EntryPoint = "NDIlib_recv_ptz_focus", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+			[DllImport(Dllx64Name, EntryPoint = "NDIlib_recv_ptz_focus", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
 			[return: MarshalAsAttribute(UnmanagedType.U1)]
 			internal static extern bool recv_ptz_focus_64(IntPtr p_instance, float focus_value);
-			[DllImport("Processing.NDI.Lib.x86.dll", EntryPoint = "NDIlib_recv_ptz_focus", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+			[DllImport(Dllx86Name, EntryPoint = "NDIlib_recv_ptz_focus", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
 			[return: MarshalAsAttribute(UnmanagedType.U1)]
 			internal static extern bool recv_ptz_focus_32(IntPtr p_instance, float focus_value);
 
 			// recv_ptz_focus_speed 
-			[DllImport("Processing.NDI.Lib.x64.dll", EntryPoint = "NDIlib_recv_ptz_focus_speed", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+			[DllImport(Dllx64Name, EntryPoint = "NDIlib_recv_ptz_focus_speed", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
 			[return: MarshalAsAttribute(UnmanagedType.U1)]
 			internal static extern bool recv_ptz_focus_speed_64(IntPtr p_instance, float focus_speed);
-			[DllImport("Processing.NDI.Lib.x86.dll", EntryPoint = "NDIlib_recv_ptz_focus_speed", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+			[DllImport(Dllx86Name, EntryPoint = "NDIlib_recv_ptz_focus_speed", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
 			[return: MarshalAsAttribute(UnmanagedType.U1)]
 			internal static extern bool recv_ptz_focus_speed_32(IntPtr p_instance, float focus_speed);
 
 			// recv_ptz_white_balance_auto 
-			[DllImport("Processing.NDI.Lib.x64.dll", EntryPoint = "NDIlib_recv_ptz_white_balance_auto", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+			[DllImport(Dllx64Name, EntryPoint = "NDIlib_recv_ptz_white_balance_auto", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
 			[return: MarshalAsAttribute(UnmanagedType.U1)]
 			internal static extern bool recv_ptz_white_balance_auto_64(IntPtr p_instance);
-			[DllImport("Processing.NDI.Lib.x86.dll", EntryPoint = "NDIlib_recv_ptz_white_balance_auto", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+			[DllImport(Dllx86Name, EntryPoint = "NDIlib_recv_ptz_white_balance_auto", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
 			[return: MarshalAsAttribute(UnmanagedType.U1)]
 			internal static extern bool recv_ptz_white_balance_auto_32(IntPtr p_instance);
 
 			// recv_ptz_white_balance_indoor 
-			[DllImport("Processing.NDI.Lib.x64.dll", EntryPoint = "NDIlib_recv_ptz_white_balance_indoor", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+			[DllImport(Dllx64Name, EntryPoint = "NDIlib_recv_ptz_white_balance_indoor", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
 			[return: MarshalAsAttribute(UnmanagedType.U1)]
 			internal static extern bool recv_ptz_white_balance_indoor_64(IntPtr p_instance);
-			[DllImport("Processing.NDI.Lib.x86.dll", EntryPoint = "NDIlib_recv_ptz_white_balance_indoor", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+			[DllImport(Dllx86Name, EntryPoint = "NDIlib_recv_ptz_white_balance_indoor", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
 			[return: MarshalAsAttribute(UnmanagedType.U1)]
 			internal static extern bool recv_ptz_white_balance_indoor_32(IntPtr p_instance);
 
 			// recv_ptz_white_balance_outdoor 
-			[DllImport("Processing.NDI.Lib.x64.dll", EntryPoint = "NDIlib_recv_ptz_white_balance_outdoor", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+			[DllImport(Dllx64Name, EntryPoint = "NDIlib_recv_ptz_white_balance_outdoor", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
 			[return: MarshalAsAttribute(UnmanagedType.U1)]
 			internal static extern bool recv_ptz_white_balance_outdoor_64(IntPtr p_instance);
-			[DllImport("Processing.NDI.Lib.x86.dll", EntryPoint = "NDIlib_recv_ptz_white_balance_outdoor", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+			[DllImport(Dllx86Name, EntryPoint = "NDIlib_recv_ptz_white_balance_outdoor", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
 			[return: MarshalAsAttribute(UnmanagedType.U1)]
 			internal static extern bool recv_ptz_white_balance_outdoor_32(IntPtr p_instance);
 
 			// recv_ptz_white_balance_oneshot 
-			[DllImport("Processing.NDI.Lib.x64.dll", EntryPoint = "NDIlib_recv_ptz_white_balance_oneshot", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+			[DllImport(Dllx64Name, EntryPoint = "NDIlib_recv_ptz_white_balance_oneshot", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
 			[return: MarshalAsAttribute(UnmanagedType.U1)]
 			internal static extern bool recv_ptz_white_balance_oneshot_64(IntPtr p_instance);
-			[DllImport("Processing.NDI.Lib.x86.dll", EntryPoint = "NDIlib_recv_ptz_white_balance_oneshot", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+			[DllImport(Dllx86Name, EntryPoint = "NDIlib_recv_ptz_white_balance_oneshot", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
 			[return: MarshalAsAttribute(UnmanagedType.U1)]
 			internal static extern bool recv_ptz_white_balance_oneshot_32(IntPtr p_instance);
 
 			// recv_ptz_white_balance_manual 
-			[DllImport("Processing.NDI.Lib.x64.dll", EntryPoint = "NDIlib_recv_ptz_white_balance_manual", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+			[DllImport(Dllx64Name, EntryPoint = "NDIlib_recv_ptz_white_balance_manual", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
 			[return: MarshalAsAttribute(UnmanagedType.U1)]
 			internal static extern bool recv_ptz_white_balance_manual_64(IntPtr p_instance, float red, float blue);
-			[DllImport("Processing.NDI.Lib.x86.dll", EntryPoint = "NDIlib_recv_ptz_white_balance_manual", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+			[DllImport(Dllx86Name, EntryPoint = "NDIlib_recv_ptz_white_balance_manual", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
 			[return: MarshalAsAttribute(UnmanagedType.U1)]
 			internal static extern bool recv_ptz_white_balance_manual_32(IntPtr p_instance, float red, float blue);
 
 			// recv_ptz_exposure_auto 
-			[DllImport("Processing.NDI.Lib.x64.dll", EntryPoint = "NDIlib_recv_ptz_exposure_auto", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+			[DllImport(Dllx64Name, EntryPoint = "NDIlib_recv_ptz_exposure_auto", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
 			[return: MarshalAsAttribute(UnmanagedType.U1)]
 			internal static extern bool recv_ptz_exposure_auto_64(IntPtr p_instance);
-			[DllImport("Processing.NDI.Lib.x86.dll", EntryPoint = "NDIlib_recv_ptz_exposure_auto", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+			[DllImport(Dllx86Name, EntryPoint = "NDIlib_recv_ptz_exposure_auto", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
 			[return: MarshalAsAttribute(UnmanagedType.U1)]
 			internal static extern bool recv_ptz_exposure_auto_32(IntPtr p_instance);
 
 			// recv_ptz_exposure_manual 
-			[DllImport("Processing.NDI.Lib.x64.dll", EntryPoint = "NDIlib_recv_ptz_exposure_manual", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+			[DllImport(Dllx64Name, EntryPoint = "NDIlib_recv_ptz_exposure_manual", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
 			[return: MarshalAsAttribute(UnmanagedType.U1)]
 			internal static extern bool recv_ptz_exposure_manual_64(IntPtr p_instance, float exposure_level);
-			[DllImport("Processing.NDI.Lib.x86.dll", EntryPoint = "NDIlib_recv_ptz_exposure_manual", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+			[DllImport(Dllx86Name, EntryPoint = "NDIlib_recv_ptz_exposure_manual", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
 			[return: MarshalAsAttribute(UnmanagedType.U1)]
 			internal static extern bool recv_ptz_exposure_manual_32(IntPtr p_instance, float exposure_level);
 
 			// recv_recording_start 
-			[DllImport("Processing.NDI.Lib.x64.dll", EntryPoint = "NDIlib_recv_recording_start", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+			[DllImport(Dllx64Name, EntryPoint = "NDIlib_recv_recording_start", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
 			[return: MarshalAsAttribute(UnmanagedType.U1)]
 			internal static extern bool recv_recording_start_64(IntPtr p_instance, IntPtr p_filename_hint);
-			[DllImport("Processing.NDI.Lib.x86.dll", EntryPoint = "NDIlib_recv_recording_start", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+			[DllImport(Dllx86Name, EntryPoint = "NDIlib_recv_recording_start", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
 			[return: MarshalAsAttribute(UnmanagedType.U1)]
 			internal static extern bool recv_recording_start_32(IntPtr p_instance, IntPtr p_filename_hint);
 
 			// recv_recording_stop 
-			[DllImport("Processing.NDI.Lib.x64.dll", EntryPoint = "NDIlib_recv_recording_stop", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+			[DllImport(Dllx64Name, EntryPoint = "NDIlib_recv_recording_stop", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
 			[return: MarshalAsAttribute(UnmanagedType.U1)]
 			internal static extern bool recv_recording_stop_64(IntPtr p_instance);
-			[DllImport("Processing.NDI.Lib.x86.dll", EntryPoint = "NDIlib_recv_recording_stop", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+			[DllImport(Dllx86Name, EntryPoint = "NDIlib_recv_recording_stop", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
 			[return: MarshalAsAttribute(UnmanagedType.U1)]
 			internal static extern bool recv_recording_stop_32(IntPtr p_instance);
 
 			// recv_recording_set_audio_level 
-			[DllImport("Processing.NDI.Lib.x64.dll", EntryPoint = "NDIlib_recv_recording_set_audio_level", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+			[DllImport(Dllx64Name, EntryPoint = "NDIlib_recv_recording_set_audio_level", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
 			[return: MarshalAsAttribute(UnmanagedType.U1)]
 			internal static extern bool recv_recording_set_audio_level_64(IntPtr p_instance, float level_dB);
-			[DllImport("Processing.NDI.Lib.x86.dll", EntryPoint = "NDIlib_recv_recording_set_audio_level", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+			[DllImport(Dllx86Name, EntryPoint = "NDIlib_recv_recording_set_audio_level", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
 			[return: MarshalAsAttribute(UnmanagedType.U1)]
 			internal static extern bool recv_recording_set_audio_level_32(IntPtr p_instance, float level_dB);
 
 			// recv_recording_is_recording 
-			[DllImport("Processing.NDI.Lib.x64.dll", EntryPoint = "NDIlib_recv_recording_is_recording", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+			[DllImport(Dllx64Name, EntryPoint = "NDIlib_recv_recording_is_recording", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
 			[return: MarshalAsAttribute(UnmanagedType.U1)]
 			internal static extern bool recv_recording_is_recording_64(IntPtr p_instance);
-			[DllImport("Processing.NDI.Lib.x86.dll", EntryPoint = "NDIlib_recv_recording_is_recording", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+			[DllImport(Dllx86Name, EntryPoint = "NDIlib_recv_recording_is_recording", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
 			[return: MarshalAsAttribute(UnmanagedType.U1)]
 			internal static extern bool recv_recording_is_recording_32(IntPtr p_instance);
 
 			// recv_recording_get_filename 
-			[DllImport("Processing.NDI.Lib.x64.dll", EntryPoint = "NDIlib_recv_recording_get_filename", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+			[DllImport(Dllx64Name, EntryPoint = "NDIlib_recv_recording_get_filename", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
 			internal static extern IntPtr recv_recording_get_filename_64(IntPtr p_instance);
-			[DllImport("Processing.NDI.Lib.x86.dll", EntryPoint = "NDIlib_recv_recording_get_filename", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+			[DllImport(Dllx86Name, EntryPoint = "NDIlib_recv_recording_get_filename", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
 			internal static extern IntPtr recv_recording_get_filename_32(IntPtr p_instance);
 
 			// recv_recording_get_error 
-			[DllImport("Processing.NDI.Lib.x64.dll", EntryPoint = "NDIlib_recv_recording_get_error", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+			[DllImport(Dllx64Name, EntryPoint = "NDIlib_recv_recording_get_error", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
 			internal static extern IntPtr recv_recording_get_error_64(IntPtr p_instance);
-			[DllImport("Processing.NDI.Lib.x86.dll", EntryPoint = "NDIlib_recv_recording_get_error", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+			[DllImport(Dllx86Name, EntryPoint = "NDIlib_recv_recording_get_error", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
 			internal static extern IntPtr recv_recording_get_error_32(IntPtr p_instance);
 
 			// recv_recording_get_times 
-			[DllImport("Processing.NDI.Lib.x64.dll", EntryPoint = "NDIlib_recv_recording_get_times", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+			[DllImport(Dllx64Name, EntryPoint = "NDIlib_recv_recording_get_times", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
 			[return: MarshalAsAttribute(UnmanagedType.U1)]
 			internal static extern bool recv_recording_get_times_64(IntPtr p_instance, ref recv_recording_time_t p_times);
-			[DllImport("Processing.NDI.Lib.x86.dll", EntryPoint = "NDIlib_recv_recording_get_times", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+			[DllImport(Dllx86Name, EntryPoint = "NDIlib_recv_recording_get_times", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
 			[return: MarshalAsAttribute(UnmanagedType.U1)]
 			internal static extern bool recv_recording_get_times_32(IntPtr p_instance, ref recv_recording_time_t p_times);
 
