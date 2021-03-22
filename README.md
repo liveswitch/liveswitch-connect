@@ -276,14 +276,14 @@ The `ffcapture` verb lets you capture local media from FFmpeg and send it to a L
 
 ## ndifind
 
-The `ndifind` verb prints a list of the discoverable NDI devices on the network.
+The `ndifind` verb prints a list of the discoverable [NDI®](https://ndi.tv/) devices on the network.
 
 ## ndicapture
 
-The `ndicapture` verb lets you capture media from an NDI device and send it to a LiveSwitch server.
+The `ndicapture` verb lets you capture media from an [NDI®](https://ndi.tv/) device and send it to a LiveSwitch server.
 
 ```shell
-  --stream-name                   Required. Name of the NDI stream to capture.
+  --stream-name                   Required. Name of the NDI® stream to capture.
 
   --audio-clock-rate              (Default: 48000) The audio clock rate in Hz.
                                   Minimum value is 8000. Maximum value is 48000.
@@ -589,10 +589,10 @@ The `ffrender` verb lets you render remote media from a LiveSwitch server to FFm
 
 ## ndirender
 
-The `ndirender` verb lets you render remote media from a LiveSwitch server to NDI.
+The `ndirender` verb lets you render remote media from a LiveSwitch server to [NDI®](https://ndi.tv/).
 
 ```shell
-  --stream-name             (Default: LiveswitchConnect) Name of the NDI stream
+  --stream-name             (Default: LiveswitchConnect) Name of the NDI® stream
 
   --audio-clock-rate        (Default: 48000) The audio clock rate in Hz. Must be
                             a multiple of 8000. Minimum value is 8000. Maximum
@@ -1041,12 +1041,12 @@ You can stream the content in a LiveSwitch channel to an RTMP server. The follow
 lsconnect ffrender ... --output-args="-f flv rtmp://a.rtmp.youtube.com/live2/<YouTube Stream Key>"
 ```
 
-## Using NDI
+## Using NDI®
 
-For Windows: You'll need to install the NDI Runtime found here: <http://new.tk/NDIRedistV4>
+For Windows: You'll need to install the NDI® Runtime found here: <http://new.tk/NDIRedistV4>
 Add the runtime directory to the Path environment variable. Default: `C:\Program Files\NDI.tv\NDI 4 Runtime\v4`
 
-For Mac: You'll need to install the NDI SDK found here: <https://downloads.ndi.tv/SDK/NDI_SDK_Mac/InstallNDISDK_v4_Apple.pkg>
+For Mac: You'll need to install the NDI® SDK found here: <https://downloads.ndi.tv/SDK/NDI_SDK_Mac/InstallNDISDK_v4_Apple.pkg>
 
 ## Contact
 
@@ -1055,3 +1055,5 @@ To learn more, visit [frozenmountain.com](https://www.frozenmountain.com) or [li
 For inquiries, contact [sales@frozenmountain.com](mailto:sales@frozenmountain.com).
 
 All contents copyright © Frozen Mountain Software.
+
+NDI® is a registered trademark of NewTek, Inc.
