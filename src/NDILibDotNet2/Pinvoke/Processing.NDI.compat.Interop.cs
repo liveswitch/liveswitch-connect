@@ -31,6 +31,20 @@ namespace NewTek
 	{
 		public static UInt32 INFINITE = 0xffffffff;
 
+		internal static partial class UnsafeNativeMethods
+		{
+
+			#if WIN32
+			private const string Dllx64Name = "Processing.NDI.Lib.x64.dll";
+			private const string Dllx86Name = "Processing.NDI.Lib.x86.dll";
+			#elif OSX
+			private const string Dllx64Name = "libndi.4.dylib";
+			private const string Dllx86Name = "libndi.4.dylib";
+			#else
+			#error Detected OS not supported. Check defined symbols in NDI C# project.
+			#endif
+		}
+
 	} // class NDIlib
 
 } // namespace NewTek

@@ -98,28 +98,28 @@ namespace NewTek
 		internal static partial class UnsafeNativeMethods
 		{
 			// find_create_v2 
-			[DllImport("Processing.NDI.Lib.x64.dll", EntryPoint = "NDIlib_find_create_v2", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+			[DllImport(Dllx64Name, EntryPoint = "NDIlib_find_create_v2", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
 			internal static extern IntPtr find_create_v2_64(ref find_create_t p_create_settings);
-			[DllImport("Processing.NDI.Lib.x86.dll", EntryPoint = "NDIlib_find_create_v2", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+			[DllImport(Dllx86Name, EntryPoint = "NDIlib_find_create_v2", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
 			internal static extern IntPtr find_create_v2_32(ref find_create_t p_create_settings);
 
 			// find_destroy 
-			[DllImport("Processing.NDI.Lib.x64.dll", EntryPoint = "NDIlib_find_destroy", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+			[DllImport(Dllx64Name, EntryPoint = "NDIlib_find_destroy", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
 			internal static extern void find_destroy_64(IntPtr p_instance);
-			[DllImport("Processing.NDI.Lib.x86.dll", EntryPoint = "NDIlib_find_destroy", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+			[DllImport(Dllx86Name, EntryPoint = "NDIlib_find_destroy", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
 			internal static extern void find_destroy_32(IntPtr p_instance);
 
 			// find_get_current_sources 
-			[DllImport("Processing.NDI.Lib.x64.dll", EntryPoint = "NDIlib_find_get_current_sources", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+			[DllImport(Dllx64Name, EntryPoint = "NDIlib_find_get_current_sources", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
 			internal static extern IntPtr find_get_current_sources_64(IntPtr p_instance, ref UInt32 p_no_sources);
-			[DllImport("Processing.NDI.Lib.x86.dll", EntryPoint = "NDIlib_find_get_current_sources", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+			[DllImport(Dllx86Name, EntryPoint = "NDIlib_find_get_current_sources", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
 			internal static extern IntPtr find_get_current_sources_32(IntPtr p_instance, ref UInt32 p_no_sources);
 
 			// find_wait_for_sources 
-			[DllImport("Processing.NDI.Lib.x64.dll", EntryPoint = "NDIlib_find_wait_for_sources", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+			[DllImport(Dllx64Name, EntryPoint = "NDIlib_find_wait_for_sources", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
 			[return: MarshalAsAttribute(UnmanagedType.U1)]
 			internal static extern bool find_wait_for_sources_64(IntPtr p_instance, UInt32 timeout_in_ms);
-			[DllImport("Processing.NDI.Lib.x86.dll", EntryPoint = "NDIlib_find_wait_for_sources", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
+			[DllImport(Dllx86Name, EntryPoint = "NDIlib_find_wait_for_sources", ExactSpelling = true, CallingConvention = CallingConvention.Cdecl)]
 			[return: MarshalAsAttribute(UnmanagedType.U1)]
 			internal static extern bool find_wait_for_sources_32(IntPtr p_instance, UInt32 timeout_in_ms);
 

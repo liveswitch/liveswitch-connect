@@ -1043,8 +1043,10 @@ lsconnect ffrender ... --output-args="-f flv rtmp://a.rtmp.youtube.com/live2/<Yo
 
 ## Using NDI
 
-You'll need to install the NDI Runtime found here: <http://new.tk/NDIRedistV4>
+For Windows: You'll need to install the NDI Runtime found here: <http://new.tk/NDIRedistV4>
 Add the runtime directory to the Path environment variable. Default: `C:\Program Files\NDI.tv\NDI 4 Runtime\v4`
+
+For Mac: You'll need to install the NDI SDK found here: <https://downloads.ndi.tv/SDK/NDI_SDK_Mac/InstallNDISDK_v4_Apple.pkg>
 
 ## Contact
 
