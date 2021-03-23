@@ -13,13 +13,13 @@ Use `dotnet publish` to create a single, self-contained file for a specific plat
 ### Windows
 
 ```shell
-dotnet publish -r win-x64 -c Release /p:PublishSingleFile=true /p:PublishTrimmed=true -o win
+dotnet publish src/FM.LiveSwitch.Connect -r win-x64 -c Release /p:PublishSingleFile=true /p:PublishTrimmed=true -o win
 ```
 
 ### macOS
 
 ```shell
-dotnet publish -r osx-x64 -c Release /p:PublishSingleFile=true /p:PublishTrimmed=true -o osx
+dotnet publish src/FM.LiveSwitch.Connect -r osx-x64 -c Release /p:PublishSingleFile=true /p:PublishTrimmed=true -o osx
 ```
 
 ### Linux
