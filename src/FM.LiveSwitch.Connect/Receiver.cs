@@ -68,6 +68,11 @@ namespace FM.LiveSwitch.Connect
                 Console.Error.WriteLine("--no-audio and --no-video cannot both be set.");
                 return 1;
             }
+            if (Options.ConnectionId == null && Options.MediaId == null)
+            {
+                Console.Error.WriteLine("Either --connection-id or --media-id must be set.");
+                return 1;
+            }
 
             try
             {
@@ -90,11 +95,18 @@ namespace FM.LiveSwitch.Connect
 
                         try
                         {
-                            Console.Error.WriteLine($"{GetType().Name} is waiting for remote connection '{Options.ConnectionId}'.");
+                            //If a Media ID is specified, this replaces the connection info
+                            if (Options.MediaId == null)
+                            {
+                                Console.Error.WriteLine($"{GetType().Name} is waiting for remote connection '{Options.ConnectionId}'.");
 
-                            RemoteConnectionInfo = await GetRemoteConnectionInfo().ConfigureAwait(false);
-
-                            Console.Error.WriteLine($"{GetType().Name} has remote connection:{Environment.NewLine}{Descriptor.Format(RemoteConnectionInfo.GetDescriptors())}");
+                                RemoteConnectionInfo = await GetRemoteConnectionInfo().ConfigureAwait(false);
+                                Console.Error.WriteLine($"{GetType().Name} has remote connection:{Environment.NewLine}{Descriptor.Format(RemoteConnectionInfo.GetDescriptors())}");
+                            }
+                            else
+                            {
+                                Console.Error.WriteLine($"{GetType().Name} has remote media ID '{Options.MediaId}'.");
+                            }
 
                             var connected = false;
                             while (!connected)
@@ -106,6 +118,12 @@ namespace FM.LiveSwitch.Connect
                                 Console.Error.WriteLine($"{GetType().Name} streams initialized.");
 
                                 Connection = Options.CreateConnection(Channel, RemoteConnectionInfo, AudioStream, VideoStream, DataStream);
+
+                                //For a Media ID based connection, store the Remote Connection Info once available
+                                if (RemoteConnectionInfo == null && Options.MediaId != null)
+                                {
+                                    RemoteConnectionInfo = Connection.Info;
+                                }
 
                                 Console.Error.WriteLine($"{GetType().Name} connection created:{Environment.NewLine}{Descriptor.Format(Connection.GetDescriptors())}");
 
@@ -294,7 +312,7 @@ namespace FM.LiveSwitch.Connect
 
         private void InitializeAudioStream()
         {
-            if (Options.NoAudio || !RemoteConnectionInfo.HasAudio)
+            if (Options.NoAudio || (RemoteConnectionInfo != null && !RemoteConnectionInfo.HasAudio))
             {
                 return;
             }
@@ -466,7 +484,7 @@ namespace FM.LiveSwitch.Connect
 
         private void InitializeVideoStream()
         {
-            if (Options.NoVideo || !RemoteConnectionInfo.HasVideo)
+            if (Options.NoVideo || (RemoteConnectionInfo != null && !RemoteConnectionInfo.HasVideo))
             {
                 return;
             }
@@ -630,7 +648,7 @@ namespace FM.LiveSwitch.Connect
 
         private void InitializeDataStream()
         {
-            if (Options.DataChannelLabel == null || !RemoteConnectionInfo.HasData)
+            if (Options.DataChannelLabel == null || (RemoteConnectionInfo != null && !RemoteConnectionInfo.HasData))
             {
                 return;
             }
