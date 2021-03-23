@@ -43,7 +43,7 @@ namespace FM.LiveSwitch.Connect
             _RequestedHeight = requestedHeight;
             _RequestedWidth = requestedWidth;
             _NdiSender = ndiSender;
-            _VideoBuffer = VideoBuffer.CreateBlack(requestedWidth, requestedHeight, VideoFormat.I420Name);
+            _VideoBuffer = VideoBuffer.CreateBlack(requestedWidth, requestedHeight, format.Name);
         }
 
         protected override void DoProcessFrame(VideoFrame frame, VideoBuffer inputBuffer)
@@ -88,7 +88,7 @@ namespace FM.LiveSwitch.Connect
                 _RequestedWidth,
                 _RequestedHeight,
                 _Stride,
-                NDIlib.FourCC_type_e.NDIlib_FourCC_video_type_I420,
+                (NDIlib.FourCC_type_e)InputFormat.FourCC,
                 (float)_Width / _Height,
                 _FrameRateNumerator,
                 _FrameRateDenominator,

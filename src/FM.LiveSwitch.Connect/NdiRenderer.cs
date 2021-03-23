@@ -76,6 +76,25 @@ namespace FM.LiveSwitch.Connect
                 return Task.FromResult(1);
             }
 
+            switch (Options.VideoFormat)
+            {
+                case ImageFormat.I420:
+                    // Supported
+                    break;
+                case ImageFormat.Rgb:
+                case ImageFormat.Bgr:
+                case ImageFormat.Rgba:
+                case ImageFormat.Bgra:
+                case ImageFormat.Yv12:
+                case ImageFormat.Nv12:
+                case ImageFormat.Nv21:
+                case ImageFormat.Argb:
+                case ImageFormat.Abgr:
+                default:
+                    Console.Error.WriteLine("--video-format not supported");
+                    return Task.FromResult(1);
+            }
+
             return Receive();
         }
 
@@ -93,7 +112,7 @@ namespace FM.LiveSwitch.Connect
         protected override NdiVideoSink CreateVideoSink()
         {
             _Log.Info("Ndi Video Sink Created");
-            var sink = new NdiVideoSink(_NdiSender, Options.VideoWidth, Options.VideoHeight, Options.FrameRateNumerator, Options.FrameRateDenominator, VideoFormat.I420);
+            var sink = new NdiVideoSink(_NdiSender, Options.VideoWidth, Options.VideoHeight, Options.FrameRateNumerator, Options.FrameRateDenominator, ImageFormatExtensions.CreateFormat(Options.VideoFormat));
             return sink;
         }
 

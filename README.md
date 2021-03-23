@@ -605,7 +605,7 @@ The `ndirender` verb lets you render remote media from a LiveSwitch server to [N
                             milliseconds. Minimum value is 5. Maximum value is
                             100.
 
-  --video-format            (Default: Bgr) The video format.
+  --video-format            (Default: I420) The video format. Currently only I420 is supported.
 
   --video-width             (Default: 800) The video width.
 

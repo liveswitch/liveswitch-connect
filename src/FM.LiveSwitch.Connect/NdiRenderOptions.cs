@@ -17,7 +17,7 @@ namespace FM.LiveSwitch.Connect
         [Option("audio-frame-duration", Required = false, Default = 20, HelpText = "The audio frame duration in milliseconds. Minimum value is 5. Maximum value is 100.")]
         public int AudioFrameDuration { get; set; }
 
-        [Option("video-format", Required = false, Default = ImageFormat.Bgr, HelpText = "The video format.")]
+        [Option("video-format", Required = false, Default = ImageFormat.I420, HelpText = "The video format. Currently only I420 is supported.")]
         public ImageFormat VideoFormat { get; set; }
         
         [Option("video-width", Required = false, Default = 1920, HelpText = "The video width.")]
