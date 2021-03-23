@@ -16,9 +16,9 @@ namespace FM.LiveSwitch.Connect
             get { return "Ndi Audio Sink"; }
         }
 
-        protected NDI.Sender NdiSender { get; private set; }
-        protected NDI.AudioFrame16bpp NdiAudioFrame16bpp { get; private set; }
-        protected bool IsCheckConnectionCount { get; private set; }
+        protected NDI.Sender _NdiSender { get; private set; }
+        protected NDI.AudioFrame16bpp _NdiAudioFrame16bpp { get; private set; }
+        protected bool _IsCheckConnectionCount { get; private set; }
 
         public NdiAudioSink(NDI.Sender ndiSender, int maxRate, int sampleRate, int channelCount, AudioFormat format)
             : base(format)
@@ -28,19 +28,19 @@ namespace FM.LiveSwitch.Connect
 
         private void Initialize(NDI.Sender ndiSender, int maxRate, int sampleRate, int channelCount)
         {
-            NdiSender = ndiSender;
-            NdiAudioFrame16bpp = new NDI.AudioFrame16bpp(maxRate, sampleRate, channelCount);
+            _NdiSender = ndiSender;
+            _NdiAudioFrame16bpp = new NDI.AudioFrame16bpp(maxRate, sampleRate, channelCount);
         }
 
         protected override void DoProcessFrame(AudioFrame frame, AudioBuffer inputBuffer)
         {
-            if (IsCheckConnectionCount && NdiSender.GetConnections(10000) < 1)
+            if (_IsCheckConnectionCount && _NdiSender.GetConnections(10000) < 1)
             {
                 _Log.Error(Id, "No NDI connections, not rendering audio frame");
                 return;
             } else
             {
-                IsCheckConnectionCount = false;
+                _IsCheckConnectionCount = false;
             }
 
             if (!WriteFrame(frame, inputBuffer))
@@ -69,21 +69,21 @@ namespace FM.LiveSwitch.Connect
             try
             {
                 // Split across the channels
-                var chanLength = buffer.Length / NdiAudioFrame16bpp.NumChannels;
-                for (int ch = 0; ch < NdiAudioFrame16bpp.NumChannels; ch++)
+                var chanLength = buffer.Length / _NdiAudioFrame16bpp.NumChannels;
+                for (int ch = 0; ch < _NdiAudioFrame16bpp.NumChannels; ch++)
                 {
                     // Calculate the size of each channel
-                    int channelStride = ch * NdiAudioFrame16bpp.NumSamples * sizeof(short);
+                    int channelStride = ch * _NdiAudioFrame16bpp.NumSamples * sizeof(short);
 
                     // Set the pointer to the start of this channel.
-                    IntPtr destStart = new IntPtr(NdiAudioFrame16bpp.AudioBuffer.ToInt64() + channelStride);
+                    IntPtr destStart = new IntPtr(_NdiAudioFrame16bpp.AudioBuffer.ToInt64() + channelStride);
 
                     // Write the byytes
                     Marshal.Copy(buffer.Data, ch * chanLength, destStart, chanLength);
                 }
 
                 // Send the frame
-                NdiSender.Send(NdiAudioFrame16bpp);
+                _NdiSender.Send(_NdiAudioFrame16bpp);
                 return true;
             }
             catch (Exception ex)
@@ -95,7 +95,9 @@ namespace FM.LiveSwitch.Connect
 
         protected override void DoDestroy()
         {
-            NdiAudioFrame16bpp.Dispose();
+            if (_NdiAudioFrame16bpp != null) {
+                _NdiAudioFrame16bpp.Dispose();
+            }
         }
     }
 }

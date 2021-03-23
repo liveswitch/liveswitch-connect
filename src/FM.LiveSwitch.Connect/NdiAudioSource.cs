@@ -15,29 +15,29 @@ namespace FM.LiveSwitch.Connect
             get { return "Ndi Audio Source"; }
         }
 
-        protected NDI.Receiver NdiReceiver { get; private set; }
+        protected NDI.Receiver _NdiReceiver { get; private set; }
 
-        private AudioBuffer buffer;
+        private AudioBuffer _Buffer;
 
-        private bool bufferAllocated = false;
-        private int bufferSize = 0;
-        private readonly int numChannels;
-        private readonly int sampleRate;
+        private bool _BufferAllocated = false;
+        private int _BufferSize = 0;
+        private readonly int _NumChannels;
+        private readonly int _SampleRate;
 
         public NdiAudioSource(NDI.Receiver ndiReceiver, AudioFormat format, int clockRate, int channelCount)
             : base(format)
         {
-            NdiReceiver = ndiReceiver;
-            sampleRate = clockRate;
-            numChannels = channelCount;
+            _NdiReceiver = ndiReceiver;
+            _SampleRate = clockRate;
+            _NumChannels = channelCount;
         }
 
         protected override Future<object> DoStart()
         {
             var promise = new Promise<object>();
-            if (NdiReceiver != null)
+            if (_NdiReceiver != null)
             {
-                NdiReceiver.AudioFrameReceived += ProcessFrameReceived;
+                _NdiReceiver.AudioFrameReceived += ProcessFrameReceived;
                 promise.Resolve(null);
             }
             else
@@ -50,15 +50,15 @@ namespace FM.LiveSwitch.Connect
         protected override Future<object> DoStop()
         {
             var promise = new Promise<object>();
-            if (NdiReceiver != null)
+            if (_NdiReceiver != null)
             {
-                NdiReceiver.AudioFrameReceived -= ProcessFrameReceived;
+                _NdiReceiver.AudioFrameReceived -= ProcessFrameReceived;
 
-                if (bufferAllocated)
+                if (_BufferAllocated)
                 {
-                    buffer.Free();
-                    bufferSize = 0;
-                    bufferAllocated = false;
+                    _Buffer.Free();
+                    _BufferSize = 0;
+                    _BufferAllocated = false;
                 }
 
                 promise.Resolve(null);
@@ -73,39 +73,39 @@ namespace FM.LiveSwitch.Connect
         private void AllocateBuffer(int sampleRate, int numSamples, int numChannels)
         {
             _Log.Debug($"Creating audio buffer - sample rate: {sampleRate}, samples: {numSamples}, channels: {numChannels}");
-            if (bufferAllocated)
+            if (_BufferAllocated)
             {
-                buffer.Free();
+                _Buffer.Free();
             }
 
-            bufferSize = numChannels * numSamples * sizeof(short);
-            DataBuffer dataBuffer = DataBuffer.Allocate(bufferSize, true); // PCM requires little endian?
-            buffer = new AudioBuffer(dataBuffer, new Pcm.Format(sampleRate, numChannels));
-            bufferAllocated = true;
+            _BufferSize = numChannels * numSamples * sizeof(short);
+            DataBuffer dataBuffer = DataBuffer.Allocate(_BufferSize, true); // PCM requires little endian?
+            _Buffer = new AudioBuffer(dataBuffer, new Pcm.Format(sampleRate, numChannels));
+            _BufferAllocated = true;
         }
 
         protected void ProcessFrameReceived(object sender, NDI.AudioFrameReceivedEventArgs e)
         {
-            if (!bufferAllocated || (e.Frame.NumChannels * e.Frame.NumSamples * sizeof(short)) > bufferSize)
+            if (!_BufferAllocated || (e.Frame.NumChannels * e.Frame.NumSamples * sizeof(short)) > _BufferSize)
             {
-                if (e.Frame.NumChannels != numChannels)
+                if (e.Frame.NumChannels != _NumChannels)
                 {
-                    _Log.Error($"--audio-channel-count argument doesn't match what's being received. Configured: {numChannels} Received: {e.Frame.NumChannels}");
+                    _Log.Error($"--audio-channel-count argument doesn't match what's being received. Configured: {_NumChannels} Received: {e.Frame.NumChannels}");
                 }
-                if (e.Frame.SampleRate != sampleRate)
+                if (e.Frame.SampleRate != _SampleRate)
                 {
-                    _Log.Error($"--audio-clock-rate argument doesn't match what's being received. Configured: {sampleRate} Received: {e.Frame.SampleRate}");
+                    _Log.Error($"--audio-clock-rate argument doesn't match what's being received. Configured: {_SampleRate} Received: {e.Frame.SampleRate}");
                 }
 
                 AllocateBuffer(e.Frame.SampleRate, e.Frame.NumSamples, e.Frame.NumChannels);
             }
 
             // Populate buffer with NDI frame data
-            Marshal.Copy(e.Frame.AudioBuffer, buffer.DataBuffer.Data, 0, e.Frame.NumChannels * e.Frame.NumSamples * sizeof(short));
+            Marshal.Copy(e.Frame.AudioBuffer, _Buffer.DataBuffer.Data, 0, e.Frame.NumChannels * e.Frame.NumSamples * sizeof(short));
 
             // rusty.clarkson: Due to int rounding we might be losing samples...
             int duration = (1000 * e.Frame.NumSamples) / e.Frame.SampleRate;
-            RaiseFrame(new AudioFrame(duration, buffer));
+            RaiseFrame(new AudioFrame(duration, _Buffer));
         }
     }
 }

@@ -10,8 +10,8 @@ namespace FM.LiveSwitch.Connect
     {
         static ILog _Log = Log.GetLogger(typeof(NdiCapturer));
 
-        protected NDI.Finder finder;
-        protected const int findDuration = 5;
+        protected NDI.Finder _NdiFinder;
+        public int FindDuration = 5;
 
         public NdiFinder(NdiFindOptions options)
         {
@@ -19,26 +19,26 @@ namespace FM.LiveSwitch.Connect
         
         protected void Start()
         {
-            Console.WriteLine($"Looking for NDI device sources for {findDuration} seconds.");
-            finder = new NDI.Finder(true);
-            finder.Sources.CollectionChanged += HandleNdiSourcesChanged;
+            Console.WriteLine($"Looking for NDI device sources for {FindDuration} seconds.");
+            _NdiFinder = new NDI.Finder(true);
+            _NdiFinder.Sources.CollectionChanged += HandleNdiSourcesChanged;
         }
 
         public async Task<int> Run()
         {
             Start();
-            await Task.Delay(findDuration*1000);
+            await Task.Delay(FindDuration*1000);
             Stop();
             return 0;
         }
 
         protected void Stop()
         {
-            if (finder != null)
+            if (_NdiFinder != null)
             {
-                finder.Sources.CollectionChanged -= HandleNdiSourcesChanged;
-                finder.Dispose();
-                finder = null;
+                _NdiFinder.Sources.CollectionChanged -= HandleNdiSourcesChanged;
+                _NdiFinder.Dispose();
+                _NdiFinder = null;
             }
         }
 

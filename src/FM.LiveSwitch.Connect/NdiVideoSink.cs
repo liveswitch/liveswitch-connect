@@ -2,8 +2,6 @@
 using NewTek;
 using NDI = NewTek.NDI;
 using System;
-using System.Drawing;
-using System.Drawing.Drawing2D;
 using System.Runtime.InteropServices;
 
 namespace FM.LiveSwitch.Connect
@@ -18,51 +16,46 @@ namespace FM.LiveSwitch.Connect
             get { return "Ndi Video Sink"; }
         }
 
-        protected NDI.Sender NdiSender { get; private set; }
-        protected NDI.VideoFrame NdiVideoFrame { get; private set; }
-        protected bool IsCheckConnectionCount { get; private set; }
+        protected NDI.Sender _NdiSender { get; private set; }
+        protected NDI.VideoFrame _NdiVideoFrame { get; private set; }
+        protected bool _IsCheckConnectionCount { get; private set; }
 
-        private int stride = -1;
+        private int _RequestedWidth = -1;
+        private int _RequestedHeight = -1;
 
-        private int width = -1;
+        private int _Width = -1;
+        private int _Height = -1;
 
-        private int height = -1;
+        private int _Stride = -1;
 
-        private int requestedWidth = -1;
+        private readonly int _FrameRateNumerator = 30000;
+        private readonly int _FrameRateDenominator = 1000;
 
-        private int requestedHeight = -1;
-
-        private VideoBuffer videoBuffer;
-
-        private readonly int frameRateNumerator = 30000;
-
-        private readonly int frameRateDenominator = 1000;
-
-        private IntPtr videoBufferPtr = IntPtr.Zero;
-
-        private bool videoBufferAllocated = false;
+        private VideoBuffer _VideoBuffer;
+        private IntPtr _VideoBufferPtr = IntPtr.Zero;
+        private bool _VideoBufferAllocated = false;
 
         public NdiVideoSink(NDI.Sender ndiSender, int requestedWidth, int requestedHeight, int frameRateNumerator, int frameRateDenominator, VideoFormat format)
             : base(format)
         {
-            this.frameRateNumerator = frameRateNumerator;
-            this.frameRateDenominator = frameRateDenominator;
-            this.requestedHeight = requestedHeight;
-            this.requestedWidth = requestedWidth;
-            this.NdiSender = ndiSender;
-            this.videoBuffer = VideoBuffer.CreateBlack(requestedWidth, requestedHeight, VideoFormat.I420Name);
+            _FrameRateNumerator = frameRateNumerator;
+            _FrameRateDenominator = frameRateDenominator;
+            _RequestedHeight = requestedHeight;
+            _RequestedWidth = requestedWidth;
+            _NdiSender = ndiSender;
+            _VideoBuffer = VideoBuffer.CreateBlack(requestedWidth, requestedHeight, VideoFormat.I420Name);
         }
 
         protected override void DoProcessFrame(VideoFrame frame, VideoBuffer inputBuffer)
         {
-            if (IsCheckConnectionCount && NdiSender.GetConnections(10000) < 1)
+            if (_IsCheckConnectionCount && _NdiSender.GetConnections(10000) < 1)
             {
                 _Log.Info(Id, "No NDI connections, not rendering audio frame");
                 return;
             }
             else
             {
-                IsCheckConnectionCount = false;
+                _IsCheckConnectionCount = false;
             }
 
             if (!WriteFrame(frame, inputBuffer))
@@ -76,29 +69,29 @@ namespace FM.LiveSwitch.Connect
 
         private void initializeNdiFrame()
         {
-            stride = videoBuffer.Stride;
-            width = videoBuffer.Width;
-            height = videoBuffer.Height;
+            _Stride = _VideoBuffer.Stride;
+            _Width = _VideoBuffer.Width;
+            _Height = _VideoBuffer.Height;
 
-            int bufferSize = height * stride * 3 / 2;
+            int bufferSize = _Height * _Stride * 3 / 2;
 
-            if (videoBufferAllocated)
+            if (_VideoBufferAllocated)
             {
-                Marshal.FreeHGlobal(videoBufferPtr);
+                Marshal.FreeHGlobal(_VideoBufferPtr);
             }
 
-            videoBufferPtr = Marshal.AllocHGlobal(bufferSize);
-            videoBufferAllocated = true;
+            _VideoBufferPtr = Marshal.AllocHGlobal(bufferSize);
+            _VideoBufferAllocated = true;
 
-            NdiVideoFrame = new NDI.VideoFrame(
-                videoBufferPtr,
-                requestedWidth,
-                requestedHeight,
-                stride,
+            _NdiVideoFrame = new NDI.VideoFrame(
+                _VideoBufferPtr,
+                _RequestedWidth,
+                _RequestedHeight,
+                _Stride,
                 NDIlib.FourCC_type_e.NDIlib_FourCC_video_type_I420,
-                (float)width / height,
-                frameRateNumerator,
-                frameRateDenominator,
+                (float)_Width / _Height,
+                _FrameRateNumerator,
+                _FrameRateDenominator,
                 NDIlib.frame_format_type_e.frame_format_type_progressive);
         }
 
@@ -108,14 +101,14 @@ namespace FM.LiveSwitch.Connect
             try
             {
 
-                if (NdiVideoFrame == null)
+                if (_NdiVideoFrame == null)
                 {
                     initializeNdiFrame();
                 }
 
-                var output = videoBuffer.DataBuffer.Data;
+                var output = _VideoBuffer.DataBuffer.Data;
                 var stride = inputBuffer.Stride;
-                var outputStride = videoBuffer.Stride;
+                var outputStride = _VideoBuffer.Stride;
 
                 var yCopyLength = Math.Min(Math.Min(outputStride, stride), inputBuffer.Width);
                 var uvCopyLength = Math.Min(Math.Min(outputStride/2, stride/2), inputBuffer.Width/2);
@@ -125,8 +118,8 @@ namespace FM.LiveSwitch.Connect
                 var inputVOffset = inputUOffset + inputULength;
                 var inputVLength = inputULength;
 
-                var outputUOffset = videoBuffer.Height * outputStride;
-                var outputULength = videoBuffer.Height / 2 * outputStride / 2;
+                var outputUOffset = _VideoBuffer.Height * outputStride;
+                var outputULength = _VideoBuffer.Height / 2 * outputStride / 2;
                 var outputVOffset = outputUOffset + outputULength;
 
                 foreach (var dataBuffer in inputBuffer.DataBuffers)
@@ -156,8 +149,8 @@ namespace FM.LiveSwitch.Connect
                         Buffer.BlockCopy(input, startPosition, output, outPosition, uvCopyLength);
                     }
 
-                    Marshal.Copy(output, 0, NdiVideoFrame.BufferPtr, output.Length);
-                    NdiSender.Send(NdiVideoFrame);
+                    Marshal.Copy(output, 0, _NdiVideoFrame.BufferPtr, output.Length);
+                    _NdiSender.Send(_NdiVideoFrame);
                 }
                 
                 return true;
@@ -171,13 +164,15 @@ namespace FM.LiveSwitch.Connect
 
         protected override void DoDestroy()
         {
-            if (videoBufferAllocated)
+            if (_VideoBufferAllocated)
             {
-                Marshal.FreeHGlobal(videoBufferPtr);
-                videoBufferPtr = IntPtr.Zero;
+                Marshal.FreeHGlobal(_VideoBufferPtr);
+                _VideoBufferPtr = IntPtr.Zero;
             }
-            NdiVideoFrame.Dispose();
-            
+            if (_NdiVideoFrame != null)
+            {
+                _NdiVideoFrame.Dispose();
+            }            
 
         }
     }

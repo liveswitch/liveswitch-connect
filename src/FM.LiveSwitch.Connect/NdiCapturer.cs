@@ -12,7 +12,7 @@ namespace FM.LiveSwitch.Connect
         public NdiCapturer(NdiCaptureOptions options)
             : base(options)
         {
-            NdiReceiver = new NDI.Receiver(options.StreamName, "LiveSwitchConnect");
+            _NdiReceiver = new NDI.Receiver(options.StreamName, "LiveSwitchConnect");
             ProcessVideoFormat();
         }
 
@@ -89,32 +89,35 @@ namespace FM.LiveSwitch.Connect
             return Send();
         }
 
-        protected NDI.Receiver NdiReceiver;
+        protected NDI.Receiver _NdiReceiver;
 
         protected override NdiAudioSource CreateAudioSource()
         {
             _Log.Info("Ndi Audio Source Created");
-            var source = new NdiAudioSource(NdiReceiver, new Pcm.Format(Options.AudioClockRate, Options.AudioChannelCount), Options.AudioClockRate, Options.AudioChannelCount);
+            var source = new NdiAudioSource(_NdiReceiver, new Pcm.Format(Options.AudioClockRate, Options.AudioChannelCount), Options.AudioClockRate, Options.AudioChannelCount);
             return source;
         }
 
         protected override NdiVideoSource CreateVideoSource()
         {
             _Log.Info("Ndi Video Source Created");
-            var source = new NdiVideoSource(NdiReceiver, Options.VideoFormat);
+            var source = new NdiVideoSource(_NdiReceiver, Options.VideoFormat);
             return source;
         }
 
         protected override Task Ready()
         {
-            NdiReceiver.Connect(LsToNdiVideoFormat(Options.VideoFormat));
+            _NdiReceiver.Connect(LsToNdiVideoFormat(Options.VideoFormat));
             return base.Ready();
         }
 
         protected override Task Unready()
         {
-            NdiReceiver.Disconnect();
-            NdiReceiver.Dispose();
+            if (_NdiReceiver != null)
+            {
+                _NdiReceiver.Disconnect();
+                _NdiReceiver.Dispose();
+            }
             return base.Unready();
         }
 

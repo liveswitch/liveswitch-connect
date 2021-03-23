@@ -15,27 +15,27 @@ namespace FM.LiveSwitch.Connect
             get { return "Ndi Video Source"; }
         }
 
-        protected NDI.Receiver NdiReceiver { get; private set; }
+        protected NDI.Receiver _NdiReceiver { get; private set; }
 
-        private VideoBuffer buffer;
+        private VideoBuffer _Buffer;
 
-        private bool bufferAllocated = false;
-        private int allocatedPixels;
-        private readonly int fourCC;
+        private bool _BufferAllocated = false;
+        private int _AllocatedPixels;
+        private readonly int _FourCC;
 
         public NdiVideoSource(NDI.Receiver ndiReceiver, ImageFormat format)
             : base(ImageFormatExtensions.CreateFormat(format))
         {
-            NdiReceiver = ndiReceiver;
-            fourCC = OutputFormat.FourCC;
+            _NdiReceiver = ndiReceiver;
+            _FourCC = OutputFormat.FourCC;
         }
 
         protected override Future<object> DoStart()
         {
             var promise = new Promise<object>();
-            if (NdiReceiver != null)
+            if (_NdiReceiver != null)
             {
-                NdiReceiver.VideoFrameReceived += ProcessFrameReceived;
+                _NdiReceiver.VideoFrameReceived += ProcessFrameReceived;
                 promise.Resolve(null);
             }
             else
@@ -48,14 +48,14 @@ namespace FM.LiveSwitch.Connect
         protected override Future<object> DoStop()
         {
             var promise = new Promise<object>();
-            if (NdiReceiver != null)
+            if (_NdiReceiver != null)
             {
-                NdiReceiver.VideoFrameReceived -= ProcessFrameReceived;
+                _NdiReceiver.VideoFrameReceived -= ProcessFrameReceived;
 
-                if (bufferAllocated)
+                if (_BufferAllocated)
                 {
-                    buffer.Free();
-                    bufferAllocated = false;
+                    _Buffer.Free();
+                    _BufferAllocated = false;
                 }
 
                 promise.Resolve(null);
@@ -69,16 +69,16 @@ namespace FM.LiveSwitch.Connect
 
         protected void AllocateBuffer(int width, int height)
         {
-            allocatedPixels = width * height;
-            buffer = VideoBuffer.CreateBlack(width, height, OutputFormat.Name);
-            bufferAllocated = true;
+            _AllocatedPixels = width * height;
+            _Buffer = VideoBuffer.CreateBlack(width, height, OutputFormat.Name);
+            _BufferAllocated = true;
         }
 
         protected void ProcessFrameReceived(object sender, NDI.VideoFrameReceivedEventArgs e)
         {
-            if (!bufferAllocated)
+            if (!_BufferAllocated)
             {
-                if (fourCC != e.Frame.FourCC)
+                if (_FourCC != e.Frame.FourCC)
                 {
                     string receivedFormatName = OutputFormat.FourCCToFormatName(e.Frame.FourCC);
                     if (receivedFormatName.Length == 0)
@@ -88,33 +88,32 @@ namespace FM.LiveSwitch.Connect
                     _Log.Error($"Specified format {OutputFormat.Name} doesn't match NDI device format {receivedFormatName}");
                 }
 
-
                 _Log.Debug($"Creating video buffer {e.Frame.Width}x{e.Frame.Height} {OutputFormat.Name}");
                 AllocateBuffer(e.Frame.Width, e.Frame.Height);
             }
-            else if (e.Frame.Width != buffer.Width || e.Frame.Height != buffer.Height)
+            else if (e.Frame.Width != _Buffer.Width || e.Frame.Height != _Buffer.Height)
             {
                 _Log.Debug($"Video size changed to {e.Frame.Width}x{e.Frame.Height}");
-                if (e.Frame.Width * e.Frame.Height > allocatedPixels)
+                if (e.Frame.Width * e.Frame.Height > _AllocatedPixels)
                 {
                     // Only reallocate if pixel count increased
-                    buffer.Free();
-                    bufferAllocated = false;
+                    _Buffer.Free();
+                    _BufferAllocated = false;
                     _Log.Debug($"Re-creating video buffer");
                     AllocateBuffer(e.Frame.Width, e.Frame.Height);
                 }
                 else
                 {
-                    buffer.Width = e.Frame.Width;
-                    buffer.Height = e.Frame.Height;
-                    buffer.Stride = e.Frame.Stride;
+                    _Buffer.Width = e.Frame.Width;
+                    _Buffer.Height = e.Frame.Height;
+                    _Buffer.Stride = e.Frame.Stride;
                 }
             }
 
             // Populate buffer with NDI frame data
-            Marshal.Copy(e.Frame.BufferPtr, buffer.DataBuffer.Data, 0, e.Frame.Height * e.Frame.Stride);
+            Marshal.Copy(e.Frame.BufferPtr, _Buffer.DataBuffer.Data, 0, e.Frame.Height * e.Frame.Stride);
 
-            RaiseFrame(new VideoFrame(buffer));
+            RaiseFrame(new VideoFrame(_Buffer));
         }
     }
 }

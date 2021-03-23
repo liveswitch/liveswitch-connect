@@ -79,17 +79,13 @@ namespace FM.LiveSwitch.Connect
             return Receive();
         }
 
-        protected Sender NdiSender;
-
-        protected bool IsNdiConnected = false;
-        protected bool IsAwaitingFirstFrame = true;
+        protected Sender _NdiSender;
 
         protected override NdiAudioSink CreateAudioSink()
         {
             _Log.Info("Ndi Audio Sink Created");
             var maxRate = Options.AudioClockRate / 1000 * Options.AudioFrameDuration; // 1000ms
-            var sink = new NdiAudioSink(NdiSender, maxRate,  Options.AudioClockRate, Options.AudioChannelCount, new Pcm.Format(Options.AudioClockRate, Options.AudioChannelCount));
-
+            var sink = new NdiAudioSink(_NdiSender, maxRate,  Options.AudioClockRate, Options.AudioChannelCount, new Pcm.Format(Options.AudioClockRate, Options.AudioChannelCount));
             
             return sink;
         }
@@ -97,7 +93,7 @@ namespace FM.LiveSwitch.Connect
         protected override NdiVideoSink CreateVideoSink()
         {
             _Log.Info("Ndi Video Sink Created");
-            var sink = new NdiVideoSink(NdiSender, Options.VideoWidth, Options.VideoHeight, Options.FrameRateNumerator, Options.FrameRateDenominator, VideoFormat.I420);
+            var sink = new NdiVideoSink(_NdiSender, Options.VideoWidth, Options.VideoHeight, Options.FrameRateNumerator, Options.FrameRateDenominator, VideoFormat.I420);
             return sink;
         }
 
@@ -112,20 +108,19 @@ namespace FM.LiveSwitch.Connect
             _Log.Info($"Initializing NDI Stream - {Options.StreamName} (Alt: {failoverName})");
 
             // Faster to put the clock on audio as opposed to video
-            NdiSender = new Sender(Options.StreamName, false, true, null, failoverName);
+            _NdiSender = new Sender(Options.StreamName, false, true, null, failoverName);
             
             return base.Initialize();
         }
 
         protected override Task Ready()
         {
-
             return base.Ready();
         }
 
         protected override Task Unready()
         {
-            NdiSender.Dispose();
+            _NdiSender.Dispose();
             return base.Unready();
         }
     }
