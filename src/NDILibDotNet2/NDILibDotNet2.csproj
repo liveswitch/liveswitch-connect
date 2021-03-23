@@ -4,6 +4,7 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <DefineConstants Condition="$([MSBuild]::IsOsPlatform('Windows'))">WIN32</DefineConstants>
     <DefineConstants Condition="$([MSBuild]::IsOsPlatform('OSX'))">OSX</DefineConstants>
+    <DefineConstants Condition="$([MSBuild]::IsOsPlatform('Linux'))">LINUX</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>

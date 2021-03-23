@@ -40,6 +40,9 @@ namespace NewTek
 			#elif OSX
 			private const string Dllx64Name = "libndi.4.dylib";
 			private const string Dllx86Name = "libndi.4.dylib";
+			#elif LINUX
+			private const string Dllx64Name = "libndi.so";
+			private const string Dllx86Name = "libndi.so";
 			#else
 			#error Detected OS not supported. Check defined symbols in NDI C# project.
 			#endif
