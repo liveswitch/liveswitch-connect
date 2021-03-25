@@ -19,7 +19,7 @@ namespace FM.LiveSwitch.Connect
 
         private VideoBuffer _Buffer;
 
-        private bool _BufferAllocated = false;
+        private bool _BufferAllocated;
         private int _AllocatedPixels;
         private readonly int _FourCC;
 

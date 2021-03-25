@@ -7,6 +7,13 @@ namespace FM.LiveSwitch.Connect
 {
     class NdiCapturer : Sender<NdiCaptureOptions, NdiAudioSource, NdiVideoSource>
     {
+        class VideoFormatNotSupportedException : Exception
+        {
+            public VideoFormatNotSupportedException() {}
+            public VideoFormatNotSupportedException(string message)
+                : base(message) {}
+        }
+
         static ILog _Log = Log.GetLogger(typeof(NdiCapturer));
 
         public NdiCapturer(NdiCaptureOptions options)
@@ -70,18 +77,12 @@ namespace FM.LiveSwitch.Connect
                 case ImageFormat.Bgra:
                     // Supported
                     break;
-                case ImageFormat.I420:
-                case ImageFormat.Yv12:
-                case ImageFormat.Nv12:
-                case ImageFormat.Nv21:
+                default:
                     // YUV formats unsupported for now. Would need to add support converting from Packed(UYVY) to Planar.
                     // Can specify UYVY to NDI on creation, but LS YUV formats are planar.
                     // That being said all of the planar formats are listed as possible VideoFrame outputs.
                     // Might be worth communicating with NDI to understand why you can't specify planar formats, but it's
                     // possible to receive them.
-                case ImageFormat.Argb:
-                case ImageFormat.Abgr:
-                default:
                     Console.Error.WriteLine("--video-format not supported");
                     return Task.FromResult(1);
             }
@@ -131,17 +132,11 @@ namespace FM.LiveSwitch.Connect
                 case ImageFormat.Bgr:
                 case ImageFormat.Bgra:
                     return NDIlib.recv_color_format_e.recv_color_format_BGRX_BGRA;
-                case ImageFormat.I420:
-                case ImageFormat.Yv12:
-                case ImageFormat.Nv12:
-                case ImageFormat.Nv21:
+                default:
                     // YUV formats unsupported for now. Would need to add support converting from Packed(UYVY) to Planar
                     //return NDIlib.recv_color_format_e.recv_color_format_UYVY_BGRA;
-                case ImageFormat.Argb:
-                case ImageFormat.Abgr:
-                default:
                     // Above formats can't be specified in NDI, but we should've failed by now.
-                    throw new Exception("Trying to use invalid video formats.");
+                    throw new VideoFormatNotSupportedException("Trying to use invalid video formats.");
             }
         }
 

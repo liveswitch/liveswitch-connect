@@ -20,8 +20,8 @@ namespace FM.LiveSwitch.Connect
         protected NDI.VideoFrame _NdiVideoFrame { get; private set; }
         protected bool _IsCheckConnectionCount { get; private set; }
 
-        private int _RequestedWidth = -1;
-        private int _RequestedHeight = -1;
+        private readonly int _RequestedWidth = -1;
+        private readonly int _RequestedHeight = -1;
 
         private int _Width = -1;
         private int _Height = -1;
@@ -31,9 +31,9 @@ namespace FM.LiveSwitch.Connect
         private readonly int _FrameRateNumerator = 30000;
         private readonly int _FrameRateDenominator = 1000;
 
-        private VideoBuffer _VideoBuffer;
+        private readonly VideoBuffer _VideoBuffer;
         private IntPtr _VideoBufferPtr = IntPtr.Zero;
-        private bool _VideoBufferAllocated = false;
+        private bool _VideoBufferAllocated;
 
         public NdiVideoSink(NDI.Sender ndiSender, int requestedWidth, int requestedHeight, int frameRateNumerator, int frameRateDenominator, VideoFormat format)
             : base(format)

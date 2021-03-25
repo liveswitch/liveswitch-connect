@@ -19,7 +19,7 @@ namespace FM.LiveSwitch.Connect
         
         protected void Start()
         {
-            Console.WriteLine($"Looking for NDI device sources for {FindDuration} seconds.");
+            Console.Error.WriteLine($"Looking for NDI device sources for {FindDuration} seconds.");
             _NdiFinder = new NDI.Finder(true);
             _NdiFinder.Sources.CollectionChanged += HandleNdiSourcesChanged;
         }
@@ -27,7 +27,7 @@ namespace FM.LiveSwitch.Connect
         public async Task<int> Run()
         {
             Start();
-            await Task.Delay(FindDuration*1000);
+            await Task.Delay(FindDuration*1000).ConfigureAwait(false);
             Stop();
             return 0;
         }
@@ -46,7 +46,7 @@ namespace FM.LiveSwitch.Connect
         {
             if (e.NewItems != null)
             {
-                Console.WriteLine($"Found {e.NewItems.Count} new NDI device sources:");
+                Console.Error.WriteLine($"Found {e.NewItems.Count} new NDI device sources:");
                 foreach(NDI.Source source in e.NewItems)
                 {
                     Console.WriteLine("  " + source.Name);

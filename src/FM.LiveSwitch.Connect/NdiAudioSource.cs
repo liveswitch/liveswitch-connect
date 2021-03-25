@@ -19,7 +19,7 @@ namespace FM.LiveSwitch.Connect
 
         private AudioBuffer _Buffer;
 
-        private bool _BufferAllocated = false;
+        private bool _BufferAllocated;
         private int _BufferSize = 0;
         private readonly int _NumChannels;
         private readonly int _SampleRate;

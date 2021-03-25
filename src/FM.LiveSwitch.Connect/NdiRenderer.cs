@@ -81,15 +81,6 @@ namespace FM.LiveSwitch.Connect
                 case ImageFormat.I420:
                     // Supported
                     break;
-                case ImageFormat.Rgb:
-                case ImageFormat.Bgr:
-                case ImageFormat.Rgba:
-                case ImageFormat.Bgra:
-                case ImageFormat.Yv12:
-                case ImageFormat.Nv12:
-                case ImageFormat.Nv21:
-                case ImageFormat.Argb:
-                case ImageFormat.Abgr:
                 default:
                     Console.Error.WriteLine("--video-format not supported");
                     return Task.FromResult(1);
