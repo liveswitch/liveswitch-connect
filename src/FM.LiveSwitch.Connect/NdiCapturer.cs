@@ -20,6 +20,8 @@ namespace FM.LiveSwitch.Connect
             : base(options)
         {
             _NdiReceiver = new NDI.Receiver(options.StreamName, "LiveSwitchConnect");
+            _NdiReceiver.IsAudioEnabled = !options.NoAudio;
+            _NdiReceiver.IsVideoEnabled = !options.NoVideo;
             ProcessVideoFormat();
         }
 

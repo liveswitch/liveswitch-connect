@@ -412,7 +412,7 @@ namespace NewTek.NDI
                 color_format = colorFormat,
 
                 // we want full quality - for small previews or limited bandwidth, choose lowest
-                bandwidth = NDIlib.recv_bandwidth_e.recv_bandwidth_highest,
+                bandwidth = _videoEnabled ? NDIlib.recv_bandwidth_e.recv_bandwidth_highest : NDIlib.recv_bandwidth_e.recv_bandwidth_audio_only,
 
                 // let NDIlib deinterlace for us if needed
                 allow_video_fields = false,
