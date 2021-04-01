@@ -23,11 +23,6 @@ namespace FM.LiveSwitch.Connect
         private readonly int _RequestedWidth = -1;
         private readonly int _RequestedHeight = -1;
 
-        private int _Width = -1;
-        private int _Height = -1;
-
-        private int _Stride = -1;
-
         private readonly int _FrameRateNumerator = 30000;
         private readonly int _FrameRateDenominator = 1000;
 
@@ -69,11 +64,7 @@ namespace FM.LiveSwitch.Connect
 
         private void initializeNdiFrame()
         {
-            _Stride = _VideoBuffer.Stride;
-            _Width = _VideoBuffer.Width;
-            _Height = _VideoBuffer.Height;
-
-            int bufferSize = _Height * _Stride * 3 / 2;
+            int bufferSize = _VideoBuffer.Height * _VideoBuffer.Stride * 3 / 2;
 
             if (_VideoBufferAllocated)
             {
@@ -87,9 +78,9 @@ namespace FM.LiveSwitch.Connect
                 _VideoBufferPtr,
                 _RequestedWidth,
                 _RequestedHeight,
-                _Stride,
+                _VideoBuffer.Stride,
                 (NDIlib.FourCC_type_e)InputFormat.FourCC,
-                (float)_Width / _Height,
+                (float)_VideoBuffer.Width / _VideoBuffer.Height,
                 _FrameRateNumerator,
                 _FrameRateDenominator,
                 NDIlib.frame_format_type_e.frame_format_type_progressive);
@@ -116,7 +107,6 @@ namespace FM.LiveSwitch.Connect
                 var inputUOffset = inputBuffer.Height * stride;
                 var inputULength = inputBuffer.Height / 2 * stride / 2;
                 var inputVOffset = inputUOffset + inputULength;
-                var inputVLength = inputULength;
 
                 var outputUOffset = _VideoBuffer.Height * outputStride;
                 var outputULength = _VideoBuffer.Height / 2 * outputStride / 2;

@@ -76,14 +76,10 @@ namespace FM.LiveSwitch.Connect
                 return Task.FromResult(1);
             }
 
-            switch (Options.VideoFormat)
+            if (Options.VideoFormat != ImageFormat.I420)
             {
-                case ImageFormat.I420:
-                    // Supported
-                    break;
-                default:
-                    Console.Error.WriteLine("--video-format not supported");
-                    return Task.FromResult(1);
+                Console.Error.WriteLine("--video-format not supported");
+                return Task.FromResult(1);
             }
 
             return Receive();
