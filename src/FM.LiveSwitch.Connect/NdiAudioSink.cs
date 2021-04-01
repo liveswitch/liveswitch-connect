@@ -68,21 +68,9 @@ namespace FM.LiveSwitch.Connect
         {
             try
             {
-                // Split across the channels
-                var chanLength = buffer.Length / _NdiAudioFrame16bpp.NumChannels;
-                for (int ch = 0; ch < _NdiAudioFrame16bpp.NumChannels; ch++)
-                {
-                    // Calculate the size of each channel
-                    int channelStride = ch * _NdiAudioFrame16bpp.NumSamples * sizeof(short);
+                // Do straight copy as it's interleaved data
+                Marshal.Copy(buffer.Data, 0, _NdiAudioFrame16bpp.AudioBuffer, buffer.Length);
 
-                    // Set the pointer to the start of this channel.
-                    IntPtr destStart = new IntPtr(_NdiAudioFrame16bpp.AudioBuffer.ToInt64() + channelStride);
-
-                    // Write the byytes
-                    Marshal.Copy(buffer.Data, ch * chanLength, destStart, chanLength);
-                }
-
-                // Send the frame
                 _NdiSender.Send(_NdiAudioFrame16bpp);
                 return true;
             }
