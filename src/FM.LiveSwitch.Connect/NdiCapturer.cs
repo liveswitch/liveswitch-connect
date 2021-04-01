@@ -8,7 +8,7 @@ namespace FM.LiveSwitch.Connect
 {
     class NdiCapturer : Sender<NdiCaptureOptions, NdiAudioSource, NdiVideoSource>
     {
-        class VideoFormatNotSupportedException : Exception
+        public class VideoFormatNotSupportedException : Exception
         {
             public VideoFormatNotSupportedException() {}
             public VideoFormatNotSupportedException(string message)
@@ -144,7 +144,6 @@ namespace FM.LiveSwitch.Connect
                     return NDIlib.recv_color_format_e.recv_color_format_BGRX_BGRA;
                 default:
                     // YUV formats unsupported for now. Would need to add support converting from Packed(UYVY) to Planar
-                    //return NDIlib.recv_color_format_e.recv_color_format_UYVY_BGRA;
                     // Above formats can't be specified in NDI, but we should've failed by now.
                     throw new VideoFormatNotSupportedException("Trying to use invalid video formats.");
             }
