@@ -110,6 +110,7 @@ namespace FM.LiveSwitch.Connect
 
         protected override Task Ready()
         {
+            _NdiReceiver.ConnectionStateChange += ProcessConnectionStateChange;
             _NdiReceiver.Connect(LsToNdiVideoFormat(Options.VideoFormat));
             return base.Ready();
         }
@@ -118,6 +119,7 @@ namespace FM.LiveSwitch.Connect
         {
             if (_NdiReceiver != null)
             {
+                _NdiReceiver.ConnectionStateChange -= ProcessConnectionStateChange;
                 _NdiReceiver.Disconnect();
                 _NdiReceiver.Dispose();
             }
@@ -158,6 +160,22 @@ namespace FM.LiveSwitch.Connect
                 return;
             }
             _Log.Warn("Forced video format to use alpha channel.");
+        }
+
+        protected void ProcessConnectionStateChange(object sender, EventArgs e)
+        {
+            if (!_NdiReceiver.Connected)
+            {
+                _Log.Info("Connection to NDI source lost.");
+            }
+            else if (!_NdiReceiver.ReceivingFrames)
+            {
+                _Log.Info("Stopped receiving frames from NDI source.");
+            }
+            else
+            {
+                _Log.Info("Connection to NDI source established.");
+            }
         }
     }
 }

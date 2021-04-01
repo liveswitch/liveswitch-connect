@@ -94,6 +94,34 @@ namespace NewTek.NDI
             }
         }
 
+        [Category("NewTek NDI"),
+        Description("Are we connected to the NDI source?")]
+        public bool Connected
+        {
+            get { return _connected; }
+            private set {
+                if (_connected != value)
+                {
+                    _connected = value;
+                    ConnectionStateChange?.Invoke(this, EventArgs.Empty);
+                }
+            }
+        }
+
+        [Category("NewTek NDI"),
+        Description("Are we receiving frames from the NDI source?")]
+        public bool ReceivingFrames
+        {
+            get { return _receivingFrames; }
+            private set {
+                if (_receivingFrames != value)
+                {
+                    _receivingFrames = value;
+                    ConnectionStateChange?.Invoke(this, EventArgs.Empty);
+                }
+            }
+        }
+
         public Receiver(String sourceName, String receiverName)
         {
             if (String.IsNullOrEmpty(sourceName))
@@ -507,6 +535,7 @@ namespace NewTek.NDI
                 // No data
                 case NDIlib.frame_type_e.frame_type_none:
                     // No data received
+                    ReceivingFrames = false;
                     break;
 
                 // frame settings - check for extended functionality
@@ -537,6 +566,8 @@ namespace NewTek.NDI
 
                 // Video data
                 case NDIlib.frame_type_e.frame_type_video:
+                    Connected = true;
+                    ReceivingFrames = true;
 
                     // if not enabled, just discard
                     // this can also occasionally happen when changing sources
@@ -558,6 +589,8 @@ namespace NewTek.NDI
 
                 // audio is beyond the scope of this example
                 case NDIlib.frame_type_e.frame_type_audio:
+                    Connected = true;
+                    ReceivingFrames = true;
 
                     // if no audio or disabled, nothing to do
                     if (!_audioEnabled || audioFrame.p_data == IntPtr.Zero || audioFrame.no_samples == 0)
@@ -619,6 +652,10 @@ namespace NewTek.NDI
                     // free frames that were received
                     NDIlib.recv_free_metadata(_recvInstancePtr, ref metadataFrame);
                     break;
+                
+                case NDIlib.frame_type_e.frame_type_error:
+                    Connected = false;
+                    break;
                 }
             }
         }
@@ -634,6 +671,7 @@ namespace NewTek.NDI
 
         public event EventHandler<AudioFrameReceivedEventArgs> AudioFrameReceived;
         public event EventHandler<VideoFrameReceivedEventArgs> VideoFrameReceived;
+        public event EventHandler ConnectionStateChange;
 
         private readonly String _sourceName;
         private readonly String _receiverName;
@@ -643,6 +681,9 @@ namespace NewTek.NDI
 
         // should we send video to Windows or not?
         private bool _videoEnabled = true;
+
+        private bool _connected = false;
+        private bool _receivingFrames = false;
 
         private bool _isPtz = false;
         private bool _canRecord = false;
