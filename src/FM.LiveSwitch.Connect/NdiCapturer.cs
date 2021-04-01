@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using System.Timers;
 using NewTek;
 using NDI = NewTek.NDI;
 
@@ -22,6 +23,8 @@ namespace FM.LiveSwitch.Connect
             _NdiReceiver = new NDI.Receiver(options.StreamName, "LiveSwitchConnect");
             _NdiReceiver.IsAudioEnabled = !options.NoAudio;
             _NdiReceiver.IsVideoEnabled = !options.NoVideo;
+            _PerformanceTimer = new Timer(10000);
+            _PerformanceTimer.Elapsed += new ElapsedEventHandler(OnPerformanceTimer);
             ProcessVideoFormat();
         }
 
@@ -93,6 +96,7 @@ namespace FM.LiveSwitch.Connect
         }
 
         protected NDI.Receiver _NdiReceiver;
+        private Timer _PerformanceTimer;
 
         protected override NdiAudioSource CreateAudioSource()
         {
@@ -112,11 +116,13 @@ namespace FM.LiveSwitch.Connect
         {
             _NdiReceiver.ConnectionStateChange += ProcessConnectionStateChange;
             _NdiReceiver.Connect(LsToNdiVideoFormat(Options.VideoFormat));
+            _PerformanceTimer.Start();
             return base.Ready();
         }
 
         protected override Task Unready()
         {
+            _PerformanceTimer.Stop();
             if (_NdiReceiver != null)
             {
                 _NdiReceiver.ConnectionStateChange -= ProcessConnectionStateChange;
@@ -175,6 +181,15 @@ namespace FM.LiveSwitch.Connect
             else
             {
                 _Log.Info("Connection to NDI source established.");
+            }
+        }
+
+        private void OnPerformanceTimer(object source, ElapsedEventArgs e)
+        {
+            if (_NdiReceiver != null)
+            {
+                NDI.FramesReceived fr = _NdiReceiver.GetPerformance();
+                _Log.Info($"Frame metrics ~ Audio - Total: {fr.AudioTotal} Dropped: {fr.AudioDropped} | Video - Total: {fr.VideoTotal} Dropped: {fr.VideoDropped}");
             }
         }
     }

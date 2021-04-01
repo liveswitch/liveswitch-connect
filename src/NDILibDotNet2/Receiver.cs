@@ -17,6 +17,14 @@ namespace NewTek.NDI
         public VideoFrame Frame { get; set; }
     }
 
+    public struct FramesReceived
+    {
+        public Int64 AudioTotal;
+        public Int64 AudioDropped;
+        public Int64 VideoTotal;
+        public Int64 VideoDropped;
+    }
+
     // If you do not use this control, you can remove this file
     // and remove the dependency on naudio.
     // Alternatively you can also remove any naudio related entries
@@ -501,6 +509,26 @@ namespace NewTek.NDI
             IsPtz = false;
             IsRecordingSupported = false;
             WebControlUrl = String.Empty;
+        }
+
+        public FramesReceived GetPerformance()
+        {
+            FramesReceived fr = new FramesReceived();
+
+            if (_recvInstancePtr != IntPtr.Zero)
+            {
+                NDIlib.recv_performance_t totalFrames = new NDIlib.recv_performance_t();
+                NDIlib.recv_performance_t droppedFrames = new NDIlib.recv_performance_t();
+    
+                NDIlib.recv_get_performance(_recvInstancePtr, ref totalFrames, ref droppedFrames);
+    
+                fr.AudioTotal = totalFrames.audio_frames;
+                fr.VideoTotal = totalFrames.video_frames;
+                fr.AudioDropped = droppedFrames.audio_frames;
+                fr.VideoDropped = droppedFrames.video_frames;
+            }
+
+            return fr;
         }
 
         void SetTallyIndicators(bool onProgram, bool onPreview)
