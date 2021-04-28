@@ -97,7 +97,7 @@ namespace FM.LiveSwitch.Connect
         }
 
         protected NDI.Receiver _NdiReceiver;
-        private Timer _PerformanceTimer;
+        private readonly Timer _PerformanceTimer;
 
         protected override NdiAudioSource CreateAudioSource()
         {
