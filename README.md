@@ -25,7 +25,7 @@ dotnet publish src/FM.LiveSwitch.Connect -r osx-x64 -c Release /p:PublishSingleF
 ### Linux
 
 ```shell
-dotnet publish -r linux-x64 -c Release /p:PublishSingleFile=true /p:PublishTrimmed=true -o linux
+dotnet publish src/FM.LiveSwitch.Connect -r linux-x64 -c Release /p:PublishSingleFile=true /p:PublishTrimmed=true -o linux
 ```
 
 Alternatively, use `dotnet build` to create a platform-agnostic bundle (the .NET Core runtime must be installed):
