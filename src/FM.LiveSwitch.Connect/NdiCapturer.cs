@@ -6,14 +6,15 @@ using NDI = NewTek.NDI;
 
 namespace FM.LiveSwitch.Connect
 {
+    public class NdiVideoFormatNotSupportedException : Exception
+    {
+        public NdiVideoFormatNotSupportedException() {}
+        public NdiVideoFormatNotSupportedException(string message)
+            : base(message) {}
+    }
+
     class NdiCapturer : Sender<NdiCaptureOptions, NdiAudioSource, NdiVideoSource>
     {
-        public class VideoFormatNotSupportedException : Exception
-        {
-            public VideoFormatNotSupportedException() {}
-            public VideoFormatNotSupportedException(string message)
-                : base(message) {}
-        }
 
         static ILog _Log = Log.GetLogger(typeof(NdiCapturer));
 
@@ -145,7 +146,7 @@ namespace FM.LiveSwitch.Connect
                 default:
                     // YUV formats unsupported for now. Would need to add support converting from Packed(UYVY) to Planar
                     // Above formats can't be specified in NDI, but we should've failed by now.
-                    throw new VideoFormatNotSupportedException("Trying to use invalid video formats.");
+                    throw new NdiVideoFormatNotSupportedException("Trying to use invalid video formats.");
             }
         }
 
