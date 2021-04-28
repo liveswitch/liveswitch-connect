@@ -13,19 +13,19 @@ Use `dotnet publish` to create a single, self-contained file for a specific plat
 ### Windows
 
 ```shell
-dotnet publish -r win-x64 -c Release /p:PublishSingleFile=true /p:PublishTrimmed=true -o win
+dotnet publish src/FM.LiveSwitch.Connect -r win-x64 -c Release /p:PublishSingleFile=true /p:PublishTrimmed=true -o win
 ```
 
 ### macOS
 
 ```shell
-dotnet publish -r osx-x64 -c Release /p:PublishSingleFile=true /p:PublishTrimmed=true -o osx
+dotnet publish src/FM.LiveSwitch.Connect -r osx-x64 -c Release /p:PublishSingleFile=true /p:PublishTrimmed=true -o osx
 ```
 
 ### Linux
 
 ```shell
-dotnet publish -r linux-x64 -c Release /p:PublishSingleFile=true /p:PublishTrimmed=true -o linux
+dotnet publish src/FM.LiveSwitch.Connect -r linux-x64 -c Release /p:PublishSingleFile=true /p:PublishTrimmed=true -o linux
 ```
 
 Alternatively, use `dotnet build` to create a platform-agnostic bundle (the .NET Core runtime must be installed):
@@ -250,6 +250,76 @@ The `ffcapture` verb lets you capture local media from FFmpeg and send it to a L
   --video-width                   The video width, if known, for signalling.
 
   --video-height                  The video height, if known, for signalling.
+
+  --video-frame-rate              The video frame-rate, if known, for
+                                  signalling.
+
+  --channel-id                    Required. The channel ID.
+
+  --data-channel-label            The data channel label.
+
+  --user-id                       The local user ID.
+
+  --user-alias                    The local user alias.
+
+  --device-id                     The local device ID.
+
+  --device-alias                  The local device alias.
+
+  --client-tag                    The local client tag.
+
+  --client-roles                  The local client roles.
+
+  --connection-tag                The local connection tag.
+
+  --no-audio                      Do not process audio.
+
+  --no-video                      Do not process video.
+
+  --audio-codec                   (Default: Any) The audio codec to negotiate
+                                  with LiveSwitch.
+
+  --video-codec                   (Default: Any) The video codec to negotiate
+                                  with LiveSwitch.
+
+  --gateway-url                   Required. The gateway URL.
+
+  --application-id                Required. The application ID.
+
+  --shared-secret                 Required. The shared secret for the
+                                  application ID.
+
+  --log-level                     (Default: Error) The LiveSwitch log level.
+```
+
+## ndifind
+
+The `ndifind` verb prints a list of the discoverable [NDI®](https://ndi.tv/) devices on the network.
+
+## ndicapture
+
+The `ndicapture` verb lets you capture media from an [NDI®](https://ndi.tv/) device and send it to a LiveSwitch server.
+
+```shell
+  --stream-name                   Required. Name of the NDI® stream to capture.
+
+  --audio-clock-rate              (Default: 48000) The audio clock rate in Hz.
+                                  Minimum value is 8000. Maximum value is 48000.
+
+  --audio-channel-count           (Default: 2) The audio channel count. Minimum value
+                                  is 1. Maximum value is 4.
+
+  --video-format                  (Default: Bgra) The video format. (rgb, bgr, rgba, bgra)
+
+  --video-width                   (Default: 1920) The video width, to send to the LiveSwitch server.
+
+  --video-height                  (Default: 1080) The video height, to send to the LiveSwitch server.
+
+  --media-id                      The local media ID.
+
+  --audio-bitrate                 The audio bitrate.
+
+  --video-bitrate                 The video bitrate.
 
   --video-frame-rate              The video frame-rate, if known, for
                                   signalling.
@@ -537,6 +607,79 @@ The `ffrender` verb lets you render remote media from a LiveSwitch server to FFm
   --shared-secret         Required. The shared secret for the application ID.
 
   --log-level             (Default: Error) The LiveSwitch log level.
+```
+
+## ndirender
+
+The `ndirender` verb lets you render remote media from a LiveSwitch server to [NDI®](https://ndi.tv/).
+
+```shell
+  --stream-name             (Default: LiveswitchConnect) Name of the NDI® stream
+
+  --audio-clock-rate        (Default: 48000) The audio clock rate in Hz. Must be
+                            a multiple of 8000. Minimum value is 8000. Maximum
+                            value is 48000.
+
+  --audio-channel-count     (Default: 2) The audio channel count. Minimum value
+                            is 1. Maximum value is 2.
+
+  --audio-frame-duration    (Default: 20) The audio frame duration in
+                            milliseconds. Minimum value is 5. Maximum value is
+                            100.
+
+  --video-format            (Default: I420) The video format. Currently only I420 is supported.
+
+  --video-width             (Default: 800) The video width.
+
+  --video-height            (Default: 800) The video height.
+
+  --frame-rate-numerator    (Default: 30000) The frame rate numerator.
+
+  --frame-rate-denominator  (Default: 1000) The frame rate denominator.
+
+  --connection-id           Required. The remote connection ID or 'mcu'.
+
+  --audio-bitrate           The audio bitrate.
+
+  --video-bitrate           The video bitrate.
+
+  --channel-id              Required. The channel ID.
+
+  --data-channel-label      The data channel label.
+
+  --region                  The local region.
+
+  --user-id                 The local user ID.
+
+  --user-alias              The local user alias.
+
+  --device-id               The local device ID.
+
+  --device-alias            The local device alias.
+
+  --client-tag              The local client tag.
+
+  --client-roles            The local client roles.
+
+  --connection-tag          The local connection tag.
+
+  --no-audio                Do not process audio.
+
+  --no-video                Do not process video.
+
+  --audio-codec             (Default: Any) The audio codec to negotiate with
+                            LiveSwitch.
+
+  --video-codec             (Default: Any) The video codec to negotiate with
+                            LiveSwitch.
+
+  --gateway-url             Required. The gateway URL.
+
+  --application-id          Required. The application ID.
+
+  --shared-secret           Required. The shared secret for the application ID.
+
+  --log-level               (Default: Error) The LiveSwitch log level.
 ```
 
 ## log
@@ -926,6 +1069,13 @@ You can stream the content in a LiveSwitch channel to an RTMP server. The follow
 lsconnect ffrender ... --output-args="-f flv rtmp://a.rtmp.youtube.com/live2/<YouTube Stream Key>"
 ```
 
+## Using NDI®
+
+For Windows: You'll need to install the NDI® Runtime found here: <http://new.tk/NDIRedistV4>
+Add the runtime directory to the Path environment variable. Default: `C:\Program Files\NDI.tv\NDI 4 Runtime\v4`
+
+For Mac: You'll need to install the NDI® SDK found here: <https://downloads.ndi.tv/SDK/NDI_SDK_Mac/InstallNDISDK_v4_Apple.pkg>
+
 ## Contact
 
 To learn more, visit [frozenmountain.com](https://www.frozenmountain.com) or [liveswitch.io](https://www.liveswitch.io).
@@ -933,3 +1083,5 @@ To learn more, visit [frozenmountain.com](https://www.frozenmountain.com) or [li
 For inquiries, contact [sales@frozenmountain.com](mailto:sales@frozenmountain.com).
 
 All contents copyright © Frozen Mountain Software.
+
+NDI® is a registered trademark of NewTek, Inc.

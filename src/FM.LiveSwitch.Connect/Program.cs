@@ -23,13 +23,16 @@ namespace FM.LiveSwitch.Connect
                 ShellOptions,
                 CaptureOptions, 
                 FFCaptureOptions,
+                NdiCaptureOptions,
                 FakeOptions,
                 PlayOptions, 
                 RenderOptions,
                 FFRenderOptions,
+                NdiRenderOptions,
                 LogOptions,
                 RecordOptions,
-                InterceptOptions
+                InterceptOptions,
+                NdiFindOptions
             >(AppendEnvironmentVariables(args));
 
             result.MapResult(
@@ -47,6 +50,14 @@ namespace FM.LiveSwitch.Connect
                     {
                         Initialize(options);
                         return await new Capturer(options).Capture();
+                    }).GetAwaiter().GetResult();
+                },
+                (NdiCaptureOptions options) =>
+                {
+                    return Task.Run(async () =>
+                    {
+                        Initialize(options);
+                        return await new NdiCapturer(options).Capture();
                     }).GetAwaiter().GetResult();
                 },
                 (FFCaptureOptions options) =>
@@ -81,6 +92,14 @@ namespace FM.LiveSwitch.Connect
                         return await new Renderer(options).Render();
                     }).GetAwaiter().GetResult();
                 },
+                (NdiRenderOptions options) =>
+                {
+                    return Task.Run(async () =>
+                    {
+                        Initialize(options);
+                        return await new NdiRenderer(options).Render();
+                    }).GetAwaiter().GetResult();
+                },
                 (FFRenderOptions options) =>
                 {
                     return Task.Run(async () =>
@@ -111,6 +130,13 @@ namespace FM.LiveSwitch.Connect
                     {
                         Initialize(options);
                         return await new Interceptor(options).Intercept();
+                    }).GetAwaiter().GetResult();
+                },
+                (NdiFindOptions options) =>
+                {
+                    return Task.Run(async () =>
+                    {
+                        return await new NdiFinder(options).Run();
                     }).GetAwaiter().GetResult();
                 },
                 errors =>

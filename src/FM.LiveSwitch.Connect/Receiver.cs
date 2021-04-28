@@ -144,6 +144,8 @@ namespace FM.LiveSwitch.Connect
 
                             Console.Error.WriteLine($"{GetType().Name} connection connected.");
 
+                            await Initialize().ConfigureAwait(false);
+
                             await Task.WhenAll(
                                 StartAudioStream(),
                                 StartVideoStream(),
@@ -697,6 +699,11 @@ namespace FM.LiveSwitch.Connect
         protected virtual DataSink CreateDataSink()
         {
             return new DataSink();
+        }
+
+        protected virtual Task Initialize()
+        {
+            return Task.CompletedTask;
         }
 
         protected virtual Task Ready()

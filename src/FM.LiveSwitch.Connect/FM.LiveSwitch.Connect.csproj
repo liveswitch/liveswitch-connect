@@ -20,4 +20,13 @@
     <PackageReference Include="FM.LiveSwitch" Version="1.10.0.34671" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\NDILibDotNet2\NDILibDotNet2.csproj" />
+  </ItemGroup>
+
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <Exec Condition="$([MSBuild]::IsOsPlatform('Windows'))" Command="xcopy &quot;%25NDI_RUNTIME_DIR_V4%25\*.dll&quot;  &quot;$(TargetDir)&quot; /D /Y&#xD;&#xA;EXIT 0" />
+    <Copy Condition="$([MSBuild]::IsOsPlatform('OSX'))" SourceFiles="/Library/NDI SDK for Apple/lib/x64/libndi.4.dylib" DestinationFolder="$(PublishDir)"/>
+  </Target>
+
 </Project>
