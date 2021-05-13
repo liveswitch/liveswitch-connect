@@ -365,7 +365,10 @@ namespace FM.LiveSwitch.Connect
 
             try
             {
-                File.Delete(H264SdpFileName);
+                if (File.Exists(H264SdpFileName))
+                {
+                    File.Delete(H264SdpFileName);
+                }
             }
             catch (Exception ex)
             {
