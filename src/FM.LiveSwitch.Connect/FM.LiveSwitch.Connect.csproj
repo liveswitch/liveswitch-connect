@@ -13,11 +13,11 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Logging" Version="3.1.3" />
-    <PackageReference Include="FM.LiveSwitch.Opus" Version="1.10.0.34671" />
-    <PackageReference Include="FM.LiveSwitch.Yuv" Version="1.10.0.34671" />
-    <PackageReference Include="FM.LiveSwitch.Vpx" Version="1.10.0.34671" />
-    <PackageReference Include="FM.LiveSwitch.OpenH264" Version="1.10.0.34671" />
-    <PackageReference Include="FM.LiveSwitch" Version="1.10.0.34671" />
+    <PackageReference Include="FM.LiveSwitch.Opus" Version="1.12.3.46193" />
+    <PackageReference Include="FM.LiveSwitch.Yuv" Version="1.12.3.46193" />
+    <PackageReference Include="FM.LiveSwitch.Vpx" Version="1.12.3.46193" />
+    <PackageReference Include="FM.LiveSwitch.OpenH264" Version="1.12.3.46193" />
+    <PackageReference Include="FM.LiveSwitch" Version="1.12.3.46193" />
   </ItemGroup>
 
   <ItemGroup>
@@ -26,7 +26,7 @@
 
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
     <Exec Condition="$([MSBuild]::IsOsPlatform('Windows'))" Command="xcopy &quot;%25NDI_RUNTIME_DIR_V4%25\*.dll&quot;  &quot;$(TargetDir)&quot; /D /Y&#xD;&#xA;EXIT 0" />
-    <Copy Condition="$([MSBuild]::IsOsPlatform('OSX')) And Exists('/Library/NDI SDK for Apple/lib/x64/libndi.4.dylib')" SourceFiles="/Library/NDI SDK for Apple/lib/x64/libndi.4.dylib" DestinationFolder="$(PublishDir)"/>
+    <Copy Condition="$([MSBuild]::IsOsPlatform('OSX')) And Exists('/Library/NDI SDK for Apple/lib/x64/libndi.4.dylib')" SourceFiles="/Library/NDI SDK for Apple/lib/x64/libndi.4.dylib" DestinationFolder="$(PublishDir)" />
   </Target>
 
 </Project>
