@@ -174,9 +174,9 @@ The `capture` verb lets you capture local media from a named pipe and send it to
 
   --media-id                The local media ID.
 
-  --audio-bitrate           The audio bitrate.
+  --audio-bitrate           The audio bitrate in kbps.
 
-  --video-bitrate           The video bitrate.
+  --video-bitrate           The video bitrate in kbps.
 
   --video-frame-rate        The video frame-rate, if known, for signalling.
 
@@ -243,9 +243,9 @@ The `ffcapture` verb lets you capture local media from FFmpeg and send it to a L
 
   --media-id                      The local media ID.
 
-  --audio-bitrate                 The audio bitrate.
+  --audio-bitrate                 The audio bitrate in kbps.
 
-  --video-bitrate                 The video bitrate.
+  --video-bitrate                 The video bitrate in kbps.
 
   --video-width                   The video width, if known, for signalling.
 
@@ -317,9 +317,9 @@ The `ndicapture` verb lets you capture media from an [NDI®](https://ndi.tv/) de
 
   --media-id                      The local media ID.
 
-  --audio-bitrate                 The audio bitrate.
+  --audio-bitrate                 The audio bitrate in kbps.
 
-  --video-bitrate                 The video bitrate.
+  --video-bitrate                 The video bitrate in kbps.
 
   --video-frame-rate              The video frame-rate, if known, for
                                   signalling.
@@ -393,9 +393,9 @@ The `fake` verb lets you generate fake media and send it to a LiveSwitch server.
 
   --media-id               The local media ID.
 
-  --audio-bitrate          The audio bitrate.
+  --audio-bitrate          The audio bitrate in kbps.
 
-  --video-bitrate          The video bitrate.
+  --video-bitrate          The video bitrate in kbps.
 
   --channel-id             Required. The channel ID.
 
@@ -445,9 +445,9 @@ The `play` verb lets you capture media from a local file (or pair of files) and 
 
   --media-id              The local media ID.
 
-  --audio-bitrate         The audio bitrate.
+  --audio-bitrate         The audio bitrate in kbps.
 
-  --video-bitrate         The video bitrate.
+  --video-bitrate         The video bitrate in kbps.
 
   --video-width           The video width, if known, for signalling.
 
@@ -639,9 +639,9 @@ The `ndirender` verb lets you render remote media from a LiveSwitch server to [N
 
   --connection-id           Required. The remote connection ID or 'mcu'.
 
-  --audio-bitrate           The audio bitrate.
+  --audio-bitrate           The audio bitrate in kbps.
 
-  --video-bitrate           The video bitrate.
+  --video-bitrate           The video bitrate in kbps.
 
   --channel-id              Required. The channel ID.
 

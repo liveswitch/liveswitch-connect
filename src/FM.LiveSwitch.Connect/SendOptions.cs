@@ -7,10 +7,10 @@ namespace FM.LiveSwitch.Connect
         [Option("media-id", Required = false, HelpText = "The local media ID.")]
         public string MediaId { get; set; }
 
-        [Option("audio-bitrate", Required = false, HelpText = "The audio bitrate.")]
+        [Option("audio-bitrate", Required = false, HelpText = "The audio bitrate in kbps.")]
         public int? AudioBitrate { get; set; }
 
-        [Option("video-bitrate", Required = false, HelpText = "The video bitrate.")]
+        [Option("video-bitrate", Required = false, HelpText = "The video bitrate in kbps.")]
         public int? VideoBitrate { get; set; }
 
         [Option("video-width", Required = false, HelpText = "The video width, if known, for signalling.")]
