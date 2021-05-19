@@ -105,6 +105,7 @@ namespace FM.LiveSwitch.Connect
                             }
                             else
                             {
+                                RemoteConnectionInfo = null;
                                 Console.Error.WriteLine($"{GetType().Name} has remote media ID '{Options.MediaId}'.");
                             }
 
