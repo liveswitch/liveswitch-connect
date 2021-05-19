@@ -52,13 +52,27 @@ namespace FM.LiveSwitch.Connect
 
         public void Destroy()
         {
-            Stream.Flush();
+            try
+            {
+                Stream.Flush();
+            }
+            catch
+            {
+                // best effort
+            }
             Stream.Dispose();
         }
 
         public async Task DestroyAsync()
         {
-            await Stream.FlushAsync();
+            try
+            {
+                await Stream.FlushAsync();
+            }
+            catch
+            {
+                // best effort
+            }
             await Stream.DisposeAsync();
         }
 
