@@ -4,8 +4,6 @@
 
 The LiveSwitch Connect CLI lets you send and receive media to and from LiveSwitch.
 
-Requires .NET Core 3.1 or newer. Requires LiveSwitch Server 1.10.0 or newer.
-
 ## Building
 
 Use `dotnet publish` to create a single, self-contained file for a specific platform/architecture:
@@ -62,33 +60,39 @@ lsconnect [verb] [options]
 
 ### Verbs
 
-```shell
-  shell        Starts an interactive shell.
+```
+  shell         Starts an interactive shell.
 
-  capture      Captures local media from a named pipe.
+  capture       Captures local media from a named pipe.
 
-  ffcapture    Captures local media from FFmpeg.
+  ffcapture     Captures local media from FFmpeg.
 
-  fake         Sends media from a fake source.
+  ndicapture    Captures media from an ndi stream.
 
-  play         Sends media from a local file.
+  fake          Sends media from a fake source.
 
-  render       Renders remote media to a named pipe.
+  play          Sends media from a local file.
 
-  ffrender     Renders remote media to FFmpeg.
+  render        Renders remote media to a named pipe.
 
-  log          Logs remote media to stdout.
+  ffrender      Renders remote media to FFmpeg.
 
-  record       Records remote media to a local file.
+  ndirender     Renders remote media to an ndi stream.
 
-  intercept    Forwards packets for lawful intercept.
+  log           Logs remote media to stdout.
+
+  record        Records remote media to a local file.
+
+  intercept     Forwards packets for lawful intercept.
+
+  ndifind       Find available NDI devices.
 ```
 
 ## shell
 
 The `shell` verb starts an interactive shell that lets you monitor clients and connections in a LiveSwitch Server.
 
-```shell
+```
   --gateway-url       Required. The gateway URL.
 
   --application-id    Required. The application ID.
@@ -100,7 +104,7 @@ The `shell` verb starts an interactive shell that lets you monitor clients and c
 
 Once the `shell` is active:
 
-```shell
+```
   register    Registers a client.
 
   exit        Exits the shell.
@@ -108,7 +112,7 @@ Once the `shell` is active:
 
 After you `register`:
 
-```shell
+```
   unregister    Unregisters the client.
 
   join          Joins a channel.
@@ -118,7 +122,7 @@ After you `register`:
 
 After you `join` a channel (e.g. `join my-channel-id`):
 
-```shell
+```
   leave          Leaves the channel.
 
   clients        Prints remote client details to stdout.
@@ -130,7 +134,7 @@ After you `join` a channel (e.g. `join my-channel-id`):
 
 The `clients` verb has additional options:
 
-```shell
+```
   --ids        Print IDs only.
 
   --listen     Listen for join/leave events. (Press Q to stop.)
@@ -138,7 +142,7 @@ The `clients` verb has additional options:
 
 The `connections` verb has additional options as well:
 
-```shell
+```
   --ids        Print IDs only.
 
   --listen     Listen for open/close events. (Press Q to stop.)
@@ -148,7 +152,7 @@ The `connections` verb has additional options as well:
 
 The `capture` verb lets you capture local media from a named pipe and send it to a LiveSwitch server.
 
-```shell
+```
   --audio-pipe              The named pipe for audio.
 
   --video-pipe              The named pipe for video.
@@ -183,6 +187,8 @@ The `capture` verb lets you capture local media from a named pipe and send it to
   --channel-id              Required. The channel ID.
 
   --data-channel-label      The data channel label.
+
+  --region                  The local region.
 
   --user-id                 The local user ID.
 
@@ -221,75 +227,73 @@ The `capture` verb lets you capture local media from a named pipe and send it to
 
 The `ffcapture` verb lets you capture local media from FFmpeg and send it to a LiveSwitch server.
 
-```shell
-  --input-args                    Required. The FFmpeg input arguments.
+```
+  --input-args            Required. The FFmpeg input arguments.
 
-  --audio-mode                    (Default: LSEncode) Where audio is encoded.
+  --audio-mode            (Default: LSEncode) Where audio is encoded.
 
-  --video-mode                    (Default: LSEncode) Where video is encoded.
+  --video-mode            (Default: LSEncode) Where video is encoded.
 
-  --audio-encoding                The audio encoding of the input stream, if
-                                  different from audio-codec. Enables
-                                  transcoding if audio-mode is noencode or
-                                  ffencode.
+  --audio-encoding        The audio encoding of the input stream, if different
+                          from audio-codec. Enables transcoding if audio-mode is
+                          noencode or ffencode.
 
-  --video-encoding                The video encoding of the input stream, if
-                                  different from video-codec. Enables
-                                  transcoding if video-mode is noencode or
-                                  ffencode.
+  --video-encoding        The video encoding of the input stream, if different
+                          from video-codec. Enables transcoding if video-mode is
+                          noencode or ffencode.
 
-  --ffencode-keyframe-interval    (Default: 30) The keyframe interval for video.
-                                  Only used if video-mode is ffencode.
+  --keyframe-interval     (Default: 60) The keyframe interval for video, in
+                          frames. Only used if video-mode is ffencode.
 
-  --media-id                      The local media ID.
+  --media-id              The local media ID.
 
-  --audio-bitrate                 The audio bitrate in kbps.
+  --audio-bitrate         The audio bitrate in kbps.
 
-  --video-bitrate                 The video bitrate in kbps.
+  --video-bitrate         The video bitrate in kbps.
 
-  --video-width                   The video width, if known, for signalling.
+  --video-width           The video width, if known, for signalling.
 
-  --video-height                  The video height, if known, for signalling.
+  --video-height          The video height, if known, for signalling.
 
-  --video-frame-rate              The video frame-rate, if known, for
-                                  signalling.
+  --video-frame-rate      The video frame-rate, if known, for signalling.
 
-  --channel-id                    Required. The channel ID.
+  --channel-id            Required. The channel ID.
 
-  --data-channel-label            The data channel label.
+  --data-channel-label    The data channel label.
 
-  --user-id                       The local user ID.
+  --region                The local region.
 
-  --user-alias                    The local user alias.
+  --user-id               The local user ID.
 
-  --device-id                     The local device ID.
+  --user-alias            The local user alias.
 
-  --device-alias                  The local device alias.
+  --device-id             The local device ID.
 
-  --client-tag                    The local client tag.
+  --device-alias          The local device alias.
 
-  --client-roles                  The local client roles.
+  --client-tag            The local client tag.
 
-  --connection-tag                The local connection tag.
+  --client-roles          The local client roles.
 
-  --no-audio                      Do not process audio.
+  --connection-tag        The local connection tag.
 
-  --no-video                      Do not process video.
+  --no-audio              Do not process audio.
 
-  --audio-codec                   (Default: Any) The audio codec to negotiate
-                                  with LiveSwitch.
+  --no-video              Do not process video.
 
-  --video-codec                   (Default: Any) The video codec to negotiate
-                                  with LiveSwitch.
+  --audio-codec           (Default: Any) The audio codec to negotiate with
+                          LiveSwitch.
 
-  --gateway-url                   Required. The gateway URL.
+  --video-codec           (Default: Any) The video codec to negotiate with
+                          LiveSwitch.
 
-  --application-id                Required. The application ID.
+  --gateway-url           Required. The gateway URL.
 
-  --shared-secret                 Required. The shared secret for the
-                                  application ID.
+  --application-id        Required. The application ID.
 
-  --log-level                     (Default: Error) The LiveSwitch log level.
+  --shared-secret         Required. The shared secret for the application ID.
+
+  --log-level             (Default: Error) The LiveSwitch log level.
 ```
 
 ## ndifind
@@ -300,73 +304,74 @@ The `ndifind` verb prints a list of the discoverable [NDI®](https://ndi.tv/) de
 
 The `ndicapture` verb lets you capture media from an [NDI®](https://ndi.tv/) device and send it to a LiveSwitch server.
 
-```shell
-  --stream-name                   Required. Name of the NDI® stream to capture.
+```
+  --stream-name            Required. Name of the NDI stream to capture.
 
-  --audio-clock-rate              (Default: 48000) The audio clock rate in Hz.
-                                  Minimum value is 8000. Maximum value is 48000.
+  --audio-clock-rate       (Default: 48000) The audio clock rate in Hz. Minimum
+                           value is 8000. Maximum value is 48000.
 
-  --audio-channel-count           (Default: 2) The audio channel count. Minimum value
-                                  is 1. Maximum value is 4.
+  --audio-channel-count    (Default: 2) The audio channel count. Minimum value
+                           is 1. Maximum value is 4.
 
-  --video-format                  (Default: Bgra) The video format. (rgb, bgr, rgba, bgra)
+  --video-format           (Default: Bgra) The video format. (rgb, bgr, rgba,
+                           bgra)
 
-  --video-width                   (Default: 1920) The video width, to send to the LiveSwitch server.
+  --video-width            (Default: 1920) The video width.
 
-  --video-height                  (Default: 1080) The video height, to send to the LiveSwitch server.
+  --video-height           (Default: 1080) The video height.
 
-  --media-id                      The local media ID.
+  --media-id               The local media ID.
 
-  --audio-bitrate                 The audio bitrate in kbps.
+  --audio-bitrate          The audio bitrate in kbps.
 
-  --video-bitrate                 The video bitrate in kbps.
+  --video-bitrate          The video bitrate in kbps.
 
-  --video-frame-rate              The video frame-rate, if known, for
-                                  signalling.
+  --video-frame-rate       The video frame-rate, if known, for signalling.
 
-  --channel-id                    Required. The channel ID.
+  --channel-id             Required. The channel ID.
 
-  --data-channel-label            The data channel label.
+  --data-channel-label     The data channel label.
 
-  --user-id                       The local user ID.
+  --region                 The local region.
 
-  --user-alias                    The local user alias.
+  --user-id                The local user ID.
 
-  --device-id                     The local device ID.
+  --user-alias             The local user alias.
 
-  --device-alias                  The local device alias.
+  --device-id              The local device ID.
 
-  --client-tag                    The local client tag.
+  --device-alias           The local device alias.
 
-  --client-roles                  The local client roles.
+  --client-tag             The local client tag.
 
-  --connection-tag                The local connection tag.
+  --client-roles           The local client roles.
 
-  --no-audio                      Do not process audio.
+  --connection-tag         The local connection tag.
 
-  --no-video                      Do not process video.
+  --no-audio               Do not process audio.
 
-  --audio-codec                   (Default: Any) The audio codec to negotiate
-                                  with LiveSwitch.
+  --no-video               Do not process video.
 
-  --video-codec                   (Default: Any) The video codec to negotiate
-                                  with LiveSwitch.
+  --audio-codec            (Default: Any) The audio codec to negotiate with
+                           LiveSwitch.
 
-  --gateway-url                   Required. The gateway URL.
+  --video-codec            (Default: Any) The video codec to negotiate with
+                           LiveSwitch.
 
-  --application-id                Required. The application ID.
+  --gateway-url            Required. The gateway URL.
 
-  --shared-secret                 Required. The shared secret for the
-                                  application ID.
+  --application-id         Required. The application ID.
 
-  --log-level                     (Default: Error) The LiveSwitch log level.
+  --shared-secret          Required. The shared secret for the application ID.
+
+  --log-level              (Default: Error) The LiveSwitch log level.
 ```
 
 ## fake
 
 The `fake` verb lets you generate fake media and send it to a LiveSwitch server. Audio is generated as a continuous tone following the argument provided. Video is generated as a sequence of solid-fill images that rotate through the colour wheel.
 
-```shell
+```
   --audio-clock-rate       (Default: 48000) The audio clock rate in Hz. Must be
                            a multiple of 8000. Minimum value is 8000. Maximum
                            value is 96000.
@@ -400,6 +405,8 @@ The `fake` verb lets you generate fake media and send it to a LiveSwitch server.
   --channel-id             Required. The channel ID.
 
   --data-channel-label     The data channel label.
+
+  --region                 The local region.
 
   --user-id                The local user ID.
 
@@ -438,7 +445,7 @@ The `fake` verb lets you generate fake media and send it to a LiveSwitch server.
 
 The `play` verb lets you capture media from a local file (or pair of files) and send it to a LiveSwitch server. Note that this is specifically for files that have been recorded in the recording format of `lsconnect` or LiveSwitch itself. To stream arbitrary media, use `ffcapture`. For details, see `Stream from an arbitrary mp4 file` below.
 
-```shell
+```
   --audio-path            The audio file path.
 
   --video-path            The video file path.
@@ -458,6 +465,8 @@ The `play` verb lets you capture media from a local file (or pair of files) and 
   --channel-id            Required. The channel ID.
 
   --data-channel-label    The data channel label.
+
+  --region                The local region.
 
   --user-id               The local user ID.
 
@@ -496,7 +505,7 @@ The `play` verb lets you capture media from a local file (or pair of files) and 
 
 The `render` verb lets you render remote media from a LiveSwitch server to a named pipe.
 
-```shell
+```
   --audio-pipe              The named pipe for audio.
 
   --video-pipe              The named pipe for video.
@@ -520,124 +529,9 @@ The `render` verb lets you render remote media from a LiveSwitch server to a nam
 
   --video-height            The video height.
 
-  --connection-id           The remote connection ID or 'mcu'.
-
   --media-id                The remote media ID.
 
-  --channel-id              Required. The channel ID.
-
-  --data-channel-label      The data channel label.
-
-  --user-id                 The local user ID.
-
-  --user-alias              The local user alias.
-
-  --device-id               The local device ID.
-
-  --device-alias            The local device alias.
-
-  --client-tag              The local client tag.
-
-  --client-roles            The local client roles.
-
-  --connection-tag          The local connection tag.
-
-  --no-audio                Do not process audio.
-
-  --no-video                Do not process video.
-
-  --audio-codec             (Default: Any) The audio codec to negotiate with
-                            LiveSwitch.
-
-  --video-codec             (Default: Any) The video codec to negotiate with
-                            LiveSwitch.
-
-  --gateway-url             Required. The gateway URL.
-
-  --application-id          Required. The application ID.
-
-  --shared-secret           Required. The shared secret for the application ID.
-
-  --log-level               (Default: Error) The LiveSwitch log level.
-```
-
-## ffrender
-
-The `ffrender` verb lets you render remote media from a LiveSwitch server to FFmpeg.
-
-```shell
-  --output-args           Required. The FFmpeg output arguments.
-
-  --connection-id         The remote connection ID or 'mcu'.
-
-  --media-id              The remote media ID.
-
-  --channel-id            Required. The channel ID.
-
-  --data-channel-label    The data channel label.
-
-  --user-id               The local user ID.
-
-  --user-alias            The local user alias.
-
-  --device-id             The local device ID.
-
-  --device-alias          The local device alias.
-
-  --client-tag            The local client tag.
-
-  --client-roles          The local client roles.
-
-  --connection-tag        The local connection tag.
-
-  --no-audio              Do not process audio.
-
-  --no-video              Do not process video.
-
-  --audio-codec           (Default: Any) The audio codec to negotiate with
-                          LiveSwitch.
-
-  --video-codec           (Default: Any) The video codec to negotiate with
-                          LiveSwitch.
-
-  --gateway-url           Required. The gateway URL.
-
-  --application-id        Required. The application ID.
-
-  --shared-secret         Required. The shared secret for the application ID.
-
-  --log-level             (Default: Error) The LiveSwitch log level.
-```
-
-## ndirender
-
-The `ndirender` verb lets you render remote media from a LiveSwitch server to [NDI®](https://ndi.tv/).
-
-```shell
-  --stream-name             (Default: LiveswitchConnect) Name of the NDI® stream
-
-  --audio-clock-rate        (Default: 48000) The audio clock rate in Hz. Must be
-                            a multiple of 8000. Minimum value is 8000. Maximum
-                            value is 48000.
-
-  --audio-channel-count     (Default: 2) The audio channel count. Minimum value
-                            is 1. Maximum value is 2.
-
-  --audio-frame-duration    (Default: 20) The audio frame duration in
-                            milliseconds. Minimum value is 5. Maximum value is
-                            100.
-
-  --video-format            (Default: I420) The video format. Currently only I420 is supported.
-
-  --video-width             (Default: 800) The video width.
-
-  --video-height            (Default: 800) The video height.
-
-  --frame-rate-numerator    (Default: 30000) The frame rate numerator.
-
-  --frame-rate-denominator  (Default: 1000) The frame rate denominator.
-
-  --connection-id           Required. The remote connection ID or 'mcu'.
+  --connection-id           The remote connection ID or 'mcu'.
 
   --audio-bitrate           The audio bitrate in kbps.
 
@@ -682,11 +576,161 @@ The `ndirender` verb lets you render remote media from a LiveSwitch server to [N
   --log-level               (Default: Error) The LiveSwitch log level.
 ```
 
+## ffrender
+
+The `ffrender` verb lets you render remote media from a LiveSwitch server to FFmpeg.
+
+```
+  --output-args           Required. The FFmpeg output arguments.
+
+  --audio-mode            (Default: LSDecode) Where audio is decoded.
+
+  --video-mode            (Default: LSDecode) Where video is decoded.
+
+  --audio-encoding        The audio encoding of the output stream, if different
+                          from audio-codec. Enables transcoding if audio-mode is
+                          nodecode or ffdecode.
+
+  --video-encoding        The video encoding of the output stream, if different
+                          from video-codec. Enables transcoding if video-mode is
+                          nodecode or ffdecode.
+
+  --keyframe-interval     (Default: 60) The keyframe interval for video, in
+                          frames. Only used if video-mode is nodecode.
+
+  --video-frame-rate      The video frame rate in frames per second, if known.
+                          Only used if video-mode is nodecode.
+
+  --media-id              The remote media ID.
+
+  --connection-id         The remote connection ID or 'mcu'.
+
+  --audio-bitrate         The audio bitrate in kbps.
+
+  --video-bitrate         The video bitrate in kbps.
+
+  --channel-id            Required. The channel ID.
+
+  --data-channel-label    The data channel label.
+
+  --region                The local region.
+
+  --user-id               The local user ID.
+
+  --user-alias            The local user alias.
+
+  --device-id             The local device ID.
+
+  --device-alias          The local device alias.
+
+  --client-tag            The local client tag.
+
+  --client-roles          The local client roles.
+
+  --connection-tag        The local connection tag.
+
+  --no-audio              Do not process audio.
+
+  --no-video              Do not process video.
+
+  --audio-codec           (Default: Any) The audio codec to negotiate with
+                          LiveSwitch.
+
+  --video-codec           (Default: Any) The video codec to negotiate with
+                          LiveSwitch.
+
+  --gateway-url           Required. The gateway URL.
+
+  --application-id        Required. The application ID.
+
+  --shared-secret         Required. The shared secret for the application ID.
+
+  --log-level             (Default: Error) The LiveSwitch log level.
+```
+
+## ndirender
+
+The `ndirender` verb lets you render remote media from a LiveSwitch server to [NDI®](https://ndi.tv/).
+
+```
+  --stream-name               (Default: LiveswitchConnect) Name of the NDI
+                              stream
+
+  --audio-clock-rate          (Default: 48000) The audio clock rate in Hz. Must
+                              be a multiple of 8000. Minimum value is 8000.
+                              Maximum value is 48000.
+
+  --audio-channel-count       (Default: 2) The audio channel count. Minimum
+                              value is 1. Maximum value is 2.
+
+  --audio-frame-duration      (Default: 20) The audio frame duration in
+                              milliseconds. Minimum value is 5. Maximum value is
+                              100.
+
+  --video-format              (Default: I420) The video format. Currently only
+                              I420 is supported.
+
+  --video-width               (Default: 1920) The video width.
+
+  --video-height              (Default: 1080) The video height.
+
+  --frame-rate-numerator      (Default: 30000) The frame rate numerator
+
+  --frame-rate-denominator    (Default: 1000) The frame rate denominator
+
+  --media-id                  The remote media ID.
+
+  --connection-id             The remote connection ID or 'mcu'.
+
+  --audio-bitrate             The audio bitrate in kbps.
+
+  --video-bitrate             The video bitrate in kbps.
+
+  --channel-id                Required. The channel ID.
+
+  --data-channel-label        The data channel label.
+
+  --region                    The local region.
+
+  --user-id                   The local user ID.
+
+  --user-alias                The local user alias.
+
+  --device-id                 The local device ID.
+
+  --device-alias              The local device alias.
+
+  --client-tag                The local client tag.
+
+  --client-roles              The local client roles.
+
+  --connection-tag            The local connection tag.
+
+  --no-audio                  Do not process audio.
+
+  --no-video                  Do not process video.
+
+  --audio-codec               (Default: Any) The audio codec to negotiate with
+                              LiveSwitch.
+
+  --video-codec               (Default: Any) The video codec to negotiate with
+                              LiveSwitch.
+
+  --gateway-url               Required. The gateway URL.
+
+  --application-id            Required. The application ID.
+
+  --shared-secret             Required. The shared secret for the application
+                              ID.
+
+  --log-level                 (Default: Error) The LiveSwitch log level.
+```
+
 ## log
 
 The `log` verb lets you log remote media frame details from a LiveSwitch server to standard output (stdout).
 
-```shell
+```
   --audio-log             (Default: audio: {duration}ms
                           {encoding}/{clockRate}/{channelCount} frame received
                           ({footprint} bytes) for SSRC {synchronizationSource}
@@ -710,13 +754,19 @@ The `log` verb lets you log remote media frame details from a LiveSwitch server 
                           clientId, clientTag, connectionId, connectionTag,
                           mediaId
 
+  --media-id              The remote media ID.
+
   --connection-id         The remote connection ID or 'mcu'.
 
-  --media-id              The remote media ID.
+  --audio-bitrate         The audio bitrate in kbps.
+
+  --video-bitrate         The video bitrate in kbps.
 
   --channel-id            Required. The channel ID.
 
   --data-channel-label    The data channel label.
+
+  --region                The local region.
 
   --user-id               The local user ID.
 
@@ -755,7 +805,7 @@ The `log` verb lets you log remote media frame details from a LiveSwitch server 
 
 The `record` verb lets you record remote media from a LiveSwitch server to a local pair or files.
 
-```shell
+```
   --output-path           (Default: .) The output path for the recordings. Uses
                           curly-brace syntax. Valid variables: applicationId,
                           channelId, userId, userAlias, deviceId, deviceAlias,
@@ -768,13 +818,19 @@ The `record` verb lets you record remote media from a LiveSwitch server to a loc
                           deviceAlias, clientId, clientTag, connectionId,
                           connectionTag, mediaId
 
+  --media-id              The remote media ID.
+
   --connection-id         The remote connection ID or 'mcu'.
 
-  --media-id              The remote media ID.
+  --audio-bitrate         The audio bitrate in kbps.
+
+  --video-bitrate         The video bitrate in kbps.
 
   --channel-id            Required. The channel ID.
 
   --data-channel-label    The data channel label.
+
+  --region                The local region.
 
   --user-id               The local user ID.
 
@@ -813,7 +869,7 @@ The `record` verb lets you record remote media from a LiveSwitch server to a loc
 
 The `intercept` verb lets you forward audio and/or video packets to a specific destination IP addreress and port to allow for lawful intercept via packet tracing.
 
-```shell
+```
   --audio-port            The destination port for audio packets.
 
   --video-port            The destination port for video packets.
@@ -824,13 +880,19 @@ The `intercept` verb lets you forward audio and/or video packets to a specific d
   --video-ip-address      (Default: 127.0.0.1) The destination IP address for
                           video packets.
 
+  --media-id              The remote media ID.
+
   --connection-id         The remote connection ID or 'mcu'.
 
-  --media-id              The remote media ID.
+  --audio-bitrate         The audio bitrate in kbps.
+
+  --video-bitrate         The video bitrate in kbps.
 
   --channel-id            Required. The channel ID.
 
   --data-channel-label    The data channel label.
+
+  --region                The local region.
 
   --user-id               The local user ID.
 
