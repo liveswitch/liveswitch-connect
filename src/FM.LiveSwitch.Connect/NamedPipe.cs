@@ -18,7 +18,19 @@ namespace FM.LiveSwitch.Connect
             }
             else
             {
-                return $"unix://{Path.Combine(Path.GetTempPath(), $"CoreFxPipe_{pipeName}")}";
+                return $"unix://{GetOSPipePath(pipeName)}";
+            }
+        }
+
+        public static string GetOSPipePath(string pipeName)
+        {
+            if (Platform.Instance.OperatingSystem == OperatingSystem.Windows)
+            {
+                return null;
+            }
+            else
+            {
+                return Path.Combine(Path.GetTempPath(), $"CoreFxPipe_{pipeName}");
             }
         }
 
@@ -47,6 +59,12 @@ namespace FM.LiveSwitch.Connect
             else
             {
                 Stream = _ClientStream = new NamedPipeClientStream(".", pipeName, PipeDirection.InOut, PipeOptions.Asynchronous);
+            }
+
+            // On Linux, allow global write so ffmpeg can access it.
+            if (Platform.Instance.OperatingSystem == OperatingSystem.Linux)
+            {
+                System.Diagnostics.Process.Start("chmod", $"777 {GetOSPipePath(pipeName)}").WaitForExit();
             }
         }
 
