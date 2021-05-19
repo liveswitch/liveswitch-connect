@@ -289,7 +289,6 @@ namespace FM.LiveSwitch.Connect
             args.Add(Options.OutputArgs);
 
             FFmpeg = FFUtility.FFmpeg(string.Join(" ", args), ProcessFFmpegOutput);
-            Activate();
 
             var monitor = new Thread(() =>
             {
@@ -301,7 +300,6 @@ namespace FM.LiveSwitch.Connect
                     {
                         Console.Error.WriteLine("FFmpeg exited unexpectedly.");
                         FFmpeg = FFUtility.FFmpeg(string.Join(" ", args), ProcessFFmpegOutput);
-                        Activate();
                     }
                 }
             })
@@ -388,19 +386,6 @@ namespace FM.LiveSwitch.Connect
             if (VideoSink != null)
             {
                 VideoSink.Deactivated = true;
-            }
-        }
-
-        private void Activate()
-        {
-            if (AudioSink != null)
-            {
-                AudioSink.Deactivated = false;
-            }
-
-            if (VideoSink != null)
-            {
-                VideoSink.Deactivated = false;
             }
         }
     }
