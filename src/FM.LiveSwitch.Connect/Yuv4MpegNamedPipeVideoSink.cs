@@ -1,4 +1,6 @@
-﻿namespace FM.LiveSwitch.Connect
+﻿using System.Text;
+
+namespace FM.LiveSwitch.Connect
 {
     class Yuv4MpegNamedPipeVideoSink : NamedPipeVideoSink
     {
@@ -24,44 +26,26 @@
             var heightString = buffer.Height.ToString();
             var colourSpace = "420";
 
-            var written = true;
+            var streamHeader = new StringBuilder();
 
             // signature
-            foreach (var c in magicString)
-            {
-                written &= Write8(c);
-            }
+            streamHeader.Append(magicString);
 
             // width
-            written &= Write8(' ');
-            written &= Write8('W');
-
-            foreach (var c in widthString)
-            {
-                written &= Write8(c);
-            }
+            streamHeader.Append(" W");
+            streamHeader.Append(widthString);
 
             // height
-            written &= Write8(' ');
-            written &= Write8('H');
-
-            foreach (var c in heightString)
-            {
-                written &= Write8(c);
-            }
+            streamHeader.Append(" H");
+            streamHeader.Append(heightString);
 
             // colour space
-            written &= Write8(' ');
-            written &= Write8('C');
+            streamHeader.Append(" C");
+            streamHeader.Append(colourSpace);
 
-            foreach (var c in colourSpace)
-            {
-                written &= Write8(c);
-            }
+            streamHeader.Append("\n");
 
-            written &= Write8('\n');
-
-            return written;
+            return Pipe.TryWrite(DataBuffer.Wrap(Encoding.ASCII.GetBytes(streamHeader.ToString())));
         }
 
         protected override bool WriteFrameHeader(VideoFrame frame, VideoBuffer buffer)
@@ -70,41 +54,28 @@
             var widthString = buffer.Width == _HeaderWidth ? null : buffer.Width.ToString();
             var heightString = buffer.Height == _HeaderHeight ? null : buffer.Height.ToString();
 
-            var written = true;
+            var frameHeader = new StringBuilder();
 
             // signature
-            foreach (var c in magicString)
-            {
-                written &= Write8(c);
-            }
+            frameHeader.Append(magicString);
 
             // width
             if (widthString != null)
             {
-                written &= Write8(' ');
-                written &= Write8('W');
-
-                foreach (var c in widthString)
-                {
-                    written &= Write8(c);
-                }
+                frameHeader.Append(" W");
+                frameHeader.Append(widthString);
             }
 
             // height
             if (heightString != null)
             {
-                written &= Write8(' ');
-                written &= Write8('H');
-
-                foreach (var c in heightString)
-                {
-                    written &= Write8(c);
-                }
+                frameHeader.Append(" H");
+                frameHeader.Append(heightString);
             }
 
-            written &= Write8('\n');
+            frameHeader.Append("\n");
 
-            return written;
+            return Pipe.TryWrite(DataBuffer.Wrap(Encoding.ASCII.GetBytes(frameHeader.ToString())));
         }
 
         protected override bool WriteFrame(VideoFrame frame, VideoBuffer buffer)
