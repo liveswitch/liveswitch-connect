@@ -249,13 +249,5 @@ namespace FM.LiveSwitch.Connect
 
             return true;
         }
-
-        private readonly DataBuffer _Single = DataBuffer.Allocate(1);
-
-        private bool Write8(int value)
-        {
-            _Single.Write8(value, 0);
-            return Pipe.TryWrite(_Single);
-        }
     }
 }
