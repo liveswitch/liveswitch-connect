@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading;
 using System.Collections.Specialized;
 using System.Threading.Tasks;
 using NDI = NewTek.NDI;
@@ -24,7 +23,7 @@ namespace FM.LiveSwitch.Connect
             _NdiFinder.Sources.CollectionChanged += HandleNdiSourcesChanged;
         }
 
-        public async Task<int> Run()
+        public async Task<int> Find()
         {
             Start();
             await Task.Delay(FindDuration*1000).ConfigureAwait(false);

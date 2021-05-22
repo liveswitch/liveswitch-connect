@@ -136,7 +136,7 @@ namespace FM.LiveSwitch.Connect
                 {
                     return Task.Run(async () =>
                     {
-                        return await new NdiFinder(options).Run();
+                        return await new NdiFinder(options).Find();
                     }).GetAwaiter().GetResult();
                 },
                 errors =>
