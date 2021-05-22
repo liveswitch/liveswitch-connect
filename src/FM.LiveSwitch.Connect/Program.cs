@@ -32,7 +32,8 @@ namespace FM.LiveSwitch.Connect
                 LogOptions,
                 RecordOptions,
                 InterceptOptions,
-                NdiFindOptions
+                NdiFindOptions,
+                VoskTranscribeOptions
             >(AppendEnvironmentVariables(args));
 
             result.MapResult(
@@ -137,6 +138,13 @@ namespace FM.LiveSwitch.Connect
                     return Task.Run(async () =>
                     {
                         return await new NdiFinder(options).Find();
+                    }).GetAwaiter().GetResult();
+                },
+                (VoskTranscribeOptions options) =>
+                {
+                    return Task.Run(async () =>
+                    {
+                        return await new VoskTranscriber(options).Transcribe();
                     }).GetAwaiter().GetResult();
                 },
                 errors =>

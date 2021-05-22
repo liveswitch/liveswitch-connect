@@ -61,31 +61,33 @@ lsconnect [verb] [options]
 ### Verbs
 
 ```
-  shell         Starts an interactive shell.
+  shell             Starts an interactive shell.
 
-  capture       Captures local media from a named pipe.
+  capture           Captures local media from a named pipe.
 
-  ffcapture     Captures local media from FFmpeg.
+  ffcapture         Captures local media from FFmpeg.
 
-  ndicapture    Captures media from an ndi stream.
+  ndicapture        Captures media from an ndi stream.
 
-  fake          Sends media from a fake source.
+  fake              Sends media from a fake source.
 
-  play          Sends media from a local file.
+  play              Sends media from a local file.
 
-  render        Renders remote media to a named pipe.
+  render            Renders remote media to a named pipe.
 
-  ffrender      Renders remote media to FFmpeg.
+  ffrender          Renders remote media to FFmpeg.
 
-  ndirender     Renders remote media to an ndi stream.
+  ndirender         Renders remote media to an ndi stream.
 
-  log           Logs remote media to stdout.
+  log               Logs remote media to stdout.
 
-  record        Records remote media to a local file.
+  record            Records remote media to a local file.
 
-  intercept     Forwards packets for lawful intercept.
+  intercept         Forwards packets for lawful intercept.
 
-  ndifind       Find available NDI devices.
+  ndifind           Find available NDI devices.
+
+  vosktranscribe    Transcribes speech to text using Vosk.
 ```
 
 ## shell
@@ -295,10 +297,6 @@ The `ffcapture` verb lets you capture local media from FFmpeg and send it to a L
 
   --log-level             (Default: Error) The LiveSwitch log level.
 ```
-
-## ndifind
-
-The `ndifind` verb prints a list of the discoverable [NDI®](https://ndi.tv/) devices on the network.
 
 ## ndicapture
 
@@ -879,6 +877,67 @@ The `intercept` verb lets you forward audio and/or video packets to a specific d
 
   --video-ip-address      (Default: 127.0.0.1) The destination IP address for
                           video packets.
+
+  --media-id              The remote media ID.
+
+  --connection-id         The remote connection ID or 'mcu'.
+
+  --audio-bitrate         The audio bitrate in kbps.
+
+  --video-bitrate         The video bitrate in kbps.
+
+  --channel-id            Required. The channel ID.
+
+  --data-channel-label    The data channel label.
+
+  --region                The local region.
+
+  --user-id               The local user ID.
+
+  --user-alias            The local user alias.
+
+  --device-id             The local device ID.
+
+  --device-alias          The local device alias.
+
+  --client-tag            The local client tag.
+
+  --client-roles          The local client roles.
+
+  --connection-tag        The local connection tag.
+
+  --no-audio              Do not process audio.
+
+  --no-video              Do not process video.
+
+  --audio-codec           (Default: Any) The audio codec to negotiate with
+                          LiveSwitch.
+
+  --video-codec           (Default: Any) The video codec to negotiate with
+                          LiveSwitch.
+
+  --gateway-url           Required. The gateway URL.
+
+  --application-id        Required. The application ID.
+
+  --shared-secret         Required. The shared secret for the application ID.
+
+  --log-level             (Default: Error) The LiveSwitch log level.
+```
+
+## ndifind
+
+The `ndifind` verb prints a list of the discoverable [NDI®](https://ndi.tv/) devices on the network.
+
+## vosktranscribe
+
+The `vosktranscribe` verb uses [vosk](https://alphacephei.com/vosk/) to transcribe speech-to-text.
+
+```
+  --model-uri             (Default:
+                          https://alphacephei.com/kaldi/models/vosk-model-small-
+                          en-us-0.15.zip) The model URI. Must start with
+                          http://, https://, or file://.
 
   --media-id              The remote media ID.
 
