@@ -5,10 +5,13 @@ timestamp="$(date +%s)"
 # akamai
 event="frozen2"
 
-# liveswitch
+# liveswitch - don't forget to update this!!!
 applicationId="-- put your application id here --"
 sharedSecret="-- put your shared secret here --"
 channel="akamai-demo"
+
+echo ""
+echo -e "\033[32mYour session info (edit akamai.sh to change): $applicationId, $channel, $sharedSecret \033[0m"
 
 echo ""
 echo -e "\033[32mJoin the session: \033[0m"
@@ -19,7 +22,7 @@ echo "http://players.akamai.com/players/hlsjs?streamUrl=https%3A%2F%2Ffrozen.aka
 echo ""
 
 # run the project up one level
-dotnet run -p ../ -- ffrender \
+dotnet run -p ../src/FM.LiveSwitch.Connect/ -- ffrender \
 \
 --gateway-url https://cloud.liveswitch.io/ \
 --application-id $applicationId \
