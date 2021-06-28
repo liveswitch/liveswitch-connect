@@ -236,7 +236,7 @@ namespace FM.LiveSwitch.Connect
             }
             catch (Exception ex)
             {
-                Console.Error.WriteLine($"Could not accept connection on named pipe '{PipeName}'.", ex);
+                Console.Error.WriteLine($"Could not accept connection on named pipe '{PipeName}'. " + ex.Message, ex);
             }
             return false;
         }
@@ -252,11 +252,11 @@ namespace FM.LiveSwitch.Connect
                 }
                 catch (Exception ex) when (ex is ObjectDisposedException || ex is IOException)
                 {
-                    Console.Error.WriteLine($"Could not write to named pipe '{PipeName}'.", ex);
+                    Console.Error.WriteLine($"Could not write to named pipe '{PipeName}'. " + ex.Message, ex);
                 }
                 catch (Exception ex)
                 {
-                    Console.Error.WriteLine($"Could not write to named pipe '{PipeName}'.", ex);
+                    Console.Error.WriteLine($"Could not write to named pipe '{PipeName}'." + ex.Message, ex);
                 }
             }
             return false;

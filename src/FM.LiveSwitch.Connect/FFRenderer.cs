@@ -123,7 +123,8 @@ namespace FM.LiveSwitch.Connect
 
             var args = new List<string>
             {
-                "-y"
+                "-y",
+                //"-loglevel verbose"
             };
 
             if (AudioSink != null)
