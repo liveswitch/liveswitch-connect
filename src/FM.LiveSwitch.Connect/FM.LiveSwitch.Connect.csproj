@@ -18,6 +18,8 @@
     <PackageReference Include="FM.LiveSwitch.Vpx" Version="1.12.3.46193" />
     <PackageReference Include="FM.LiveSwitch.OpenH264" Version="1.12.3.46193" />
     <PackageReference Include="FM.LiveSwitch" Version="1.12.3.46193" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="Vosk" Version="0.3.27" />
   </ItemGroup>
 
   <ItemGroup>
