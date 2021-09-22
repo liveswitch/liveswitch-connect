@@ -45,7 +45,7 @@ namespace FM.LiveSwitch.Connect
 
             streamHeader.Append("\n");
 
-            return Pipe.TryWrite(DataBuffer.Wrap(Encoding.ASCII.GetBytes(streamHeader.ToString())));
+            return Pipe.TryWriteAsync(DataBuffer.Wrap(Encoding.ASCII.GetBytes(streamHeader.ToString()))).Result;
         }
 
         protected override bool WriteFrameHeader(VideoFrame frame, VideoBuffer buffer)
@@ -75,7 +75,7 @@ namespace FM.LiveSwitch.Connect
 
             frameHeader.Append("\n");
 
-            return Pipe.TryWrite(DataBuffer.Wrap(Encoding.ASCII.GetBytes(frameHeader.ToString())));
+            return Pipe.TryWriteAsync(DataBuffer.Wrap(Encoding.ASCII.GetBytes(frameHeader.ToString()))).Result;
         }
 
         protected override bool WriteFrame(VideoFrame frame, VideoBuffer buffer)
@@ -159,7 +159,7 @@ namespace FM.LiveSwitch.Connect
             {
                 if (yStride == width)
                 {
-                    if (!Pipe.TryWrite(yDataBuffer))
+                    if (!Pipe.TryWriteAsync(yDataBuffer).Result)
                     {
                         return false;
                     }
@@ -169,7 +169,7 @@ namespace FM.LiveSwitch.Connect
                     var yOffset = 0;
                     for (var i = 0; i < height; i++)
                     {
-                        if (!Pipe.TryWrite(yDataBuffer.Subset(yOffset, width)))
+                        if (!Pipe.TryWriteAsync(yDataBuffer.Subset(yOffset, width)).Result)
                         {
                             return false;
                         }
@@ -182,7 +182,7 @@ namespace FM.LiveSwitch.Connect
             {
                 if (uvStride == width)
                 {
-                    if (!Pipe.TryWrite(uvDataBuffer))
+                    if (!Pipe.TryWriteAsync(uvDataBuffer).Result)
                     {
                         return false;
                     }
@@ -192,7 +192,7 @@ namespace FM.LiveSwitch.Connect
                     var uOffset = 0;
                     for (var i = 0; i < height_2; i++)
                     {
-                        if (!Pipe.TryWrite(uvDataBuffer.Subset(uOffset, width)))
+                        if (!Pipe.TryWriteAsync(uvDataBuffer.Subset(uOffset, width)).Result)
                         {
                             return false;
                         }
@@ -205,7 +205,7 @@ namespace FM.LiveSwitch.Connect
             {
                 if (uStride == width_2)
                 {
-                    if (!Pipe.TryWrite(uDataBuffer))
+                    if (!Pipe.TryWriteAsync(uDataBuffer).Result)
                     {
                         return false;
                     }
@@ -215,7 +215,7 @@ namespace FM.LiveSwitch.Connect
                     var uOffset = 0;
                     for (var i = 0; i < height_2; i++)
                     {
-                        if (!Pipe.TryWrite(uDataBuffer.Subset(uOffset, width_2)))
+                        if (!Pipe.TryWriteAsync(uDataBuffer.Subset(uOffset, width_2)).Result)
                         {
                             return false;
                         }
@@ -228,7 +228,7 @@ namespace FM.LiveSwitch.Connect
             {
                 if (vStride == width_2)
                 {
-                    if (!Pipe.TryWrite(vDataBuffer))
+                    if (!Pipe.TryWriteAsync(vDataBuffer).Result)
                     {
                         return false;
                     }
@@ -238,7 +238,7 @@ namespace FM.LiveSwitch.Connect
                     var vOffset = 0;
                     for (var i = 0; i < height_2; i++)
                     {
-                        if (!Pipe.TryWrite(vDataBuffer.Subset(vOffset, width_2)))
+                        if (!Pipe.TryWriteAsync(vDataBuffer.Subset(vOffset, width_2)).Result)
                         {
                             return false;
                         }

@@ -1,4 +1,7 @@
-﻿namespace FM.LiveSwitch.Connect
+﻿using System;
+using System.Threading.Tasks;
+
+namespace FM.LiveSwitch.Connect
 {
     class NamedPipeVideoSink : VideoSink
     {
@@ -52,14 +55,14 @@
                     handler();
                 }
             };
-
+            Task ready;
             if (client)
             {
-                Pipe.Connect();
+                ready = Pipe.ConnectAsync();
             }
             else
             {
-                _ = Pipe.TryAccept();
+                ready = Pipe.TryAccept();
             }
         }
 
@@ -116,7 +119,7 @@
         {
             foreach (var dataBuffer in inputBuffer.DataBuffers)
             {
-                if (!Pipe.TryWrite(dataBuffer))
+                if (!Pipe.TryWriteAsync(dataBuffer).Result)
                 {
                     return false;
                 }
