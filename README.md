@@ -982,7 +982,7 @@ You should see logs indicating that:
 Check your web browser! You should see your camera echoed back as a new connection!
 
 ## Using FFmpeg
-
+ **MUST be v4.2.1**
 [FFmpeg](https://www.ffmpeg.org/) can read from and write to the named pipes that `lsconnect` creates. The process is slightly different for Windows and Linux.
 
 > `ffmpeg` always runs in the client role, so make sure your `lsconnect capture` command uses the `--server` flag.
