@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <AssemblyName>lsconnect</AssemblyName>
   </PropertyGroup>
 
@@ -13,11 +13,11 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Logging" Version="3.1.3" />
-    <PackageReference Include="FM.LiveSwitch.Opus" Version="1.12.3.46193" />
-    <PackageReference Include="FM.LiveSwitch.Yuv" Version="1.12.3.46193" />
-    <PackageReference Include="FM.LiveSwitch.Vpx" Version="1.12.3.46193" />
-    <PackageReference Include="FM.LiveSwitch.OpenH264" Version="1.12.3.46193" />
-    <PackageReference Include="FM.LiveSwitch" Version="1.12.3.46193" />
+    <PackageReference Include="FM.LiveSwitch.Opus" Version="1.16.0.18248" />
+    <PackageReference Include="FM.LiveSwitch.Yuv" Version="1.16.0.18248" />
+    <PackageReference Include="FM.LiveSwitch.Vpx" Version="1.16.0.18248" />
+    <PackageReference Include="FM.LiveSwitch.OpenH264" Version="1.16.0.18248" />
+    <PackageReference Include="FM.LiveSwitch" Version="1.16.0.18248" />
   </ItemGroup>
 
   <ItemGroup>
