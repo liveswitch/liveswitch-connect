@@ -10,7 +10,7 @@ namespace FM.LiveSwitch.Connect
             set
             {
                 _Bits = value;
-                _RolloverSize = (int)MathAssistant.Pow(2, _Bits);
+                _RolloverSize = (long)MathAssistant.Pow(2, _Bits);
                 _RolloverSize_2 = _RolloverSize / 2;
             }
         }
