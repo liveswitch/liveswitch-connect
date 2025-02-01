@@ -9,7 +9,7 @@ on:
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     env:
       DOTNET_SYSTEM_GLOBALIZATION_INVARIANT: 1
 
@@ -17,10 +17,6 @@ jobs:
     - uses: actions/checkout@v4
       with:
         fetch-depth: 0
-    - name: Install libssl
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y libssl3
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v4
       with:
